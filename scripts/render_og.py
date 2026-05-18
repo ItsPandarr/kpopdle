@@ -1,9 +1,11 @@
 """Render the Open Graph / Twitter Card image (1200x630 PNG) used as the
 social-link preview for the site.
 
-Composes the card with Pillow (no SVG rendering, no extra deps beyond the
-already-required pip Pillow). Saves to repo-root og-image.png. The build
-script copies that file into dist/ on every build.
+Everything is composed in Pillow — background gradient, confetti, the
+heart-shaped lightstick (Bezier-sampled from the favicon's actual SVG
+path + a per-pixel radial gradient), text, and the wordle-style emoji-
+grid hint at the bottom. No external SVG renderer is required, so the
+build works identically on any machine with Pillow installed.
 
 Why 1200x630: that's the spec for og:image used by Facebook, LinkedIn,
 Slack, Discord, and Twitter (twitter:card=summary_large_image). Smaller
@@ -103,12 +105,9 @@ def vertical_gradient(img: Image.Image, top: tuple, bot: tuple) -> None:
             px[x, y] = (r, g, b)
 
 
-def draw_lightstick(draw: ImageDraw.ImageDraw, cx: int, cy: int, scale: float) -> None:
-    """Stylized heart-shaped lightstick — matches the favicon. `cx, cy` is the
-    rough center of the bulb; `scale` ~= bulb radius."""
-    # Halo: small filled circle on a much larger transparent canvas, then a
-    # heavy gaussian blur so the result fades smoothly to fully transparent
-    # at the canvas edge (no visible bounding-box rectangle).
+def draw_lightstick_halo(img: Image.Image, cx: int, cy: int, scale: float) -> None:
+    """Soft warm-pink glow behind the lightstick. Used by both the
+    favicon-rasterized path and the Pillow fallback."""
     halo_canvas = int(scale * 4.5)
     halo_r = int(scale * 1.1)
     halo = Image.new("RGBA", (halo_canvas, halo_canvas), (0, 0, 0, 0))
@@ -120,64 +119,183 @@ def draw_lightstick(draw: ImageDraw.ImageDraw, cx: int, cy: int, scale: float) -
         fill=(255, 95, 162, 140),
     )
     halo = halo.filter(ImageFilter.GaussianBlur(scale * 0.8))
-    img = draw._image  # private but fine for our use; Pillow exposes no cleaner hook
     img.paste(halo, (cx - halo_center, cy - halo_center), halo)
 
-    # Handle (vertical bar below bulb)
+
+def _bezier_cubic(p0, p1, p2, p3, steps):
+    """Sample `steps` points along a cubic Bezier curve from p0 → p3 with
+    control points p1, p2. Returns list of (x, y) tuples."""
+    out = []
+    for i in range(steps + 1):
+        t = i / steps
+        mt = 1 - t
+        x = mt**3 * p0[0] + 3 * mt**2 * t * p1[0] + 3 * mt * t**2 * p2[0] + t**3 * p3[0]
+        y = mt**3 * p0[1] + 3 * mt**2 * t * p1[1] + 3 * mt * t**2 * p2[1] + t**3 * p3[1]
+        out.append((x, y))
+    return out
+
+
+def _heart_polygon(cx: float, cy: float, scale: float) -> list:
+    """Sample the favicon's heart-bulb cubic-Bezier path into a polygon.
+
+    Original SVG path (viewBox 0..64):
+        M 32 38
+        C 32 38, 12 28, 12 18
+        C 12 12, 16 8, 21 8
+        C 26 8, 32 12, 32 16
+        C 32 12, 38 8, 43 8
+        C 48 8, 52 12, 52 18
+        C 52 28, 32 38, 32 38 Z
+
+    Bottom point is (32, 38). Top dip is (32, 16). Left/right lobe peaks at
+    y=8. The path traces counterclockwise: bottom → left → up over the dip
+    → right → back to bottom.
+
+    `cx, cy` is the heart's visual center (NOT the SVG (32, 16) midpoint);
+    `scale` scales the whole shape so the bulb is roughly `2*scale` tall.
+    """
+    # Normalize SVG coords to a unit shape centered at (0, 0), with height = 1.
+    # SVG heart spans y=8..38 (height 30) and x=12..52 (width 40).
+    # Vertical center: y=23 in SVG → maps to 0 in normalized.
+    # Horizontal center: x=32 in SVG → maps to 0 in normalized.
+    def n(sx, sy):
+        return ((sx - 32) / 30.0, (sy - 23) / 30.0)
+
+    # 5 cubic segments. Each entry is (control1, control2, endpoint), starting
+    # from the previous endpoint. The first MoveTo is (32, 38) → normalized.
+    start = n(32, 38)
+    segments = [
+        (n(32, 38), n(12, 28), n(12, 18)),   # bottom → left side mid
+        (n(12, 12), n(16, 8),  n(21, 8)),    # → left lobe peak
+        (n(26, 8),  n(32, 12), n(32, 16)),   # → top dip
+        (n(32, 12), n(38, 8),  n(43, 8)),    # → right lobe peak
+        (n(48, 8),  n(52, 12), n(52, 18)),   # → right side mid
+        (n(52, 28), n(32, 38), n(32, 38)),   # → back to bottom
+    ]
+
+    poly = []
+    p0 = start
+    for c1, c2, p3 in segments:
+        # 32 samples per segment is well above the threshold for a visually
+        # smooth curve at 1200x630 — no visible polygon facets.
+        pts = _bezier_cubic(p0, c1, c2, p3, 32)
+        poly.extend(pts[:-1])  # drop the last to avoid duplicating the next start
+        p0 = p3
+    poly.append(start)
+
+    # Scale up + translate to (cx, cy)
+    return [(cx + px * scale * 2.0, cy + py * scale * 2.0) for (px, py) in poly]
+
+
+def _radial_gradient_fill(size: tuple, stops: list, center: tuple, radius: float) -> Image.Image:
+    """Build an RGBA image filled with a radial gradient. `stops` is a list
+    of (offset, (r, g, b)) where offset ∈ [0, 1]. Interpolates linearly
+    between consecutive stops based on each pixel's distance from `center`
+    normalized by `radius`."""
+    w, h = size
+    img = Image.new("RGBA", size)
+    px = img.load()
+    cx, cy = center
+    stops_sorted = sorted(stops, key=lambda s: s[0])
+    for y in range(h):
+        for x in range(w):
+            dx = x - cx
+            dy = y - cy
+            d = math.sqrt(dx * dx + dy * dy) / radius
+            d = min(1.0, max(0.0, d))
+            # Find the bracketing stops
+            for i in range(len(stops_sorted) - 1):
+                o0, c0 = stops_sorted[i]
+                o1, c1 = stops_sorted[i + 1]
+                if d <= o1:
+                    t = (d - o0) / (o1 - o0) if o1 > o0 else 0
+                    r = round(c0[0] + (c1[0] - c0[0]) * t)
+                    g = round(c0[1] + (c1[1] - c0[1]) * t)
+                    b = round(c0[2] + (c1[2] - c0[2]) * t)
+                    px[x, y] = (r, g, b, 255)
+                    break
+            else:
+                px[x, y] = (*stops_sorted[-1][1], 255)
+    return img
+
+
+def draw_lightstick(draw: ImageDraw.ImageDraw, cx: int, cy: int, scale: float) -> None:
+    """Heart-shaped lightstick + handle + halo, composed entirely in Pillow.
+    Builds the heart from a Bezier sampling of the favicon's actual SVG path,
+    then fills it via a per-pixel radial gradient. Result matches the favicon
+    much more closely than the chunky stacked-circles approximation we had
+    before — no extra system deps, no need for rsvg-convert / librsvg.
+
+    `cx, cy` is the rough visual center of the bulb; `scale` ~= bulb half-height.
+    """
+    img = draw._image
+    draw_lightstick_halo(img, cx, cy - int(scale * 0.4), scale)
+
+    # ── Handle (drawn FIRST so the bulb overlaps the top of the handle) ──
     handle_w = int(scale * 0.34)
     handle_h = int(scale * 1.7)
     handle_x = cx - handle_w // 2
-    handle_y = cy + int(scale * 0.35)
+    handle_y = cy + int(scale * 0.55)
     draw.rounded_rectangle(
         (handle_x, handle_y, handle_x + handle_w, handle_y + handle_h),
         radius=handle_w // 3,
-        fill=(90, 90, 106),
+        fill=(90, 90, 106, 255),
     )
-    # Highlight stripe down the handle
+    # Subtle highlight stripe down the handle (favicon parity)
     stripe_x = handle_x + handle_w // 3
     draw.rectangle(
         (stripe_x, handle_y + 4, stripe_x + max(2, handle_w // 6), handle_y + handle_h - 4),
         fill=(255, 255, 255, 64),
     )
 
-    # Heart-shaped bulb — built from two circles + a downward-pointing triangle.
-    r = int(scale * 0.55)
-    lcx = cx - r // 2 - 2
-    rcx = cx + r // 2 + 2
-    cy_top = cy - int(scale * 0.15)
+    # ── Bulb: heart polygon filled via radial gradient ──
+    poly = _heart_polygon(cx, cy, scale)
+    xs = [p[0] for p in poly]
+    ys = [p[1] for p in poly]
+    pad = int(scale * 0.5)
+    bbox_x0 = int(min(xs)) - pad
+    bbox_y0 = int(min(ys)) - pad
+    bbox_x1 = int(max(xs)) + pad
+    bbox_y1 = int(max(ys)) + pad
+    bbox_w = bbox_x1 - bbox_x0
+    bbox_h = bbox_y1 - bbox_y0
 
-    # Tinted heart drawn via gradient: paint a radial-ish blend by stacking
-    # progressively-smaller filled hearts in different colors.
-    def heart_polygon(s_r):
-        # Returns the outline of a heart filling roughly the s_r circles + triangle below.
-        # Two lobes (circles) and a triangle that meets at (cx, cy + s_r*1.5).
-        lobe_left  = (cx - s_r, cy_top, cx, cy_top + s_r * 0.4)
-        lobe_right = (cx, cy_top, cx + s_r, cy_top + s_r * 0.4)
-        # We'll draw circles + triangle below
-        return (lobe_left, lobe_right, (
-            (cx - s_r, cy_top + int(s_r * 0.15)),
-            (cx + s_r, cy_top + int(s_r * 0.15)),
-            (cx, cy_top + int(s_r * 1.55)),
-        ))
+    # Mask: 1-channel image where the heart shape is 255, rest 0.
+    mask = Image.new("L", (bbox_w, bbox_h), 0)
+    mask_draw = ImageDraw.Draw(mask)
+    local_poly = [(p[0] - bbox_x0, p[1] - bbox_y0) for p in poly]
+    mask_draw.polygon(local_poly, fill=255)
 
-    # Outermost layer: cool rim
-    layers = [
-        (r,           BULB_COLD),
-        (int(r * 0.78), BULB_MID),
-        (int(r * 0.45), BULB_HOT),
-    ]
-    for layer_r, color in layers:
-        left = (cx - layer_r - 1, cy_top - 2, cx + 1, cy_top + layer_r * 1.6)
-        right = (cx - 1,            cy_top - 2, cx + layer_r + 1, cy_top + layer_r * 1.6)
-        draw.ellipse(left, fill=color)
-        draw.ellipse(right, fill=color)
-        # Bottom triangle
-        tri = [
-            (cx - layer_r, cy_top + int(layer_r * 0.45)),
-            (cx + layer_r, cy_top + int(layer_r * 0.45)),
-            (cx, cy_top + int(layer_r * 1.75)),
-        ]
-        draw.polygon(tri, fill=color)
+    # Gradient: favicon uses radialGradient cx=50% cy=40% r=55% with stops at
+    # 0% #ffe8a8 (warm core), 35% #ff5fa2 (pink), 100% #6f88ff (blue rim).
+    # Translate to bbox-local pixel coords:
+    grad_cx = bbox_w * 0.5
+    grad_cy = bbox_h * 0.42  # slight upward bias matches the favicon
+    grad_r = max(bbox_w, bbox_h) * 0.55
+    grad = _radial_gradient_fill(
+        (bbox_w, bbox_h),
+        stops=[
+            (0.00, BULB_HOT),
+            (0.35, BULB_MID),
+            (1.00, BULB_COLD),
+        ],
+        center=(grad_cx, grad_cy),
+        radius=grad_r,
+    )
+
+    # Composite the gradient onto a transparent canvas masked by the heart shape.
+    bulb = Image.new("RGBA", (bbox_w, bbox_h), (0, 0, 0, 0))
+    bulb.paste(grad, (0, 0), mask)
+
+    # A faint outer glow to echo the SVG's feGaussianBlur filter. Pad a bit
+    # so the blur has room to bleed outside the bulb's bounding box.
+    glow_pad = int(scale * 0.3)
+    glow_canvas = Image.new("RGBA", (bbox_w + glow_pad * 2, bbox_h + glow_pad * 2), (0, 0, 0, 0))
+    glow_canvas.paste(bulb, (glow_pad, glow_pad), bulb)
+    glow = glow_canvas.filter(ImageFilter.GaussianBlur(scale * 0.08))
+    # Paint glow + bulb (glow first, then the sharp bulb on top).
+    img.paste(glow, (bbox_x0 - glow_pad, bbox_y0 - glow_pad), glow)
+    img.paste(bulb, (bbox_x0, bbox_y0), bulb)
 
 
 def draw_confetti(draw: ImageDraw.ImageDraw, w: int, h: int) -> None:
