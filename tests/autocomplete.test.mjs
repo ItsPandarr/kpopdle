@@ -94,6 +94,15 @@ assert.deepEqual(findMatches(POOL, "   "), []);
   assert.equal(r.length, 8, "MAX_SUGGESTIONS cap holds");
 }
 
+// `limit` opt overrides the default cap — Detective mode uses this to pull
+// a wider window so the validity re-sort can surface valid candidates that
+// would otherwise sit beyond the top 8.
+{
+  const big = Array.from({ length: 50 }, (_, i) => ({ name: `Group${i}`, aliases: [] }));
+  const r = findMatches(big, "Group", { limit: 25 });
+  assert.equal(r.length, 25);
+}
+
 // Diacritic-insensitive matching for a Latin alias.
 {
   const pool = [{ name: "Beyoncé", aliases: [] }];

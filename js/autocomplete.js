@@ -42,7 +42,14 @@ function rank(group, q) {
 
 // Exported so tests can drive matching with a controlled pool. (The DOM-bound
 // attachAutocomplete wraps this with input/dropdown plumbing.)
-export function findMatches(pool, query) {
+//
+// `limit` controls the returned-window size (default MAX_SUGGESTIONS for the
+// normal dropdown). Detective mode pulls a larger window so the validity
+// re-sort downstream isn't restricted to the alphabetically-earliest 8 — a
+// match that happens to start with a popular prefix letter (B, S, ...) can
+// otherwise never bubble up even when it's the only valid option.
+export function findMatches(pool, query, opts = {}) {
+  const { limit = MAX_SUGGESTIONS } = opts;
   const q = normalize(query);
   if (!q) return [];
   const scored = [];
@@ -51,7 +58,7 @@ export function findMatches(pool, query) {
     if (r >= 0) scored.push([r, g]);
   }
   scored.sort((a, b) => a[0] - b[0] || a[1].name.localeCompare(b[1].name));
-  return scored.slice(0, MAX_SUGGESTIONS).map(([, g]) => g);
+  return scored.slice(0, limit).map(([, g]) => g);
 }
 
 // Levenshtein edit distance with early termination. Iterates by code-point
@@ -211,7 +218,19 @@ export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReas
   }
 
   function updateSuggestions() {
-    const all = findMatches(getPool(), input.value);
+    // Detective mode: pull a wider window (50 instead of 8) so the validity
+    // re-sort below can surface valid candidates that happen to be
+    // alphabetically later than the ruled-out ones. Otherwise typing "B"
+    // when most "B*" groups have been ruled out by clues would show only
+    // the ruled-out 8 and never reach BTS / BIGBANG / etc.
+    //
+    // Only pay the wider scan when a getReason hook is actually wired
+    // (Detective mode could be off but the hook is still present — that
+    // returns null for every candidate, which is cheap).
+    const hasReasonHook = typeof getReason === "function";
+    const all = findMatches(getPool(), input.value, {
+      limit: hasReasonHook ? 50 : undefined,
+    });
     suggestions = all.filter((g) => !guessedIds.has(g.id));
     isFuzzy = false;
     // Zero direct hits + non-trivial query → try a fuzzy fallback so the
@@ -234,6 +253,9 @@ export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReas
       const rb = reasonFor(b) ? 1 : 0;
       return ra - rb;
     });
+    // Trim back down to the visible MAX_SUGGESTIONS now that the validity
+    // sort has had a chance to bubble valid candidates to the top.
+    if (suggestions.length > MAX_SUGGESTIONS) suggestions = suggestions.slice(0, MAX_SUGGESTIONS);
     // Initial highlight lands on the first valid suggestion; if none exist,
     // fall back to the first item so the dropdown is still keyboard-navigable.
     highlighted = firstValidIndex();
