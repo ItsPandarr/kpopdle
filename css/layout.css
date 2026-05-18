@@ -1206,6 +1206,16 @@ body::before {
 .stats b {
   color: var(--text);
 }
+/* Tiny snowflake next to a streak number, shown only when the streak's
+   one-per-streak "freeze" has been used. Hovering / long-pressing surfaces
+   the explanation via the title attribute. */
+.stats .streak-freeze {
+  display: inline-block;
+  font-size: 0.85em;
+  margin-left: 0.1em;
+  cursor: help;
+  opacity: 0.85;
+}
 
 .app-footer {
   text-align: center;

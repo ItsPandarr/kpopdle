@@ -1,5 +1,5 @@
 import { STORAGE_KEY, HISTORY_CAP, DIFFICULTIES, ENTITIES } from "./config.js";
-import { todayUTC, yesterdayUTC } from "./seed.js";
+import { todayUTC, yesterdayUTC, dayBeforeYesterdayUTC } from "./seed.js";
 import { scramble, unscramble } from "./scramble.js";
 
 const EMPTY_DIFF_MAP = () => Object.fromEntries(DIFFICULTIES.map((d) => [d, {}]));
@@ -7,7 +7,10 @@ const EMPTY_DIFF_MAP = () => Object.fromEntries(DIFFICULTIES.map((d) => [d, {}])
 const DEFAULT_ENTITY_STATE = () => ({
   daily: EMPTY_DIFF_MAP(),
   streaks: Object.fromEntries(
-    DIFFICULTIES.map((d) => [d, { current: 0, best: 0, lastWinDate: null }])
+    // freezeUsed: a streak gets ONE forgiven missed day per streak. When
+    // it's used, this flips to true; it resets when the streak resets
+    // (either by another missed day or a loss). See recordDailyWin.
+    DIFFICULTIES.map((d) => [d, { current: 0, best: 0, lastWinDate: null, freezeUsed: false }])
   ),
   bests: Object.fromEntries(DIFFICULTIES.map((d) => [d, { fewestGuesses: null }])),
   endless: Object.fromEntries(DIFFICULTIES.map((d) => [d, { played: 0, bestGuesses: null }])),
@@ -51,6 +54,14 @@ function read() {
       if (!parsed[e].active) parsed[e].active = { daily: EMPTY_DIFF_MAP(), endless: EMPTY_DIFF_MAP() };
       if (!parsed[e].active.daily) parsed[e].active.daily = EMPTY_DIFF_MAP();
       if (!parsed[e].active.endless) parsed[e].active.endless = EMPTY_DIFF_MAP();
+      // Streaks gained a `freezeUsed` field in the streak-freeze feature.
+      // Older blobs don't have it — default to false so the player's next
+      // missed day gets the freebie they wouldn't have had under the old rule.
+      for (const d of DIFFICULTIES) {
+        if (parsed[e].streaks && parsed[e].streaks[d] && parsed[e].streaks[d].freezeUsed === undefined) {
+          parsed[e].streaks[d].freezeUsed = false;
+        }
+      }
     }
     return parsed;
   } catch {
@@ -86,9 +97,13 @@ export function recordDailyLoss(entity, difficulty, targetId, guessCount, date =
     won: false,
     targetId,
   };
-  // A loss breaks today's streak.
+  // A loss is a hard break — fully resets the streak's state so the next
+  // win starts fresh. Clearing lastWinDate is what makes that work: without
+  // it the day-before-yesterday check below would still match the pre-loss
+  // win and silently extend the dead streak via the freeze.
   bucket.streaks[difficulty].current = 0;
-  bucket.streaks[difficulty].lastWinDate = bucket.streaks[difficulty].lastWinDate || null;
+  bucket.streaks[difficulty].lastWinDate = null;
+  bucket.streaks[difficulty].freezeUsed = false;
   bucket.history.unshift({
     entity,
     mode: "daily",
@@ -111,13 +126,29 @@ export function recordDailyWin(entity, difficulty, targetId, guessCount, date = 
     won: true,
     targetId,
   };
+  // Streak progression with a one-per-streak "freeze" that forgives a single
+  // missed day. The rule:
+  //   - already won today → no-op
+  //   - last win was yesterday → +1 (normal continuation, freeze untouched)
+  //   - last win was 2 days ago AND freeze is unused → +1 AND consume freeze
+  //   - otherwise → streak resets to 1, freeze re-arms for the new streak
+  // Date math uses the same `date` parameter we're recording, not real
+  // wall-clock now — keeps the rule testable with arbitrary dates.
   const streak = bucket.streaks[difficulty];
+  // Treat `date` as authoritative "today" for relative-date math, so unit
+  // tests can pass any date and the comparison still works.
+  const yesterday = yesterdayUTC(new Date(date + "T00:00:00Z"));
+  const dayBefore = dayBeforeYesterdayUTC(new Date(date + "T00:00:00Z"));
   if (streak.lastWinDate === date) {
     // already counted today — no-op
-  } else if (streak.lastWinDate === yesterdayUTC()) {
+  } else if (streak.lastWinDate === yesterday) {
     streak.current += 1;
+  } else if (streak.lastWinDate === dayBefore && !streak.freezeUsed) {
+    streak.current += 1;
+    streak.freezeUsed = true;
   } else {
     streak.current = 1;
+    streak.freezeUsed = false;
   }
   streak.lastWinDate = date;
   if (streak.current > streak.best) streak.best = streak.current;

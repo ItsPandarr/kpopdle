@@ -738,11 +738,19 @@ function renderStats() {
     const best = bucket.bests[d]?.fewestGuesses ?? "—";
     const streak = bucket.streaks[d]?.current ?? 0;
     const bestStreak = bucket.streaks[d]?.best ?? 0;
+    // Streak-freeze indicator: a tiny snowflake appears next to the streak
+    // count when this streak has already consumed its one freebie. Hover/
+    // long-press surfaces the explanation. Hidden when the freeze is still
+    // available (no visual noise until it actually triggered).
+    const freezeUsed = bucket.streaks[d]?.freezeUsed === true && streak > 0;
+    const freezeIcon = freezeUsed
+      ? ` <span class="streak-freeze" title="${t("stats.streak.freeze.title")}" aria-label="${t("stats.streak.freeze.aria")}">${t("stats.streak.freeze.icon")}</span>`
+      : "";
     const summary = historySummary(state.entity, "daily", d);
     const rateText = summary.winRatePct == null
       ? `<span class="dim">${t("stats.noPlays")}</span>`
       : `${summary.wins}/${summary.played} <span class="dim">(${summary.winRatePct}%)</span>`;
-    return `<dt>${t(`toggle.difficulty.${d}`)}</dt><dd>${t("stats.best")} <b>${best}</b> · ${t("stats.streak")} ${streak} <span class="dim">${t("stats.bestStreak", { n: bestStreak })}</span> · ${t("stats.won")} ${rateText}</dd>`;
+    return `<dt>${t(`toggle.difficulty.${d}`)}</dt><dd>${t("stats.best")} <b>${best}</b> · ${t("stats.streak")} ${streak}${freezeIcon} <span class="dim">${t("stats.bestStreak", { n: bestStreak })}</span> · ${t("stats.won")} ${rateText}</dd>`;
   });
 
   const endlessRows = ["easy", "medium", "hard"].map((d) => {

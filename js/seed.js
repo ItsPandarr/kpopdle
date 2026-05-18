@@ -23,6 +23,15 @@ export function yesterdayUTC(now = new Date()) {
   return d.toISOString().slice(0, 10);
 }
 
+// Two UTC days back. Used by the streak-freeze rule: if a player's last
+// daily win is exactly 2 days ago (i.e. they missed yesterday), they get a
+// one-time-per-streak "freeze" that lets the streak survive the gap.
+export function dayBeforeYesterdayUTC(now = new Date()) {
+  const d = new Date(now);
+  d.setUTCDate(d.getUTCDate() - 2);
+  return d.toISOString().slice(0, 10);
+}
+
 export function targetForDaily(dateStr, difficulty, pool) {
   if (!pool.length) return null;
   const h = cyrb53(`${dateStr}|${difficulty}`);
