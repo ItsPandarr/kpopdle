@@ -22,7 +22,7 @@ import {
   bumpScore,
 } from "./render.js";
 import { deriveClues, formatClues, applyHintsToClues, knownAttrs, whyNotMatch } from "./clues.js";
-import { VISIBLE_ATTRS, ENTITIES, MAX_DAILY_GUESSES, ATTR_LABEL } from "./config.js";
+import { VISIBLE_ATTRS, MAX_DAILY_GUESSES } from "./config.js";
 import {
   attrsByUniqueness,
   nextHintCost,

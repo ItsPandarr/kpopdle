@@ -1,5 +1,5 @@
-import { VISIBLE_ATTRS, ATTR_LABEL } from "./config.js";
-import { emojiGridFor, wikipediaUrlFor, answerLabel, hintTag, buildShareText, currentPlayUrl } from "./share.js";
+import { VISIBLE_ATTRS } from "./config.js";
+import { emojiGridFor, wikipediaUrlFor, hintTag, buildShareText, currentPlayUrl } from "./share.js";
 import { buildPuzzleUrl } from "./puzzle.js";
 import { t } from "./i18n.js";
 

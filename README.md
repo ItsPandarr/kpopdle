@@ -115,48 +115,62 @@ KPopdle/
 │   ├── hint.js             # hint cost, ordering, attr-known logic (pure)
 │   ├── share.js            # emoji grid + clipboard text + URL helpers (pure)
 │   ├── puzzle.js           # custom-puzzle URL hash encode/decode (pure)
+│   ├── achievements.js     # 15 local-only achievement definitions (pure)
+│   ├── scramble.js         # light XOR+base64 obfuscation, used for both data files and localStorage (pure)
 │   ├── i18n.js             # tiny synchronous t() + locale loader
 │   ├── i18n-en.js          # English fallback bundled inline (auto-generated)
-│   ├── autocomplete.js     # tier-restricted prefix/alias/substring search
+│   ├── autocomplete.js     # tier-restricted prefix/alias/substring + fuzzy "did you mean" (pure helpers)
 │   ├── render.js           # the only DOM writer
 │   ├── state.js            # in-memory session state
 │   ├── persist.js          # the only localStorage writer
-│   └── ui.js               # toggles + settings popover + countdown
-├── locales/                # en.json + ko.json (UI translations)
+│   └── ui.js               # toggles + settings popover + themed confirm modal + countdown
+├── locales/                # en.json + ko.json + ja.json (UI translations)
 ├── data/                   # generated; commit to repo
+├── og-image.png            # 1200×630 social preview card, rendered by scripts/render_og.py
+├── sitemap.xml             # SEO; <loc> placeholder substituted at build time
+├── robots.txt              # SEO; allow-all + sitemap directive
 └── scripts/                # offline scrape pipeline (Python) + build helpers (Node)
 ```
 
-Pure modules (`compare`, `seed`, `clues`, `hint`, `share`, `puzzle`) have unit tests under `tests/`. The rest is UI plumbing.
+Pure modules (`compare`, `seed`, `clues`, `hint`, `share`, `puzzle`, `achievements`, autocomplete helpers) have unit tests under `tests/`. The rest is UI plumbing.
 
 ## Tests
 
 ```bash
-npm test                    # node --test tests/*.test.mjs (currently 7 suites: clues, compare, hint, persist, puzzle, seed, share)
+npm test                    # node --test tests/*.test.mjs (currently 9 suites: achievements, autocomplete, clues, compare, hint, persist, puzzle, seed, share)
 ```
 
 (`package.json` declares `"type": "module"` so the `.js` files run as ESM under Node 20+.)
 
 ## Persistence
 
-Game data is in `localStorage` under `kpopdle:v2`, with one bucket per entity (`group`, `idol`):
+Game data is in `localStorage` under `kpopdle:v2` (scrambled — same XOR + base64 layer the `.dat` files use, so the daily answer isn't sitting in plain text in DevTools). The blob is also the wire format for **Settings → Export stats / Import stats**, which lets a player move their progress between browsers or devices.
+
+The blob has one bucket per entity (`group`, `idol`):
 
 - `daily[difficulty]` — last played date, guess count, target id for "already played today" detection.
-- `streaks[difficulty]` — current and best daily streak.
+- `streaks[difficulty]` — current/best daily streak, plus a one-per-streak `freezeUsed` flag (a single missed day is forgiven without breaking the streak).
 - `bests[difficulty]` — fewest guesses ever recorded.
 - `endless[difficulty]` — plays + best guess count.
+- `totals` — lifetime `dailyWins` / `dailyLosses` / `endlessWins` / `endlessSkips` counters. Kept separately from `history` (which caps at 100 entries) so volume achievements like "100 wins" can count past the cap.
 - `active[mode][difficulty]` — in-progress round (guesses + hint reveals + detective flag) so a reload mid-game resumes seamlessly.
-- `history` — last 100 results (including endless skips and give-ups).
+- `history` — last 100 results, each carrying `guesses` (with hint penalty), `rawGuesses` (without), `hints` count, `filterMode`, target `nationality` and `generation` so achievement checks can read enough metadata without re-resolving the target.
 
-Preferences are split into their own keys so resetting stats doesn't wipe your theme:
+Plus three top-level fields outside the per-entity buckets:
+
+- `achievements` — `{ [id]: unlock_date }` for the 15 local-only achievements.
+- `recentEndlessTargets` — `{ group: [], idol: [] }` ring buffer of the last 25 endless target IDs per entity, used to keep the same group from appearing twice in a row.
+- `lastSelection` — last entity/mode/difficulty combo, restored on reload.
+
+Preferences are split into their own plain keys so resetting stats doesn't wipe your theme or language:
 
 - `kpopdle:theme` — `auto` / `light` / `dark`
 - `kpopdle:cb` — colorblind palette on/off
 - `kpopdle:calm` — reduced-motion mode on/off
 - `kpopdle:filter` — detective mode on/off
-- `kpopdle:lang` — `auto` / `en` / `ko`
-- `kpopdle:lastSelection` — last entity/mode/difficulty combo, restored on reload
+- `kpopdle:lang` — `auto` / `en` / `ko` / `ja`
 - `kpopdle:visited` — first-visit help-modal flag
+- `kpopdle:installDismissed` — set after the player responds to the PWA install hint, so it doesn't pester again
 
 "Reset all stats" (Settings) clears just `kpopdle:v2`; preferences are kept.
 
@@ -214,7 +228,7 @@ The UI ships English (bundled inline so `t()` works synchronously from import ti
 
 ```
 locales/
-├── en.json           # source of truth (162 keys)
+├── en.json           # source of truth (222 keys)
 ├── ko.json           # 한국어
 └── ja.json           # 日本語
 ```
