@@ -199,6 +199,12 @@
       <div id="board-header" class="board-header" aria-hidden="true"></div>
       <div id="board" class="board" data-i18n="board.aria" data-i18n-attr="aria-label" aria-label="Guess comparison grid"></div>
 
+      <!-- Polite live region for screen-reader announcements after a guess.
+           Visually hidden via .sr-only; only assistive tech sees it. Cleared
+           after each announcement so the same content can re-fire on the
+           next guess. -->
+      <div id="guess-announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
       <section class="stats-section">
         <h2 data-i18n="stats.title">Your stats</h2>
         <div id="stats" class="stats"></div>

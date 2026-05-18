@@ -73,6 +73,11 @@
   "clues.partialGroup.single": "前の推測と同じグループ",
   "clues.partialGroup.multi": "前の推測たちと同じグループ",
   "board.aria": "推測比較グリッド",
+  "aria.status.exact": "完全一致",
+  "aria.status.partial": "部分一致",
+  "aria.status.higher": "答えのほうが大きい",
+  "aria.status.lower": "答えのほうが小さい",
+  "aria.status.none": "一致しない",
 
   "banner.win.title": "正解！答えは {{name}} でした。",
   "banner.win.titleIdol": "正解！答えは {{group}} の {{name}} でした。",

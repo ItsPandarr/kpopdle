@@ -75,6 +75,11 @@
   "clues.partialGroup.single": "이전 추측과 같은 그룹",
   "clues.partialGroup.multi": "이전 추측들과 같은 그룹",
   "board.aria": "추측 비교 표",
+  "aria.status.exact": "정확히 일치",
+  "aria.status.partial": "부분 일치",
+  "aria.status.higher": "정답이 더 큼",
+  "aria.status.lower": "정답이 더 작음",
+  "aria.status.none": "불일치",
 
   "banner.win.title": "맞췄어요! 정답: {{name}}",
   "banner.win.titleIdol": "맞췄어요! 정답: {{group}}의 {{name}}",

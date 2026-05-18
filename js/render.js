@@ -5,6 +5,50 @@ import { t } from "./i18n.js";
 
 const ARROW = { up: "▲", down: "▼" };
 
+// Per-cell ARIA label. Sighted players read the value + arrow + cell color
+// to understand status; screen-reader users get nothing about the status
+// from the bare textContent. Compose a label like "Debut 2013, answer is
+// later" that conveys the same info as the visual cell. Returns null when
+// there's nothing useful (missing value, name column).
+function cellAriaLabel(attr, c, entity) {
+  if (!c || c.status === undefined) return null;
+  const label = t(`attr.${attr}`);
+  const valueText = fmtValue(attr, c.value, entity);
+  let statusText;
+  switch (c.status) {
+    case "exact":   statusText = t("aria.status.exact"); break;
+    case "partial": statusText = t("aria.status.partial"); break;
+    case "higher":  statusText = t("aria.status.higher"); break;
+    case "lower":   statusText = t("aria.status.lower"); break;
+    case "none":    statusText = t("aria.status.none"); break;
+    default:        statusText = null;
+  }
+  // Skip the status suffix when the value itself is unknown (—). The
+  // status of an unknown value isn't informative.
+  if (valueText === "—") return `${label}: ${t("clues.empty")}`;
+  // For some attrs (generation), fmtValue already prepends a self-label
+  // like "Gen 3" — adding another "Gen" prefix would produce "Gen Gen 3".
+  // Detect and drop the redundant prefix.
+  const startsWithLabel = label && valueText.startsWith(label);
+  const display = startsWithLabel ? valueText : `${label} ${valueText}`;
+  return statusText ? `${display}, ${statusText}` : display;
+}
+
+// One-line summary of the whole guess row, for pushing into the polite
+// live region after a guess commits. Reads as a short sentence:
+//   "BTS. Debut 2013, answer is later. Generation 3, exact match. ..."
+// Screen readers announce this within ~half a second of the row appearing.
+export function buildGuessAnnouncement(guess, comparison, entity, difficulty) {
+  const attrs = VISIBLE_ATTRS[entity][difficulty];
+  const parts = [guess.name];
+  for (const attr of attrs) {
+    const c = comparison[attr];
+    const txt = cellAriaLabel(attr, c, entity);
+    if (txt) parts.push(txt);
+  }
+  return parts.join(". ") + ".";
+}
+
 function fmtValue(attr, value, entity) {
   if (value === null || value === undefined || value === "") return "—";
   if (attr === "member_count") return String(value);
@@ -53,6 +97,11 @@ export function renderGuessRow(boardEl, guess, comparison, entity, difficulty, o
     cell.className = `cell cell-${attr} status-${c.status}`;
     // Index drives the staggered flip-in delay.
     cell.style.setProperty("--col-index", String(idx));
+    // Compose an ARIA label that includes the status (exact / partial /
+    // higher / lower / none) so a screen-reader user navigating cell-by-
+    // cell hears what sighted users see via color + arrow.
+    const aria = cellAriaLabel(attr, c, entity);
+    if (aria) cell.setAttribute("aria-label", aria);
     const text = document.createElement("span");
     text.className = "cell-text";
     text.textContent = fmtValue(attr, c.value, entity);
@@ -61,6 +110,7 @@ export function renderGuessRow(boardEl, guess, comparison, entity, difficulty, o
       const arrow = document.createElement("span");
       arrow.className = "cell-arrow";
       arrow.textContent = ARROW[c.direction] || "";
+      arrow.setAttribute("aria-hidden", "true");
       cell.appendChild(arrow);
     }
     row.appendChild(cell);

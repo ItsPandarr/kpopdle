@@ -11,6 +11,7 @@ const t = i18n.t;
 import {
   renderHeader,
   renderGuessRow,
+  buildGuessAnnouncement,
   clearBoard,
   renderWinBanner,
   renderLossBanner,
@@ -228,6 +229,19 @@ function onHint() {
 
 function prettyLabel(attr) {
   return t(`attr.${attr}`);
+}
+
+// Push text into the polite live region (#guess-announcer in index.html).
+// Clearing first then re-setting on the next microtask is the standard
+// trick that forces a re-announce when the same string would otherwise
+// be debounced. Safe no-op if the element is missing.
+function announceToSR(text) {
+  const el = document.getElementById("guess-announcer");
+  if (!el) return;
+  el.textContent = "";
+  // Defer to a microtask so the cleared state is observed before the new
+  // text — without this, the assistive tech often debounces and skips.
+  setTimeout(() => { el.textContent = text; }, 50);
 }
 
 // Build the extended-opts object passed to every record* call. Captures
@@ -532,6 +546,11 @@ function onGuess(entity) {
   const cmp = compareFor(state.entity, entity, state.target);
   recordGuess(entity, cmp);
   renderGuessRow(els.board, entity, cmp, state.entity, state.difficulty);
+  // Push a one-line summary into the polite live region so screen readers
+  // hear "BTS. Debut 2013, answer is later. Generation 3, exact match. …"
+  // right after the row appears. Clearing first ensures the same summary
+  // would re-fire on a subsequent (different) guess.
+  announceToSR(buildGuessAnnouncement(entity, cmp, state.entity, state.difficulty));
   ac?.setGuessedIds(state.guesses.map((x) => x.group.id));
   // Score line (including "1/6 guesses" daily progress) updates via refreshClues.
   refreshClues();
