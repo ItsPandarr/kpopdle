@@ -162,6 +162,7 @@ function updateHintButton() {
     clues,
     visibleAttrs: visible,
     target: state.target,
+    bounds: getNumericBounds(state.entity),
   });
   const cost = nextHintCost(state.hintEvents, state.guesses.length);
   els.hintBtn.hidden = false;
@@ -186,6 +187,7 @@ function onHint() {
     clues,
     visibleAttrs: visible,
     target: state.target,
+    bounds: getNumericBounds(state.entity),
   });
   if (!attr) return;
   const cost = nextHintCost(state.hintEvents, state.guesses.length);

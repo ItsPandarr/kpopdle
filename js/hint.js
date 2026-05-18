@@ -69,14 +69,29 @@ export function totalHintPenalty(events) {
 }
 
 // True when the player's existing guesses pin this attribute's exact value.
-export function attrIsKnown(attr, clues) {
+// For numeric attrs, also returns true when the inferred range has collapsed
+// to a single value (min === max), or when a bound saturates against the
+// dataset extreme (e.g. max <= dataset_min ⇒ value must be the dataset min).
+// `bounds` is the same `getNumericBounds()` shape used by the clue formatter —
+// optional; without it the saturation check is skipped.
+export function attrIsKnown(attr, clues, bounds = null) {
   switch (attr) {
     case "debut_year":
     case "generation":
     case "member_count":
     case "birth_year": {
       const info = clues[attr];
-      return Boolean(info && info.known != null);
+      if (!info) return false;
+      if (info.known != null) return true;
+      // Range collapse: two opposing bounds pin a single value.
+      if (info.min != null && info.max != null && info.min === info.max) return true;
+      // Bound saturation against the dataset extreme.
+      const b = bounds?.[attr];
+      if (b) {
+        if (info.max != null && info.max <= b.min) return true;
+        if (info.min != null && info.min >= b.max) return true;
+      }
+      return false;
     }
     case "company":
       return clues.company?.known != null;
@@ -95,13 +110,13 @@ export function attrIsKnown(attr, clues) {
   }
 }
 
-export function nextHintAttr({ order, events, clues, visibleAttrs, target }) {
+export function nextHintAttr({ order, events, clues, visibleAttrs, target, bounds = null }) {
   if (!target) return null;
   const revealed = new Set(events.map((e) => e.attr));
   for (const attr of order) {
     if (!visibleAttrs.includes(attr)) continue;
     if (revealed.has(attr)) continue;
-    if (attrIsKnown(attr, clues)) continue;
+    if (attrIsKnown(attr, clues, bounds)) continue;
     const value = hintValueFor(attr, target);
     if (value === null || value === undefined || value === "") continue;
     return attr;

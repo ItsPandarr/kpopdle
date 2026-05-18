@@ -85,6 +85,48 @@ import {
   assert.equal(attrIsKnown("primary_group", clues), false);
 }
 
+// Inferred-knowness: a range that has collapsed to a single value counts as
+// known even without info.known being set. This is the regression case where
+// guessing a Gen 5 and a Gen 3 idol pins generation to 4 — the hint button
+// shouldn't still offer to "reveal" it.
+{
+  const clues = {
+    debut_year:   { known: null, min: null, max: null },
+    generation:   { known: null, min: 4,    max: 4    }, // collapsed to 4
+    member_count: { known: null, min: null, max: null },
+    birth_year:   { known: null, min: null, max: null },
+  };
+  assert.equal(attrIsKnown("generation", clues), true, "range collapse (min===max) counts as known");
+  assert.equal(attrIsKnown("debut_year", clues), false);
+}
+
+// Bound saturation: when bounds are provided and the inferred range hits the
+// dataset extreme on the *opposite* side, the value is pinned (e.g. max <= 1
+// when dataset min is 1 → must be Gen 1).
+{
+  const clues = {
+    debut_year:   { known: null, min: null, max: null },
+    generation:   { known: null, min: null, max: 1    }, // "≤1" → must be 1
+    member_count: { known: null, min: null, max: null },
+    birth_year:   { known: null, min: null, max: null },
+  };
+  const bounds = { generation: { min: 1, max: 5 } };
+  assert.equal(attrIsKnown("generation", clues, bounds), true, "max saturating dataset min counts as known");
+  assert.equal(attrIsKnown("generation", clues), false, "but only when bounds are passed");
+}
+
+// Symmetric: min saturating dataset max also counts as known.
+{
+  const clues = {
+    debut_year:   { known: null, min: 2026, max: null }, // "≥2026" → must be 2026
+    generation:   { known: null, min: null, max: null },
+    member_count: { known: null, min: null, max: null },
+    birth_year:   { known: null, min: null, max: null },
+  };
+  const bounds = { debut_year: { min: 1993, max: 2026 } };
+  assert.equal(attrIsKnown("debut_year", clues, bounds), true);
+}
+
 // ─── nextHintAttr ──────────────────────────────────────────────────────────────
 
 const target = {
@@ -150,6 +192,23 @@ const target = {
   };
   const attr = nextHintAttr({ order, events: [], clues, visibleAttrs: visible, target });
   assert.equal(attr, null);
+}
+
+// Regression: nextHintAttr skips an attr whose range has collapsed to one
+// value (the "guessed Gen 5 + Gen 3 → must be Gen 4" case).
+{
+  const order = ["generation", "company"];
+  const visible = ["generation", "company"];
+  const clues = {
+    debut_year:   { known: null, min: null, max: null },
+    generation:   { known: null, min: 4, max: 4 }, // pinned by ▲/▼ guesses
+    member_count: { known: null, min: null, max: null },
+    birth_year:   { known: null, min: null, max: null },
+    company: { known: null, knownParent: null, excludedCompanies: new Set(), excludedParents: new Set() },
+    country: { known: null, excluded: new Set() },
+  };
+  const attr = nextHintAttr({ order, events: [], clues, visibleAttrs: visible, target });
+  assert.equal(attr, "company", "skip generation when range pins it to one value");
 }
 
 // ─── attrsByUniqueness ─────────────────────────────────────────────────────────
