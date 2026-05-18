@@ -1217,6 +1217,114 @@ body::before {
   opacity: 0.85;
 }
 
+/* Custom themed alertdialog — replaces window.confirm() for destructive
+   actions (give up, reset stats). Backdrop fades in over the whole page;
+   the card scales in from a small initial size. Both animations respect
+   prefers-reduced-motion via the .calm-mode override at the bottom of
+   this file (and the global @media (prefers-reduced-motion) block). */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: modal-backdrop-in 160ms ease-out;
+}
+.modal-card {
+  width: 100%;
+  max-width: 26rem;
+  background: var(--surface, #1a1a22);
+  color: var(--text, #e9e9f0);
+  border: 1px solid var(--border, #2e2e3e);
+  border-radius: 14px;
+  padding: 1.4rem 1.4rem 1.1rem;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: modal-card-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.modal-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.modal-message {
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text, #e9e9f0);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+.modal-btn {
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+.modal-btn:focus-visible {
+  outline: 2px solid var(--accent, #ff5fa2);
+  outline-offset: 2px;
+}
+.modal-btn:active {
+  transform: translateY(1px);
+}
+.modal-cancel {
+  background: transparent;
+  border-color: var(--border, #2e2e3e);
+  color: var(--text, #e9e9f0);
+}
+.modal-cancel:hover {
+  background: var(--surface-2, #232330);
+}
+.modal-confirm {
+  background: var(--accent, #ff5fa2);
+  border-color: var(--accent, #ff5fa2);
+  color: #fff;
+}
+.modal-confirm:hover {
+  filter: brightness(1.08);
+}
+/* Destructive variant — red tint so accidental Enter is harder to fire.
+   Color picked to read on both light + dark themes. */
+.modal-confirm.is-destructive {
+  background: #c04848;
+  border-color: #c04848;
+}
+.modal-confirm.is-destructive:hover {
+  background: #ad3a3a;
+  border-color: #ad3a3a;
+}
+
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modal-card-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+/* Calm mode (player toggle) + system reduced-motion: skip the entrance
+   animations entirely. The dialog still appears, just without the
+   fade/scale flourish. */
+:root[data-calm="on"] .modal-backdrop,
+:root[data-calm="on"] .modal-card {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop, .modal-card { animation: none; }
+}
+
 /* "Last 14 days" archive strip — one row per day, newest first. Past days
    are clickable to start a (stats-neutral) replay; today and the bottom
    of the list use a dimmed style so the active row stands out on tap. */

@@ -153,6 +153,8 @@
   "settings.reset": "모든 통계 초기화",
   "settings.reset.hint": "연속 기록, 히스토리, 진행 중 게임을 모두 지웁니다. 테마 및 접근성 설정은 유지됩니다.",
   "settings.reset.confirm": "모든 통계를 초기화할까요? 연속 기록, 히스토리, 진행 중 게임이 지워집니다. 테마와 접근성 설정은 유지됩니다. 되돌릴 수 없습니다.",
+  "modal.confirm": "확인",
+  "modal.cancel": "취소",
 
   "help.aria": "플레이 방법",
   "help.title": "플레이 방법",

@@ -149,6 +149,8 @@ export default {
   "settings.reset": "Reset all stats",
   "settings.reset.hint": "Clears streaks, history, and any in-progress games. Theme and accessibility preferences are kept.",
   "settings.reset.confirm": "Reset all stats? This clears streaks, history, and any in-progress games. Theme and accessibility preferences are kept. This can't be undone.",
+  "modal.confirm": "Confirm",
+  "modal.cancel": "Cancel",
   "help.aria": "How to play",
   "help.title": "How to play",
   "help.intro": "Guess the hidden K-pop group or idol. Each guess shows how its attributes compare to the answer.",

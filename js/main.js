@@ -43,6 +43,7 @@ import {
   applyCalm,
   setActive,
   formatCountdownToUTCMidnight,
+  showConfirm,
 } from "./ui.js";
 import {
   getDailyStatus,
@@ -1040,8 +1041,13 @@ async function init() {
   attachSettingsMenu({ button: els.settingsBtn, panel: els.settingsPanel });
   attachSettingsMenu({ button: els.helpBtn, panel: els.helpPanel });
 
-  els.resetStatsBtn.addEventListener("click", () => {
-    if (!confirm(t("settings.reset.confirm"))) return;
+  els.resetStatsBtn.addEventListener("click", async () => {
+    const ok = await showConfirm({
+      message: t("settings.reset.confirm"),
+      confirmLabel: t("settings.reset"),
+      destructive: true,
+    });
+    if (!ok) return;
     resetAllStats();
     // Re-init the game with a fresh persisted state.
     startGame();
@@ -1051,14 +1057,22 @@ async function init() {
   // Give-up: reveal the answer and end the round. Confirm text varies by
   // mode — daily warns about the streak, endless calls it a "skip", custom
   // just confirms the reveal.
-  els.giveUpBtn.addEventListener("click", () => {
+  els.giveUpBtn.addEventListener("click", async () => {
     if (state.frozen) return;
     const key = state.customPuzzle
       ? "meta.giveup.confirm.custom"
       : state.mode === "daily" && !state.replayDate
       ? "meta.giveup.confirm"
       : "meta.giveup.confirm.endless";
-    if (!confirm(t(key))) return;
+    // Custom puzzles aren't destructive (no stats to lose); daily / endless
+    // give-up both count against something so the confirm button is red.
+    const destructive = !state.customPuzzle;
+    const ok = await showConfirm({
+      message: t(key),
+      confirmLabel: t("meta.giveup"),
+      destructive,
+    });
+    if (!ok) return;
     forceLoss();
   });
 
