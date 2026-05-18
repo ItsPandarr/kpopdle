@@ -34,8 +34,18 @@ const DEFAULT_STATE = () => ({
   // (YYYY-MM-DD) of unlock. Lives at the top level (not per-entity) because
   // some achievements span entity modes. Cleared on "Reset all stats".
   achievements: {},
+  // Spoiler-free endless: ring buffer of the most-recent endless target IDs
+  // per entity. The endless target picker filters these out so a player
+  // doesn't get the same group twice in a row. Cap = RECENT_ENDLESS_CAP.
+  recentEndlessTargets: { group: [], idol: [] },
   ...Object.fromEntries(ENTITIES.map((e) => [e, DEFAULT_ENTITY_STATE()])),
 });
+
+// How many recent endless targets to block from re-appearing. Small enough
+// that even the easy pool (100 entities) still has ~75% of options eligible,
+// but big enough that "I just saw Aespa, why is it Aespa again" never
+// happens within a normal session.
+export const RECENT_ENDLESS_CAP = 25;
 
 function read() {
   try {
@@ -57,6 +67,14 @@ function read() {
     // Fill in missing sub-trees in case schema grew.
     if (!parsed.lastSelection) parsed.lastSelection = { entity: "group", mode: "daily", difficulty: "easy" };
     if (!parsed.achievements || typeof parsed.achievements !== "object") parsed.achievements = {};
+    if (!parsed.recentEndlessTargets || typeof parsed.recentEndlessTargets !== "object") {
+      parsed.recentEndlessTargets = { group: [], idol: [] };
+    } else {
+      // Make sure both buckets exist on older blobs that only had one entity's list.
+      for (const e of ENTITIES) {
+        if (!Array.isArray(parsed.recentEndlessTargets[e])) parsed.recentEndlessTargets[e] = [];
+      }
+    }
     for (const e of ENTITIES) {
       if (!parsed[e]) parsed[e] = DEFAULT_ENTITY_STATE();
       if (!parsed[e].active) parsed[e].active = { daily: EMPTY_DIFF_MAP(), endless: EMPTY_DIFF_MAP() };
@@ -116,6 +134,31 @@ export function markAchievement(id, date = todayUTC()) {
   s.achievements[id] = date;
   write(s);
   return true;
+}
+
+// Spoiler-free endless: the most-recent target IDs the player saw, newest
+// first, capped at RECENT_ENDLESS_CAP. Returns a fresh array; mutation by
+// the caller doesn't bleed back into storage.
+export function getRecentEndlessTargets(entity) {
+  const s = read();
+  const list = s.recentEndlessTargets?.[entity];
+  return Array.isArray(list) ? list.slice() : [];
+}
+
+// Push a new target ID to the front of the ring buffer, dedupe (in case
+// the picker falls back to allowing repeats), and trim to RECENT_ENDLESS_CAP.
+export function pushRecentEndlessTarget(entity, id) {
+  if (!id) return;
+  const s = read();
+  if (!s.recentEndlessTargets) s.recentEndlessTargets = { group: [], idol: [] };
+  if (!Array.isArray(s.recentEndlessTargets[entity])) s.recentEndlessTargets[entity] = [];
+  const list = s.recentEndlessTargets[entity];
+  // Remove any prior occurrence of this id (so an old appearance doesn't
+  // hold onto a "recent" slot when the ring buffer rotates).
+  const filtered = list.filter((x) => x !== id);
+  filtered.unshift(id);
+  s.recentEndlessTargets[entity] = filtered.slice(0, RECENT_ENDLESS_CAP);
+  write(s);
 }
 
 export function getDailyStatus(entity, difficulty, date = todayUTC()) {

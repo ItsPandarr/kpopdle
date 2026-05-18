@@ -14,7 +14,16 @@ globalThis.localStorage = (() => {
   };
 })();
 
-const { summarizeHistory, getStats, recordDailyWin, recordDailyLoss, getDailyArchive } = await import("../js/persist.js");
+const {
+  summarizeHistory,
+  getStats,
+  recordDailyWin,
+  recordDailyLoss,
+  getDailyArchive,
+  getRecentEndlessTargets,
+  pushRecentEndlessTarget,
+  RECENT_ENDLESS_CAP,
+} = await import("../js/persist.js");
 
 function resetStorage() {
   globalThis.localStorage.clear();
@@ -290,6 +299,67 @@ function streakOf(entity = "group", difficulty = "easy") {
   resetStorage();
   const a = getDailyArchive("group", "easy");
   assert.equal(a.length, 14);
+}
+
+// ─── Recent-endless ring buffer ────────────────────────────────────────────
+//
+// pickTarget filters its endless rolls against this buffer so a player
+// doesn't get the same target twice in a row. The buffer is per-entity,
+// newest-first, capped at RECENT_ENDLESS_CAP.
+
+// Empty by default; mutation through the helper survives a re-read.
+{
+  resetStorage();
+  assert.deepEqual(getRecentEndlessTargets("group"), []);
+  pushRecentEndlessTarget("group", "Q1");
+  assert.deepEqual(getRecentEndlessTargets("group"), ["Q1"]);
+  pushRecentEndlessTarget("group", "Q2");
+  assert.deepEqual(getRecentEndlessTargets("group"), ["Q2", "Q1"], "newest first");
+}
+
+// Per-entity isolation — pushing to group doesn't bleed into idol.
+{
+  resetStorage();
+  pushRecentEndlessTarget("group", "Q1");
+  assert.deepEqual(getRecentEndlessTargets("group"), ["Q1"]);
+  assert.deepEqual(getRecentEndlessTargets("idol"), []);
+}
+
+// De-dupe: pushing an id that's already in the buffer moves it to the
+// front instead of stacking duplicates. Prevents one stuck id from
+// hogging multiple slots in the ring.
+{
+  resetStorage();
+  pushRecentEndlessTarget("group", "Q1");
+  pushRecentEndlessTarget("group", "Q2");
+  pushRecentEndlessTarget("group", "Q3");
+  pushRecentEndlessTarget("group", "Q1");
+  assert.deepEqual(getRecentEndlessTargets("group"), ["Q1", "Q3", "Q2"]);
+}
+
+// Trim to RECENT_ENDLESS_CAP — oldest entries fall off the back.
+{
+  resetStorage();
+  for (let i = 0; i < RECENT_ENDLESS_CAP + 5; i++) {
+    pushRecentEndlessTarget("group", `Q${i}`);
+  }
+  const list = getRecentEndlessTargets("group");
+  assert.equal(list.length, RECENT_ENDLESS_CAP);
+  // The 5 oldest pushes should have been evicted.
+  assert.ok(!list.includes("Q0"));
+  assert.ok(!list.includes("Q4"));
+  // The 5 newest should be at the front, newest first.
+  assert.equal(list[0], `Q${RECENT_ENDLESS_CAP + 4}`);
+}
+
+// Defensive: null/empty id is a no-op rather than corrupting the list.
+{
+  resetStorage();
+  pushRecentEndlessTarget("group", "Q1");
+  pushRecentEndlessTarget("group", null);
+  pushRecentEndlessTarget("group", "");
+  pushRecentEndlessTarget("group", undefined);
+  assert.deepEqual(getRecentEndlessTargets("group"), ["Q1"]);
 }
 
 console.log("persist.test ok");

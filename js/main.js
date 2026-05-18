@@ -71,6 +71,8 @@ import {
   hasVisited,
   getUnlockedAchievements,
   markAchievement,
+  getRecentEndlessTargets,
+  pushRecentEndlessTarget,
   markVisited,
   historySummary,
 } from "./persist.js";
@@ -365,7 +367,18 @@ function pickTarget() {
     const dateStr = state.replayDate || todayUTC();
     return targetForDaily(`${state.entity}|${dateStr}`, state.difficulty, pool);
   }
-  return randomTarget(pool);
+  // Endless: spoiler-free roll. Filter out the player's recent endless
+  // targets (per entity, across difficulties — so switching from easy to
+  // medium doesn't immediately re-roll the same group). If filtering would
+  // empty the pool (very small dataset, or the recent buffer covers all of
+  // it), fall back to the full pool — picking SOMETHING beats picking
+  // nothing.
+  const recent = new Set(getRecentEndlessTargets(state.entity));
+  const fresh = pool.filter((g) => !recent.has(g.id));
+  const effective = fresh.length > 0 ? fresh : pool;
+  const target = randomTarget(effective);
+  if (target?.id) pushRecentEndlessTarget(state.entity, target.id);
+  return target;
 }
 
 function startGame({ replayDaily = false, replayDate = null } = {}) {
