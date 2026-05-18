@@ -202,9 +202,14 @@ function appendLearnMoreLink(bannerEl, entity, target) {
 }
 
 // Try the platform's native share sheet first (Web Share API — pops Messages /
-// Mail / Discord / etc. on mobile, plus a small picker on desktop Chrome).
-// Fall back to clipboard copy when the API is missing or the call fails for
-// any reason other than the user dismissing the sheet.
+// Mail / Discord / etc. on mobile). Fall back to clipboard copy when the API
+// is missing OR when we detect a cursor-primary (desktop) device.
+//
+// We gate Web Share on `(pointer: coarse)` — true when the primary pointer
+// is touch — because desktop browsers do implement navigator.share but their
+// share sheets are awkward in a desktop context (Chrome on macOS pops up a
+// "send to your phone or copy link" mini-popup that interrupts the flow).
+// Desktop users expect clipboard copy + a "Copied!" confirmation.
 //
 // Returns one of:
 //   "shared"   — the OS share sheet handled it (or the user cancelled —
@@ -213,10 +218,25 @@ function appendLearnMoreLink(bannerEl, entity, target) {
 //   "copied"   — clipboard fallback succeeded.
 //   "fallback" — both paths failed; caller surfaces the text inline as
 //                a last resort so the user can copy it by hand.
+function isTouchPrimaryDevice() {
+  // Treat any environment without matchMedia (Node tests, ancient browsers,
+  // some webviews) as desktop — the safer default since clipboard copy
+  // never has a worse UX than the share sheet on desktop.
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+  try {
+    return window.matchMedia("(pointer: coarse)").matches;
+  } catch {
+    return false;
+  }
+}
+
 async function sharePayload({ title, text, url }) {
   // navigator.share rejects (NotAllowedError) without a transient activation
   // — so this MUST be called from a click handler, which all our callers are.
-  if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+  const useShareSheet = isTouchPrimaryDevice()
+    && typeof navigator !== "undefined"
+    && typeof navigator.share === "function";
+  if (useShareSheet) {
     try {
       await navigator.share({ title, text, url });
       return "shared";
