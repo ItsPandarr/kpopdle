@@ -96,6 +96,7 @@ export function attachLangToggle(rootEl, current, onChange) {
       { value: "auto", label: t("settings.lang.auto") },
       { value: "en",   label: t("settings.lang.en") },
       { value: "ko",   label: t("settings.lang.ko") },
+      { value: "ja",   label: t("settings.lang.ja") },
     ],
     current,
     onChange,

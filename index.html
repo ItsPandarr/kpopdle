@@ -43,7 +43,7 @@
           var cm = localStorage.getItem("kpopdle:calm");
           if (cm === "on") document.documentElement.dataset.calm = "on";
           var lang = localStorage.getItem("kpopdle:lang");
-          if (lang === "en" || lang === "ko") document.documentElement.lang = lang;
+          if (lang === "en" || lang === "ko" || lang === "ja") document.documentElement.lang = lang;
         } catch (e) { /* localStorage blocked — fall back to auto */ }
       })();
     </script>

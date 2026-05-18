@@ -144,6 +144,7 @@ export default {
   "settings.lang.auto": "Auto",
   "settings.lang.en": "English",
   "settings.lang.ko": "한국어",
+  "settings.lang.ja": "日本語",
   "settings.toggle.off": "Off",
   "settings.toggle.on": "On",
   "settings.reset": "Reset all stats",

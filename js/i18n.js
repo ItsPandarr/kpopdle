@@ -9,14 +9,14 @@
 //     minuscule and the strings translatable as written.
 //   - English is bundled inline in this file so `t()` works synchronously
 //     from module-import time. Tests + clues.js don't need async setup.
-//   - Locale JSON files (locales/en.json, locales/ko.json) extend / override
-//     the bundled English at runtime — keeping the wire format human-editable
+//   - Locale JSON files (locales/{en,ko,ja}.json) extend / override the
+//     bundled English at runtime — keeping the wire format human-editable
 //     while the JS still works standalone for unit tests.
 
 import EN from "./i18n-en.js";
 
-const STORAGE_KEY = "kpopdle:lang";   // "auto" | "en" | "ko"
-const SUPPORTED = ["en", "ko"];
+const STORAGE_KEY = "kpopdle:lang";   // "auto" | "en" | "ko" | "ja"
+const SUPPORTED = ["en", "ko", "ja"];
 const DEFAULT = "en";
 
 const _locales = { en: EN };

@@ -148,6 +148,7 @@
   "settings.lang.auto": "자동",
   "settings.lang.en": "English",
   "settings.lang.ko": "한국어",
+  "settings.lang.ja": "日本語",
   "settings.toggle.off": "끔",
   "settings.toggle.on": "켬",
   "settings.reset": "모든 통계 초기화",

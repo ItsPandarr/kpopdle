@@ -2,7 +2,7 @@
 
 A Loldle-style guessing game for K-pop groups and idols. Pure static site — no backend, no accounts, no analytics. Personal bests live in your browser's localStorage.
 
-UI is available in **English** and **한국어** (auto-detected from `navigator.language`, manually overridable from Settings).
+UI is available in **English**, **한국어**, and **日本語** (auto-detected from `navigator.language`, manually overridable from Settings).
 
 ## Run it
 
@@ -210,12 +210,13 @@ Both the human-readable `.json` and the encoded `.dat` files are tracked in the 
 
 ## Internationalization
 
-The UI ships English (bundled inline so `t()` works synchronously from import time) plus a fetch-loaded Korean translation. Entity names stay romanized in every locale — only chrome (labels, buttons, banners, settings, help, footer) is translated.
+The UI ships English (bundled inline so `t()` works synchronously from import time) plus fetch-loaded Korean and Japanese translations. Entity names stay romanized in every locale — only chrome (labels, buttons, banners, settings, help, footer) is translated.
 
 ```
 locales/
-├── en.json           # source of truth (147 keys)
-└── ko.json           # 한국어
+├── en.json           # source of truth (162 keys)
+├── ko.json           # 한국어
+└── ja.json           # 日本語
 ```
 
 `js/i18n-en.js` mirrors `locales/en.json` and is **auto-generated** by `scripts/sync-i18n-en.mjs` — never hand-edit it. The generator runs as a pre-step of `npm run build` and `npm run preview`, or invoke directly:
@@ -236,7 +237,7 @@ The language toggle lives in **Settings → Language**. Changing it triggers a `
 
 - Album / single mode.
 - Hiatus detection.
-- More locales (Japanese, Spanish).
+- More locales (Spanish, Simplified Chinese).
 
 ## Authorship
 
