@@ -188,6 +188,10 @@ body::before {
   border-radius: 999px;
   color: var(--muted);
   font-size: 0.85rem;
+  /* Without this, multi-character CJK labels (e.g. "한국어", "日本語")
+     break per-glyph when the button is narrow — we want each label to
+     stay on a single line as an atomic word. */
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 .toggle-btn:hover {
@@ -1646,6 +1650,11 @@ a:focus-visible,
 .settings-panel .toggle-group .toggle-btn {
   flex: 1;
   text-align: center;
+  /* The lang toggle has 4 options including 2 multi-glyph CJK labels
+     (한국어, 日本語) which the default 0.9rem horizontal padding squeezes
+     against. Tighten so 4 buttons fit cleanly on a 360-400px wide
+     settings panel. */
+  padding: 0.35rem 0.4rem;
   /* Keep the rounded look — the outer pill already has border-radius:999px,
      so each button only needs to match the corners it owns. */
 }

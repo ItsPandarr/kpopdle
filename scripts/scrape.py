@@ -88,7 +88,11 @@ _ANCHOR = """
     # Note: scope is "groups people would expect to see in a K-pop guessing
     # game" — produced in K-pop style, by Korean labels (HYBE/SM/JYP/etc.)
     # or via K-pop survival-show pipelines, even when the members or release
-    # market are Japan/US-centric.
+    # market are Japan/US-centric. FICTIONAL groups (movie / animation /
+    # virtual idols where the members aren't real people) are deliberately
+    # excluded — they don't fit the puzzle's "guess a real entity" frame
+    # and their attributes (debut year, gender, member count) are story
+    # data rather than facts.
     VALUES ?group {
       wd:Q118178306    # BoyNextDoor (no enLabel, p31=male idol group, SK)
       wd:Q112834233    # &TEAM       (HYBE, Japan-based, J-pop tagged)
@@ -102,8 +106,15 @@ _ANCHOR = """
       wd:Q123859475    # ME:I        (Produce 101 Japan The Girls winners)
       wd:Q116770778    # DXTEEN      (Japan-based, Boys Planet alumni)
       wd:Q109362306    # BUDDiiS     (Japan-based, K-pop adjacent)
-      wd:Q135921764    # Saja Boys   (fictional KPop Demon Hunters group)
-      wd:Q119025962    # Plave       (Korean virtual idol group)
+      wd:Q119025962    # Plave       (virtual idol group with real performers
+                       #              behind 3D avatars; currently dropped by
+                       #              the data-completeness filter for missing
+                       #              member list on Wikidata)
+      # FICTIONAL — do NOT add to this list. Movie/animation characters
+      # without real-person performers don't fit a "guess a real entity"
+      # puzzle, and their attributes are story data rather than facts:
+      # - Q135921764 Saja Boys (KPop Demon Hunters animated movie)
+      # - Huntr/X / Huntrix    (same movie; Wikidata redirects to film entry)
     }
     ?group wdt:P31 ?type .
   }
