@@ -38,11 +38,21 @@ jobs:
       - name: Run unit tests
         run: npm test
 
+      # Resolves the Pages site URL (handles user-pages vs project-pages
+      # automatically — base_url is e.g. https://user.github.io/repo/ or
+      # https://user.github.io/). Has to run BEFORE the build so we can
+      # feed it in via env to substitute the sitemap.xml placeholder.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v6
+
       - name: Build dist/
         run: npm run build
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v6
+        env:
+          # Used by scripts/build.mjs to substitute the <loc> placeholder
+          # in sitemap.xml. Without this the sitemap ships with the
+          # https://example.com/ placeholder and crawlers ignore it.
+          KPOPDLE_URL: ${{ steps.pages.outputs.base_url }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
