@@ -321,6 +321,10 @@ function appendPuzzleShareButton(bannerEl, { entity, target, difficulty, filter 
       // Surface the URL so the user can copy it manually.
       btn.textContent = url;
     }
+    // Fire a custom event so the achievements layer (in main.js) can
+    // unlock the "Sharing is caring" badge without render.js needing to
+    // know about persistence directly.
+    document.dispatchEvent(new CustomEvent("kpopdle:puzzle-shared"));
   });
   bannerEl.appendChild(btn);
 }

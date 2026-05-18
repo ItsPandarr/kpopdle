@@ -5,6 +5,7 @@ import { targetForDaily, randomTarget, todayUTC, yesterdayUTC } from "./seed.js"
 import { attachAutocomplete } from "./autocomplete.js";
 import { repoUrlFor, correctionIssueUrl } from "./share.js";
 import { readPuzzleFromHash, clearPuzzleFromHash } from "./puzzle.js";
+import { ACHIEVEMENTS, achievementById, newlyUnlocked } from "./achievements.js";
 import * as i18n from "./i18n.js";
 const t = i18n.t;
 import {
@@ -68,6 +69,8 @@ import {
   recordDailyLoss,
   resetAllStats,
   hasVisited,
+  getUnlockedAchievements,
+  markAchievement,
   markVisited,
   historySummary,
 } from "./persist.js";
@@ -225,6 +228,34 @@ function prettyLabel(attr) {
   return t(`attr.${attr}`);
 }
 
+// Build the extended-opts object passed to every record* call. Captures
+// the raw guess count (vs. the hint-padded total), hint count, detective
+// flag, and a couple of target attributes — the achievements layer reads
+// these from history records to decide what to unlock.
+function recordOpts() {
+  return {
+    rawGuesses: state.guesses.length,
+    hints: state.hintEvents.length,
+    filterMode: !!state.filterMode,
+    nationality: state.target?.nationality ?? null,
+    generation: state.target?.generation ?? null,
+  };
+}
+
+// After every record* call, evaluate which achievements should now be
+// unlocked and surface a toast for the ones that just transitioned. The
+// modal renders the full list on demand; this is the live notification
+// surface. Suppressed in calm mode by the toast helper itself.
+function checkAchievementsAfterRecord() {
+  const stats = getStats();
+  const already = getUnlockedAchievements();
+  const fresh = newlyUnlocked(stats, already);
+  for (const id of fresh) {
+    markAchievement(id);
+    showAchievementToast(id);
+  }
+}
+
 // End the current round as a loss. Three flavors depending on mode:
 //   - daily:  records a daily loss (breaks streak, hits history), uses the
 //             "Out of guesses today" placeholder.
@@ -256,12 +287,13 @@ function forceLoss() {
     clearActive(state.entity, state.mode, state.difficulty);
     const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
     if (isDaily) {
-      recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries);
+      recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries, undefined, recordOpts());
     } else if (state.guesses.length > 0) {
       // Only bother recording an endless skip if the player actually engaged;
       // an immediate "show me" from a fresh round isn't worth tracking.
-      recordEndlessSkip(state.entity, state.difficulty, state.target.id, state.guesses.length);
+      recordEndlessSkip(state.entity, state.difficulty, state.target.id, state.guesses.length, recordOpts());
     }
+    checkAchievementsAfterRecord();
   } else if (isCustom) {
     // Friend's puzzle done — clear the URL so future reloads start fresh.
     clearPuzzleFromHash(location, history);
@@ -511,13 +543,19 @@ function onGuess(entity) {
     if (!state.replayDate && !isCustom) clearActive(state.entity, state.mode, state.difficulty);
     const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
     const maxGuesses = state.mode === "daily" && !isCustom ? MAX_DAILY_GUESSES[state.difficulty] : null;
-    // Replays + custom puzzles are practice — don't touch stats.
+    // Replays + custom puzzles are practice — don't touch stats. Custom
+    // puzzles DO unlock the "friend's puzzle" achievement though, since
+    // playing one is the qualifying event.
     if (!state.replayDate && !isCustom) {
       if (state.mode === "daily") {
-        recordDailyWin(state.entity, state.difficulty, state.target.id, totalTries);
+        recordDailyWin(state.entity, state.difficulty, state.target.id, totalTries, undefined, recordOpts());
       } else {
-        recordEndlessWin(state.entity, state.difficulty, state.target.id, totalTries);
+        recordEndlessWin(state.entity, state.difficulty, state.target.id, totalTries, recordOpts());
       }
+      checkAchievementsAfterRecord();
+    } else if (isCustom) {
+      // Event-based achievement — fires once, persists.
+      if (markAchievement("friends_puzzle")) showAchievementToast("friends_puzzle");
     }
     // Friend's puzzle done — clear the URL so a refresh starts fresh next
     // time and the share button's "send this to a friend" URL is the canonical
@@ -569,7 +607,8 @@ function onGuess(entity) {
       if (!state.replayDate) {
         clearActive(state.entity, state.mode, state.difficulty);
         const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
-        recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries);
+        recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries, undefined, recordOpts());
+        checkAchievementsAfterRecord();
       }
       renderLossBanner(els.banner, {
         mode: "daily",
@@ -874,6 +913,127 @@ function nameOf(entity, id) {
   return getById(entity, id)?.name ?? null;
 }
 
+// ─── Achievements UI ────────────────────────────────────────────────────────
+
+// Open a modal listing every achievement, locked and unlocked. Locked rows
+// show the icon at low opacity + a "Locked" label. Unlocked rows show the
+// unlock date.
+function openAchievementsModal() {
+  const unlocked = getUnlockedAchievements();
+  const earned = Object.keys(unlocked).length;
+  const total = ACHIEVEMENTS.length;
+
+  // Reuse the existing themed-modal backdrop+card pattern (showConfirm),
+  // but render our own contents — showConfirm is single-message + two
+  // buttons, which doesn't fit a grid layout.
+  const prev = document.activeElement;
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.setAttribute("role", "presentation");
+
+  const card = document.createElement("div");
+  card.className = "modal-card modal-card-achievements";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-modal", "true");
+  card.setAttribute("aria-labelledby", "achievements-title");
+
+  const title = document.createElement("h3");
+  title.className = "modal-title";
+  title.id = "achievements-title";
+  title.textContent = `${t("achievements.title")} (${earned}/${total})`;
+  card.appendChild(title);
+
+  const grid = document.createElement("ul");
+  grid.className = "achievement-grid";
+  for (const a of ACHIEVEMENTS) {
+    const li = document.createElement("li");
+    const isUnlocked = !!unlocked[a.id];
+    li.className = "achievement-item" + (isUnlocked ? " is-unlocked" : " is-locked");
+    li.innerHTML = `
+      <span class="achievement-icon" aria-hidden="true">${a.icon}</span>
+      <div class="achievement-text">
+        <div class="achievement-name">${escapeHTML(t(`achievement.${a.id}.name`))}</div>
+        <div class="achievement-desc">${escapeHTML(t(`achievement.${a.id}.desc`))}</div>
+        <div class="achievement-meta">${
+          isUnlocked
+            ? escapeHTML(t("achievements.unlocked", { date: unlocked[a.id] }))
+            : escapeHTML(t("achievements.locked"))
+        }</div>
+      </div>
+    `;
+    grid.appendChild(li);
+  }
+  card.appendChild(grid);
+
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "modal-btn modal-confirm";
+  closeBtn.textContent = t("achievements.close");
+  actions.appendChild(closeBtn);
+  card.appendChild(actions);
+
+  backdrop.appendChild(card);
+  document.body.appendChild(backdrop);
+
+  function close() {
+    if (!backdrop.parentNode) return;
+    backdrop.remove();
+    document.removeEventListener("keydown", onKey, true);
+    if (prev && typeof prev.focus === "function") {
+      try { prev.focus(); } catch { /* ignore */ }
+    }
+  }
+  function onKey(e) {
+    if (e.key === "Escape") { e.preventDefault(); close(); }
+  }
+  closeBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+  document.addEventListener("keydown", onKey, true);
+
+  requestAnimationFrame(() => closeBtn.focus());
+}
+
+// Brief toast notification when an achievement just unlocked. Stacks if
+// multiple unlock in quick succession (rare but possible — e.g. a 7-day
+// streak might also satisfy ten_down on the same win). Suppressed in calm
+// mode entirely; suppressed for the modal-only "event" achievements that
+// surface via the modal itself anyway is NOT done here — they get toasts
+// too, since the player clicked something and expects feedback.
+function showAchievementToast(id) {
+  if (getCalm() === "on") return;
+  const a = achievementById(id);
+  if (!a) return;
+  let container = document.getElementById("achievement-toasts");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "achievement-toasts";
+    container.className = "achievement-toasts";
+    container.setAttribute("role", "status");
+    container.setAttribute("aria-live", "polite");
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = "achievement-toast";
+  toast.innerHTML = `
+    <span class="achievement-toast-icon" aria-hidden="true">${a.icon}</span>
+    <div class="achievement-toast-text">
+      <div class="achievement-toast-label">${escapeHTML(t("achievements.unlockedToast"))}</div>
+      <div class="achievement-toast-name">${escapeHTML(t(`achievement.${id}.name`))}</div>
+    </div>
+  `;
+  container.appendChild(toast);
+  // Trigger the enter animation on the next frame so the class swap takes effect.
+  requestAnimationFrame(() => toast.classList.add("is-visible"));
+  // Auto-dismiss after a few seconds, then remove from the DOM after the
+  // exit animation completes.
+  setTimeout(() => {
+    toast.classList.remove("is-visible");
+    setTimeout(() => toast.remove(), 400);
+  }, 3600);
+}
+
 // Tiny HTML-escape for target names we're injecting into the archive markup.
 // K-pop names usually contain no special characters but defensively encode
 // in case a future dataset has an ampersand or quote (e.g. "Stray Kids & ...").
@@ -921,6 +1081,7 @@ async function init() {
   els.settingsPanel = $("settings-panel");
   els.helpBtn = $("help-btn");
   els.helpPanel = $("help-panel");
+  els.achievementsBtn = $("achievements-btn");
   els.resetStatsBtn = $("reset-stats-btn");
   els.giveUpBtn = $("give-up-btn");
   els.replayYesterdayBtn = $("replay-yesterday-btn");
@@ -1040,6 +1201,14 @@ async function init() {
   });
   attachSettingsMenu({ button: els.settingsBtn, panel: els.settingsPanel });
   attachSettingsMenu({ button: els.helpBtn, panel: els.helpPanel });
+  els.achievementsBtn?.addEventListener("click", openAchievementsModal);
+
+  // The puzzle-share button dispatches "kpopdle:puzzle-shared" — we listen
+  // here so the achievements layer can unlock the "sharing is caring" badge
+  // without render.js having to know about persistence.
+  document.addEventListener("kpopdle:puzzle-shared", () => {
+    if (markAchievement("sharing_is_caring")) showAchievementToast("sharing_is_caring");
+  });
 
   els.resetStatsBtn.addEventListener("click", async () => {
     const ok = await showConfirm({
@@ -1110,7 +1279,8 @@ async function init() {
       !state.frozen &&
       state.target
     ) {
-      recordEndlessSkip(state.entity, state.difficulty, state.target.id, state.guesses.length);
+      recordEndlessSkip(state.entity, state.difficulty, state.target.id, state.guesses.length, recordOpts());
+      checkAchievementsAfterRecord();
     }
     // Custom puzzle finished or abandoned — drop the hash so the next New
     // Round starts a normal endless round and refreshes don't re-trigger.

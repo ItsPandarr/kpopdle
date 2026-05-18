@@ -1340,6 +1340,115 @@ body::before {
   .modal-backdrop, .modal-card { animation: none; }
 }
 
+/* Achievement modal — same .modal-backdrop / .modal-card scaffold as the
+   confirm dialog, but with a wider card (achievement names + descriptions
+   need room) and a scrollable list inside. */
+.modal-card-achievements {
+  max-width: 32rem;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.achievement-grid {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+  flex: 1;
+}
+.achievement-item {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.achievement-item.is-locked {
+  opacity: 0.5;
+  filter: grayscale(0.9);
+}
+.achievement-icon {
+  font-size: 1.7rem;
+  text-align: center;
+}
+.achievement-name {
+  font-weight: 600;
+  font-size: 0.94rem;
+}
+.achievement-desc {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.achievement-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+  font-variant-numeric: tabular-nums;
+}
+.achievement-item.is-unlocked .achievement-meta {
+  color: var(--accent);
+}
+
+/* Achievement toasts — stack in the top-right, slide in from the right,
+   auto-dismiss after a few seconds. Suppressed in calm mode by the toast
+   helper itself (no DOM is added there). */
+.achievement-toasts {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 8500;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.achievement-toast {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+  min-width: 220px;
+  max-width: 320px;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.achievement-toast.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+.achievement-toast-icon {
+  font-size: 1.4rem;
+  text-align: center;
+}
+.achievement-toast-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.achievement-toast-name {
+  font-weight: 600;
+  font-size: 0.94rem;
+  color: var(--text);
+}
+@media (max-width: 540px) {
+  .achievement-toasts { top: 0.5rem; right: 0.5rem; left: 0.5rem; }
+  .achievement-toast { min-width: 0; max-width: 100%; }
+}
+
 /* "Last 14 days" archive strip — one row per day, newest first. Past days
    are clickable to start a (stats-neutral) replay; today and the bottom
    of the list use a dimmed style so the active row stands out on tap. */
@@ -1596,7 +1705,8 @@ a:focus-visible,
   right: 1rem;
   z-index: 50;
 }
-.settings-btn {
+.settings-btn,
+.achievements-btn {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -1609,7 +1719,13 @@ a:focus-visible,
   cursor: pointer;
   transition: color 0.15s, transform 0.2s, background 0.15s;
 }
-.settings-btn:hover { color: var(--text); }
+.settings-btn:hover,
+.achievements-btn:hover { color: var(--text); }
+.achievements-btn { margin-right: 0.4rem; }
+.achievements-btn:hover {
+  background: var(--surface-2);
+  transform: scale(1.05);
+}
 .settings-btn[aria-expanded="true"] {
   color: var(--text);
   background: var(--surface-2);

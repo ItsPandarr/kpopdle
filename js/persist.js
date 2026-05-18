@@ -14,6 +14,9 @@ const DEFAULT_ENTITY_STATE = () => ({
   ),
   bests: Object.fromEntries(DIFFICULTIES.map((d) => [d, { fewestGuesses: null }])),
   endless: Object.fromEntries(DIFFICULTIES.map((d) => [d, { played: 0, bestGuesses: null }])),
+  // Lifetime totals — kept separately from `history` (which caps at 100
+  // entries) so achievements like "100 wins" can count past the cap.
+  totals: { dailyWins: 0, dailyLosses: 0, endlessWins: 0, endlessSkips: 0 },
   history: [],
   // In-progress games. Survives tab close / reload until the user wins or rolls a new round.
   // Daily entries are tagged with `date` (UTC YYYY-MM-DD); a mismatched date is treated as no
@@ -27,6 +30,10 @@ const DEFAULT_ENTITY_STATE = () => ({
 const DEFAULT_STATE = () => ({
   version: 2,
   lastSelection: { entity: "group", mode: "daily", difficulty: "easy" },
+  // Achievements blob — keyed by achievement id, valued with the ISO date
+  // (YYYY-MM-DD) of unlock. Lives at the top level (not per-entity) because
+  // some achievements span entity modes. Cleared on "Reset all stats".
+  achievements: {},
   ...Object.fromEntries(ENTITIES.map((e) => [e, DEFAULT_ENTITY_STATE()])),
 });
 
@@ -49,6 +56,7 @@ function read() {
     if (parsed.version !== 2) return DEFAULT_STATE();
     // Fill in missing sub-trees in case schema grew.
     if (!parsed.lastSelection) parsed.lastSelection = { entity: "group", mode: "daily", difficulty: "easy" };
+    if (!parsed.achievements || typeof parsed.achievements !== "object") parsed.achievements = {};
     for (const e of ENTITIES) {
       if (!parsed[e]) parsed[e] = DEFAULT_ENTITY_STATE();
       if (!parsed[e].active) parsed[e].active = { daily: EMPTY_DIFF_MAP(), endless: EMPTY_DIFF_MAP() };
@@ -61,6 +69,18 @@ function read() {
         if (parsed[e].streaks && parsed[e].streaks[d] && parsed[e].streaks[d].freezeUsed === undefined) {
           parsed[e].streaks[d].freezeUsed = false;
         }
+      }
+      // Lifetime totals — added with the achievements feature. Seed from
+      // existing history so a player who's already racked up wins doesn't
+      // start at zero. History caps at 100 entries so this isn't fully
+      // accurate retroactively, but better than 0.
+      if (!parsed[e].totals || typeof parsed[e].totals !== "object") {
+        const seed = { dailyWins: 0, dailyLosses: 0, endlessWins: 0, endlessSkips: 0 };
+        for (const h of (parsed[e].history || [])) {
+          if (h.mode === "daily")  seed[h.won ? "dailyWins"  : "dailyLosses"] += 1;
+          if (h.mode === "endless") seed[h.won ? "endlessWins" : "endlessSkips"] += 1;
+        }
+        parsed[e].totals = seed;
       }
     }
     return parsed;
@@ -79,6 +99,23 @@ function write(data) {
 
 export function getStats() {
   return read();
+}
+
+// Achievement unlocks blob — { [id]: ISO_DATE_UNLOCKED }.
+export function getUnlockedAchievements() {
+  return read().achievements || {};
+}
+
+// Idempotent: marks the achievement if not already unlocked, returns true
+// if it was newly unlocked (the caller uses this to fire a toast on the
+// transition; an already-unlocked re-mark is a silent no-op).
+export function markAchievement(id, date = todayUTC()) {
+  const s = read();
+  if (!s.achievements) s.achievements = {};
+  if (s.achievements[id]) return false;
+  s.achievements[id] = date;
+  write(s);
+  return true;
 }
 
 export function getDailyStatus(entity, difficulty, date = todayUTC()) {
@@ -133,7 +170,17 @@ export function getDailyArchive(entity, difficulty, days = 14, today = todayUTC(
   return out;
 }
 
-export function recordDailyLoss(entity, difficulty, targetId, guessCount, date = todayUTC()) {
+// `opts` (all optional) supplies the richer per-round metadata that some
+// achievements need:
+//   rawGuesses  — actual guess count without the hint-cost penalty
+//                 (defaults to guessCount, matching pre-extension behavior)
+//   hints       — number of hint clicks this round (default 0)
+//   filterMode  — was Detective mode on for this round (default false)
+//   nationality — target's nationality (e.g. "Korean", "Japanese") — used
+//                 by the "around the world" achievement check
+//   generation  — target's generation 1-5 — used by "through the gens"
+// All defaults preserve old call sites that haven't been updated yet.
+export function recordDailyLoss(entity, difficulty, targetId, guessCount, date = todayUTC(), opts = {}) {
   const s = read();
   const bucket = s[entity];
   bucket.daily[difficulty] = {
@@ -149,6 +196,7 @@ export function recordDailyLoss(entity, difficulty, targetId, guessCount, date =
   bucket.streaks[difficulty].current = 0;
   bucket.streaks[difficulty].lastWinDate = null;
   bucket.streaks[difficulty].freezeUsed = false;
+  bucket.totals.dailyLosses += 1;
   bucket.history.unshift({
     entity,
     mode: "daily",
@@ -156,13 +204,18 @@ export function recordDailyLoss(entity, difficulty, targetId, guessCount, date =
     date,
     targetId,
     guesses: guessCount,
+    rawGuesses: opts.rawGuesses ?? guessCount,
+    hints: opts.hints ?? 0,
+    filterMode: !!opts.filterMode,
+    nationality: opts.nationality ?? null,
+    generation: opts.generation ?? null,
     won: false,
   });
   bucket.history = bucket.history.slice(0, HISTORY_CAP);
   write(s);
 }
 
-export function recordDailyWin(entity, difficulty, targetId, guessCount, date = todayUTC()) {
+export function recordDailyWin(entity, difficulty, targetId, guessCount, date = todayUTC(), opts = {}) {
   const s = read();
   const bucket = s[entity];
   bucket.daily[difficulty] = {
@@ -171,6 +224,7 @@ export function recordDailyWin(entity, difficulty, targetId, guessCount, date = 
     won: true,
     targetId,
   };
+  bucket.totals.dailyWins += 1;
   // Streak progression with a one-per-streak "freeze" that forgives a single
   // missed day. The rule:
   //   - already won today → no-op
@@ -210,6 +264,11 @@ export function recordDailyWin(entity, difficulty, targetId, guessCount, date = 
     date,
     targetId,
     guesses: guessCount,
+    rawGuesses: opts.rawGuesses ?? guessCount,
+    hints: opts.hints ?? 0,
+    filterMode: !!opts.filterMode,
+    nationality: opts.nationality ?? null,
+    generation: opts.generation ?? null,
     won: true,
   });
   bucket.history = bucket.history.slice(0, HISTORY_CAP);
@@ -393,9 +452,10 @@ export function clearActive(entity, mode, difficulty) {
 // guess-distribution histogram as a separate "S" bucket so the player can see
 // how many rounds they bail on. Only called when there was at least one
 // guess — instant-skip without engagement isn't worth recording.
-export function recordEndlessSkip(entity, difficulty, targetId, guessCount) {
+export function recordEndlessSkip(entity, difficulty, targetId, guessCount, opts = {}) {
   const s = read();
   const bucket = s[entity];
+  bucket.totals.endlessSkips += 1;
   bucket.history.unshift({
     entity,
     mode: "endless",
@@ -403,6 +463,11 @@ export function recordEndlessSkip(entity, difficulty, targetId, guessCount) {
     date: todayUTC(),
     targetId,
     guesses: guessCount,
+    rawGuesses: opts.rawGuesses ?? guessCount,
+    hints: opts.hints ?? 0,
+    filterMode: !!opts.filterMode,
+    nationality: opts.nationality ?? null,
+    generation: opts.generation ?? null,
     won: false,
     skipped: true,
   });
@@ -410,7 +475,7 @@ export function recordEndlessSkip(entity, difficulty, targetId, guessCount) {
   write(s);
 }
 
-export function recordEndlessWin(entity, difficulty, targetId, guessCount) {
+export function recordEndlessWin(entity, difficulty, targetId, guessCount, opts = {}) {
   const s = read();
   const bucket = s[entity];
   const e = bucket.endless[difficulty];
@@ -418,6 +483,7 @@ export function recordEndlessWin(entity, difficulty, targetId, guessCount) {
   if (e.bestGuesses == null || guessCount < e.bestGuesses) {
     e.bestGuesses = guessCount;
   }
+  bucket.totals.endlessWins += 1;
   bucket.history.unshift({
     entity,
     mode: "endless",
@@ -425,6 +491,11 @@ export function recordEndlessWin(entity, difficulty, targetId, guessCount) {
     date: todayUTC(),
     targetId,
     guesses: guessCount,
+    rawGuesses: opts.rawGuesses ?? guessCount,
+    hints: opts.hints ?? 0,
+    filterMode: !!opts.filterMode,
+    nationality: opts.nationality ?? null,
+    generation: opts.generation ?? null,
     won: true,
   });
   bucket.history = bucket.history.slice(0, HISTORY_CAP);
