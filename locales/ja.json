@@ -134,9 +134,9 @@
   "stats.archive.today": "今日",
   "stats.archive.missed": "未プレイ",
   "stats.archive.today.aria": "今日のパズル、進行中",
-  "stats.archive.skipped.aria": "未プレイ — プレイしていません",
+  "stats.archive.skipped.aria": "この日はプレイしませんでした",
   "stats.archive.won.aria": "クリア",
-  "stats.archive.lost.aria": "回数終了",
+  "stats.archive.lost.aria": "推測回数を使い切り",
   "stats.archive.replay.aria": "{{date}} のデイリーをリプレイ",
 
   "settings.aria": "設定",
@@ -189,9 +189,9 @@
 
   "achievement.first_steps.name": "はじめの一歩",
   "achievement.first_steps.desc": "デイリーパズルに初めて勝利。",
-  "achievement.ten_down.name": "10連達成",
+  "achievement.ten_down.name": "10勝達成",
   "achievement.ten_down.desc": "デイリーで合計10勝 (グループ + アイドル モード合算)。",
-  "achievement.centurion.name": "百人力",
+  "achievement.centurion.name": "100勝達成",
   "achievement.centurion.desc": "デイリーで合計100勝。",
   "achievement.both_sides.name": "両方制覇",
   "achievement.both_sides.desc": "グループとアイドル両モードで1回以上勝利。",
