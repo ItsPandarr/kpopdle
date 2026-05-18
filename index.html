@@ -10,6 +10,9 @@
          Leave blank to auto-derive from a *.github.io host; override here for
          custom domains. Example: https://github.com/your-user/kpopdle -->
     <meta name="kpopdle:repo" content="" />
+    <!-- Explicit index,follow so a misconfigured X-Robots-Tag header
+         elsewhere in the deploy stack can't accidentally noindex us. -->
+    <meta name="robots" content="index,follow" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#1a1a22" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#faf6fb" media="(prefers-color-scheme: light)" />

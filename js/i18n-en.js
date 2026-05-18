@@ -16,6 +16,7 @@ export default {
   "input.placeholder.daily.done": "Come back tomorrow for a new daily puzzle",
   "input.placeholder.replay.done": "Replay finished — start a new round",
   "input.label": "Guess a K-pop group or idol",
+  "autocomplete.didyoumean": "Did you mean…",
   "toggle.entity.group": "Group",
   "toggle.entity.idol": "Idol",
   "toggle.mode.daily": "Daily",

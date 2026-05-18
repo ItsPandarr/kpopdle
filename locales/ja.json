@@ -10,6 +10,7 @@
   "input.placeholder.daily.done": "また明日、新しいデイリーパズルで！",
   "input.placeholder.replay.done": "リプレイ終了 — 新しいラウンドを始めよう",
   "input.label": "K-POPグループまたはアイドルを入力",
+  "autocomplete.didyoumean": "もしかして…",
 
   "toggle.entity.group": "グループ",
   "toggle.entity.idol": "アイドル",

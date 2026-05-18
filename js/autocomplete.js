@@ -54,6 +54,62 @@ export function findMatches(pool, query) {
   return scored.slice(0, MAX_SUGGESTIONS).map(([, g]) => g);
 }
 
+// Levenshtein edit distance with early termination. Iterates by code-point
+// (Array.from), so multi-byte sequences like Hangul syllables count as one
+// unit — typing "방탕" vs "방탄" reads as a single substitution.
+function levenshtein(a, b, max = Infinity) {
+  const A = Array.from(a);
+  const B = Array.from(b);
+  if (!A.length) return B.length;
+  if (!B.length) return A.length;
+  if (Math.abs(A.length - B.length) > max) return max + 1;
+  let prev = new Array(B.length + 1);
+  let curr = new Array(B.length + 1);
+  for (let j = 0; j <= B.length; j++) prev[j] = j;
+  for (let i = 1; i <= A.length; i++) {
+    curr[0] = i;
+    let rowMin = i;
+    for (let j = 1; j <= B.length; j++) {
+      const cost = A[i - 1] === B[j - 1] ? 0 : 1;
+      curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+      if (curr[j] < rowMin) rowMin = curr[j];
+    }
+    if (rowMin > max) return max + 1;  // every cell exceeds max → bail
+    [prev, curr] = [curr, prev];
+  }
+  return prev[B.length];
+}
+
+// Fuzzy fallback for when findMatches() returns nothing. Surfaces names /
+// aliases within `maxDistance` edits of the query, ranked by closeness then
+// name. Only used by the dropdown's "Did you mean…?" path; we deliberately
+// skip very short queries (< minQuery chars) because edit distance on 1-2
+// chars is just noise.
+//
+// Exported for tests.
+export function findFuzzyMatches(pool, query, opts = {}) {
+  const { maxDistance = 2, max = 3, minQuery = 3 } = opts;
+  const q = normalize(query);
+  if (q.length < minQuery) return [];
+  const ranked = [];
+  for (const g of pool) {
+    const candidates = [g.name, ...(g.aliases || [])];
+    let best = Infinity;
+    for (const c of candidates) {
+      const n = normalize(c);
+      // Skip if normal substring would have caught it — findMatches handles those.
+      if (n.includes(q)) { best = -1; break; }
+      const d = levenshtein(q, n, maxDistance);
+      if (d < best) best = d;
+    }
+    if (best > 0 && best <= maxDistance) {
+      ranked.push([best, g]);
+    }
+  }
+  ranked.sort((a, b) => a[0] - b[0] || a[1].name.localeCompare(b[1].name));
+  return ranked.slice(0, max).map(([, g]) => g);
+}
+
 function whichAlias(group, query) {
   const q = normalize(query);
   if (normalize(group.name).includes(q)) return null;
@@ -63,8 +119,9 @@ function whichAlias(group, query) {
 // `getReason(group) → string|null` (optional) lets the caller tag matches as
 // invalid: a non-null reason renders the row in a dimmed, non-clickable state
 // with the reason text inline. Used by Detective mode in main.js.
-export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReason }) {
+export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReason, didYouMeanLabel }) {
   let suggestions = [];
+  let isFuzzy = false;   // true when `suggestions` came from the "Did you mean…?" fallback
   let highlighted = -1;
   let guessedIds = new Set();
 
@@ -81,6 +138,16 @@ export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReas
 
   function render() {
     dropdown.innerHTML = "";
+    // "Did you mean…?" header — only when the suggestions list came from
+    // the fuzzy fallback. Non-interactive (aria-disabled), not in the
+    // arrow-key cycle, just a visual hint above the suggestions.
+    if (isFuzzy && suggestions.length > 0 && didYouMeanLabel) {
+      const hdr = document.createElement("li");
+      hdr.className = "autocomplete-didyoumean";
+      hdr.setAttribute("aria-disabled", "true");
+      hdr.textContent = didYouMeanLabel;
+      dropdown.appendChild(hdr);
+    }
     suggestions.forEach((g, i) => {
       const reason = reasonFor(g);
       const li = document.createElement("li");
@@ -146,6 +213,19 @@ export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReas
   function updateSuggestions() {
     const all = findMatches(getPool(), input.value);
     suggestions = all.filter((g) => !guessedIds.has(g.id));
+    isFuzzy = false;
+    // Zero direct hits + non-trivial query → try a fuzzy fallback so the
+    // dropdown isn't just empty when the player typos something. The fuzzy
+    // helper has its own minQuery floor (3 chars) to avoid noise on short
+    // input.
+    if (suggestions.length === 0 && (input.value || "").trim().length > 0) {
+      const fuzzy = findFuzzyMatches(getPool(), input.value)
+        .filter((g) => !guessedIds.has(g.id));
+      if (fuzzy.length > 0) {
+        suggestions = fuzzy;
+        isFuzzy = true;
+      }
+    }
     // Sort valid candidates first so the player sees pickable options on top,
     // while still seeing the ruled-out ones below with their reason. Stable
     // within each group so the original rank order is preserved.
@@ -165,6 +245,7 @@ export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReas
     onCommit(group);
     input.value = "";
     suggestions = [];
+    isFuzzy = false;
     highlighted = -1;
     render();
   }

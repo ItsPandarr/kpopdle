@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Single-page static site, so this sitemap lists exactly one URL.
+  The <loc> value gets substituted by scripts/build.mjs at build time from
+  the KPOPDLE_URL environment variable (e.g. set in CI), falling back to
+  https://example.com/ as a documented placeholder for local dev.
+  See README.md "Hosting" section for the deploy override.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://example.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

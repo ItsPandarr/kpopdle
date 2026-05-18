@@ -104,6 +104,27 @@ async function copyAssets() {
   for (const f of ["favicon.svg", "manifest.webmanifest", "sw.js"]) {
     await fs.copyFile(path.join(ROOT, f), path.join(DIST, f));
   }
+  // SEO: robots.txt straight through, sitemap.xml with a single <loc>
+  // substitution. The source ships https://example.com/ as a placeholder;
+  // set KPOPDLE_URL=https://your-host/ at build time (e.g. in CI) to replace
+  // it. Without the env var we still copy the file so the path resolves —
+  // but the URL inside will be the placeholder and crawlers will ignore it.
+  await fs.copyFile(path.join(ROOT, "robots.txt"), path.join(DIST, "robots.txt"));
+  const sitemapSrc = await fs.readFile(path.join(ROOT, "sitemap.xml"), "utf8");
+  const deployUrl = (process.env.KPOPDLE_URL || "").trim();
+  // Replace ONLY the URL inside a <loc> tag — the placeholder string also
+  // appears in the source's leading comment block explaining itself, and
+  // a plain .replace() would substitute that first occurrence instead.
+  const sitemapOut = deployUrl
+    ? sitemapSrc.replace(
+        /<loc>https:\/\/example\.com\/<\/loc>/g,
+        `<loc>${deployUrl.replace(/\/?$/, "/")}</loc>`,
+      )
+    : sitemapSrc;
+  await fs.writeFile(path.join(DIST, "sitemap.xml"), sitemapOut);
+  if (!deployUrl) {
+    console.warn("  (sitemap.xml shipped with placeholder URL — set KPOPDLE_URL=https://your-host/ to substitute)");
+  }
   // og-image.png is optional: if it's missing (e.g. fresh clone, Pillow
   // not installed locally), skip rather than fail. Social previews will
   // degrade to title+description only, which still renders fine.
@@ -141,7 +162,7 @@ async function copyAssets() {
     await fs.copyFile(path.join(localesSrc, f), path.join(localesDst, f));
   }
   console.log(
-    `  assets favicon.svg + og-image + manifest + sw + data/*.dat + ${localeFiles.length} locales copied`,
+    `  assets favicon.svg + og-image + manifest + sw + robots + sitemap + data/*.dat + ${localeFiles.length} locales copied`,
   );
 }
 

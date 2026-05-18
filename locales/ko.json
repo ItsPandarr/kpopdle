@@ -12,6 +12,7 @@
   "input.placeholder.custom.suffix": " · 친구의 퍼즐",
   "input.placeholder.custom.done": "친구의 퍼즐 종료 — 새 라운드를 시작하세요",
   "input.label": "K-팝 그룹 또는 아이돌 입력",
+  "autocomplete.didyoumean": "이걸 찾으셨나요?",
 
   "toggle.entity.group": "그룹",
   "toggle.entity.idol": "아이돌",

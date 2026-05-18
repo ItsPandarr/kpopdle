@@ -1,0 +1,5 @@
+# KPopdle — public static site, fully indexable.
+User-agent: *
+Allow: /
+
+Sitemap: sitemap.xml

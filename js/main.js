@@ -1094,6 +1094,7 @@ async function init() {
       const clues = applyHintsToClues(deriveClues(state.guesses), state.hintEvents);
       return whyNotMatch(entity, clues, state.entity);
     },
+    didYouMeanLabel: t("autocomplete.didyoumean"),
     onCommit: onGuess,
   });
 

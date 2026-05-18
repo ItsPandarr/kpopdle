@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-import { normalize, findMatches } from "../js/autocomplete.js";
+import { normalize, findMatches, findFuzzyMatches } from "../js/autocomplete.js";
 
 // ─── normalize ──────────────────────────────────────────────────────────────
 //
@@ -99,6 +99,65 @@ assert.deepEqual(findMatches(POOL, "   "), []);
   const pool = [{ name: "Beyoncé", aliases: [] }];
   const r = findMatches(pool, "beyonce");
   assert.equal(r[0]?.name, "Beyoncé");
+}
+
+// ─── findFuzzyMatches ───────────────────────────────────────────────────────
+//
+// Catches typos within `maxDistance` edits (default 2). Used by the dropdown
+// when findMatches returned nothing, surfacing close candidates under a
+// "Did you mean…?" header. Skips very short queries to avoid noise.
+
+// Direct substring hits are NOT fuzzy matches — they belong to findMatches.
+{
+  const pool = [{ name: "BTS", aliases: [] }];
+  const r = findFuzzyMatches(pool, "BTS");
+  assert.equal(r.length, 0, "an exact match shouldn't appear in fuzzy results");
+}
+
+// Single-character typo → matched.
+{
+  const pool = [
+    { name: "Blackpink", aliases: [] },
+    { name: "Twice", aliases: [] },
+  ];
+  const r = findFuzzyMatches(pool, "Blackpunk");  // 1 substitution
+  assert.equal(r[0]?.name, "Blackpink");
+}
+
+// Hangul typo: one wrong syllable in "방탄소년단" still matches BTS.
+// (2-character queries fall below the minQuery floor — use 3+ chars so
+// fuzzy is enabled; the typo is still within maxDistance=2.)
+{
+  const pool = [{ name: "BTS", aliases: ["방탄소년단"] }];
+  const r = findFuzzyMatches(pool, "방탕소년단");  // 방탕 vs 방탄 = 1 substitution
+  assert.equal(r[0]?.name, "BTS", "Hangul edit-distance works at the syllable level");
+}
+
+// Queries shorter than `minQuery` are ignored — edit distance on 2 chars is
+// noise (would match half the catalog).
+{
+  const pool = [{ name: "BTS", aliases: [] }];
+  const r = findFuzzyMatches(pool, "BT");
+  assert.equal(r.length, 0, "minQuery floor filters out tiny queries");
+}
+
+// Beyond maxDistance → not matched.
+{
+  const pool = [{ name: "Aespa", aliases: [] }];
+  // "Blackpink" is way more than 2 edits away from Aespa
+  const r = findFuzzyMatches(pool, "Blackpink");
+  assert.equal(r.length, 0);
+}
+
+// Closest match ranks first.
+{
+  const pool = [
+    { name: "BTS", aliases: [] },
+    { name: "ITZY", aliases: [] },
+    { name: "IVE", aliases: [] },
+  ];
+  const r = findFuzzyMatches(pool, "ITY");  // 1 from ITZY/IVE, 3 from BTS
+  assert.equal(r[0]?.name === "ITZY" || r[0]?.name === "IVE", true);
 }
 
 console.log("autocomplete.test ok");

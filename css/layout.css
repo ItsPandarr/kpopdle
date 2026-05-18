@@ -292,6 +292,17 @@ body::before {
   color: var(--muted);
   font-size: 0.85rem;
 }
+/* "Did you mean…?" header — shown above the dropdown when the player's
+   query didn't directly match anything but a fuzzy fallback found close
+   candidates. Non-interactive, italicized, dimmed. */
+.autocomplete-didyoumean {
+  padding: 0.4rem 0.7rem 0.2rem;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--muted);
+  pointer-events: none;
+  user-select: none;
+}
 /* Idol's primary group, shown after the name to disambiguate stage-name
    collisions (e.g. two "Soobin"s in TXT vs WJSN). Subdued so the eye still
    reads "Soobin" first, with the group as context. */
