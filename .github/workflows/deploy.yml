@@ -1,0 +1,62 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  # Deploy when main moves.
+  push:
+    branches: [main]
+  # Manual re-deploy from the Actions tab.
+  workflow_dispatch:
+
+# Standard permissions for the GitHub-Pages deploy action.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time. Cancels in-flight runs but lets a queued run
+# finish so the latest commit always wins.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build dist/
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # The build script emits the production bundle here.
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

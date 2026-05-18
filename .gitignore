@@ -1,0 +1,73 @@
+# ─── OS metadata ─────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# ─── Editors / IDEs ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ─── Local tool config ──────────────────────────────────────────────────────
+# Claude Code's per-user dev server config. Contains an absolute path on the
+# author's machine; not useful (and slightly noisy) for other contributors.
+.claude/
+
+# ─── Node / npm ──────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.pnp.*
+.eslintcache
+
+# ─── Python (scraper pipeline) ───────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ─── Build output ────────────────────────────────────────────────────────────
+# The minified bundle is produced by `npm run build` and (in CI) by the
+# deploy workflow. Don't track it in the repo.
+dist/
+
+# ─── Scrape pipeline artifacts ──────────────────────────────────────────────
+# scripts/scrape.py caches network responses here to avoid hammering Wikidata
+# and Wikipedia on iterative runs. Local to each machine.
+scripts/.cache/
+
+# Atomic-write tempfiles from scrape.py.
+data/*.json.tmp
+
+# Note: data/groups.json and data/idols.json are tracked in the repo
+# (it's fine for the readable JSON to live in source control) but
+# scripts/build.mjs only copies the encoded .dat files into dist/, so the
+# plaintext never ships to the deployed site.
+
+# ─── Secrets / env ──────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Test / coverage output ─────────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov

@@ -1,0 +1,20 @@
+{
+  "name": "KPopdle",
+  "short_name": "KPopdle",
+  "description": "A Loldle-style K-pop guessing game. Daily puzzles and endless practice — no accounts, plays offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e0e13",
+  "theme_color": "#1a1a22",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of this software to the public domain.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <https://unlicense.org>
+
+
+─────────────────────────────────────────────────────────────────────
+
+DATA ATTRIBUTION (informational only — does not affect the software license above)
+
+The committed datasets in `data/` are derived from publicly available
+sources:
+
+  - Wikidata <https://www.wikidata.org> — content licensed CC0 (public
+    domain). No attribution required, but provided in the app footer
+    as a courtesy.
+  - Wikipedia <https://en.wikipedia.org> — content licensed CC BY-SA
+    4.0 <https://creativecommons.org/licenses/by-sa/4.0/>. The data
+    extracted here is primarily factual (debut years, member counts,
+    company names, etc.), which is not subject to copyright in most
+    jurisdictions. Attribution is provided in the app footer.
+
+If you redistribute Wikipedia content verbatim (e.g. copy-pasted
+artist biographies or descriptive prose), you remain bound by CC BY-SA
+even though the surrounding code is unlicensed.

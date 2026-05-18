@@ -1,0 +1,58 @@
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.4rem;
+  min-height: 44px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--cell-text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  word-break: break-word;
+}
+.cell-name {
+  font-weight: 600;
+  background: var(--surface);
+  justify-content: flex-start;
+  padding-left: 0.85rem;
+  text-align: left;
+  color: var(--text);
+}
+
+.cell.status-exact   { background: var(--status-exact-bg);   border-color: var(--status-exact-bd); }
+.cell.status-partial { background: var(--status-partial-bg); border-color: var(--status-partial-bd); }
+.cell.status-higher,
+.cell.status-lower   { background: var(--status-dir-bg);     border-color: var(--status-dir-bd); }
+.cell.status-none    { background: var(--status-none-bg);    border-color: var(--status-none-bd); }
+
+.cell-arrow {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+.cell.status-higher .cell-arrow { color: #b8ffc3; }
+.cell.status-lower  .cell-arrow { color: #ffd0d0; }
+
+/* Colorblind-safe status symbols. Always rendered so anyone — colorblind or
+   not, opt-in CB mode on or off — can distinguish status by shape alone. The
+   ▲/▼ arrows for higher/lower come from the .cell-arrow element added in
+   render.js. The pseudo-elements here add ✓/✗/◐ for exact/none/partial.
+   aria-hidden via CSS speak suppression isn't supported; the glyph stays
+   purely decorative — the cell text and aria-labels carry meaning for AT. */
+.cell.status-exact::before,
+.cell.status-partial::before,
+.cell.status-none::before {
+  display: inline-block;
+  margin-right: 0.2rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  opacity: 0.95;
+}
+.cell.status-exact::before   { content: "\2713"; }   /* ✓ */
+.cell.status-partial::before { content: "\25D0"; }   /* ◐ */
+.cell.status-none::before    { content: "\2717"; }   /* ✗ */

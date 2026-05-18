@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="KPopdle">
+  <defs>
+    <radialGradient id="bulb" cx="50%" cy="40%" r="55%">
+      <stop offset="0%"  stop-color="#ffe8a8"/>
+      <stop offset="35%" stop-color="#ff5fa2"/>
+      <stop offset="100%" stop-color="#6f88ff"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#1a1a22"/>
+      <stop offset="100%" stop-color="#25154a"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Dark concert-stage background -->
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="url(#bg)"/>
+  <!-- Halo behind the bulb -->
+  <circle cx="32" cy="22" r="20" fill="#ff5fa2" opacity="0.18"/>
+  <!-- Handle -->
+  <rect x="29" y="36" width="6" height="22" rx="2" fill="#5a5a6a"/>
+  <rect x="30" y="37" width="2" height="20" fill="rgba(255,255,255,0.25)"/>
+  <!-- Heart-shaped bulb -->
+  <path filter="url(#glow)" fill="url(#bulb)"
+        d="M32 38 C 32 38, 12 28, 12 18 C 12 12, 16 8, 21 8 C 26 8, 32 12, 32 16 C 32 12, 38 8, 43 8 C 48 8, 52 12, 52 18 C 52 28, 32 38, 32 38 Z"/>
+</svg>
