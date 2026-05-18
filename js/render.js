@@ -1,6 +1,5 @@
 import { VISIBLE_ATTRS, ATTR_LABEL } from "./config.js";
 import { emojiGridFor, wikipediaUrlFor, answerLabel, hintTag, buildShareText, currentPlayUrl } from "./share.js";
-import { expandPalette, accentColor } from "./colors.js";
 import { buildPuzzleUrl } from "./puzzle.js";
 import { t } from "./i18n.js";
 
@@ -73,21 +72,18 @@ export function renderGuessRow(boardEl, guess, comparison, entity, difficulty, o
 }
 
 // Spawn N confetti pieces from somewhere near the top. Pieces auto-clean.
-// `palette` lets callers override the rainbow default with the target's
-// official colors (from Wikidata P462→P465). When supplied with < 3 colors,
-// we blend them with a couple of light/dark variants so the burst still
-// reads as varied confetti rather than a wall of one shade.
+// Uses a fixed rainbow palette — we explored sourcing official group colors
+// from Wikidata (P6364 → P465) but coverage is <1% of the catalog so the
+// feature was removed as dead weight.
 export function burstConfetti({
   count = 90,
   origin = null,
   durations = [2.2, 3.4],
-  palette = null,
 } = {}) {
   const prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReduced) return;
 
-  const DEFAULT_PALETTE = ["#ff5fa2", "#ff9a4e", "#ffd76b", "#6f88ff", "#5ce0d8", "#c08fff"];
-  const chosenPalette = (palette && palette.length) ? expandPalette(palette) : DEFAULT_PALETTE;
+  const PALETTE = ["#ff5fa2", "#ff9a4e", "#ffd76b", "#6f88ff", "#5ce0d8", "#c08fff"];
   const emojis = ["✨", "💖", "⭐", "🎉", "✦", "💫"];
   const originX = origin?.x ?? window.innerWidth / 2;
   const originY = origin?.y ?? Math.min(180, window.innerHeight * 0.18);
@@ -100,7 +96,7 @@ export function burstConfetti({
     const h = 10 + Math.random() * 8;
     piece.style.width = isEmoji ? "auto" : `${w}px`;
     piece.style.height = isEmoji ? "auto" : `${h}px`;
-    piece.style.background = isEmoji ? "transparent" : chosenPalette[Math.floor(Math.random() * chosenPalette.length)];
+    piece.style.background = isEmoji ? "transparent" : PALETTE[Math.floor(Math.random() * PALETTE.length)];
     piece.style.left = `${originX + (Math.random() - 0.5) * 80}px`;
     piece.style.top = `${originY}px`;
     const dx = (Math.random() - 0.5) * 600;
@@ -205,23 +201,6 @@ function appendLearnMoreLink(bannerEl, entity, target) {
   bannerEl.appendChild(a);
 }
 
-// Apply per-entity official colors (when available) to the win/loss banner as
-// a subtle accent: colored border + soft outer glow + a thin top stripe. Text,
-// background, and CTAs keep their theme styling so contrast never breaks.
-// No colors on the target → all-clears the inline styles so a previous round's
-// accent doesn't bleed over.
-function applyEntityAccent(bannerEl, target) {
-  const palette = target?.colors;
-  const accent = accentColor(palette);
-  if (!accent) {
-    bannerEl.style.removeProperty("--entity-accent");
-    bannerEl.classList.remove("has-entity-accent");
-    return;
-  }
-  bannerEl.style.setProperty("--entity-accent", accent);
-  bannerEl.classList.add("has-entity-accent");
-}
-
 function appendShareButton(bannerEl, shareText) {
   const shareBtn = document.createElement("button");
   shareBtn.className = "share-btn";
@@ -293,7 +272,6 @@ export function renderWinBanner(bannerEl, {
   bannerEl.hidden = false;
   bannerEl.className = "banner is-win" + (mode === "custom" ? " is-custom" : "");
   bannerEl.innerHTML = "";
-  applyEntityAccent(bannerEl, target);
 
   const title = document.createElement("h2");
   title.textContent = bannerTitle("win", entity, target);
@@ -345,7 +323,6 @@ export function renderLossBanner(bannerEl, {
   bannerEl.hidden = false;
   bannerEl.className = "banner is-loss" + (mode === "custom" ? " is-custom" : "");
   bannerEl.innerHTML = "";
-  applyEntityAccent(bannerEl, target);
 
   // Daily losses use "Out of guesses. It was X" because the player actually
   // hit the cap. Endless / custom give-up use the gentler "It was X" — they

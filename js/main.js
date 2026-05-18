@@ -544,14 +544,11 @@ function onGuess(entity) {
         (state.mode === "daily" && !state.replayDate) ? buildDailyCTAs() :
         /* daily replay */                      [],
     });
-    // Big celebratory confetti from roughly above the banner. When the target
-    // has official colors on file (Wikidata P462 → P465), use them for a
-    // group-flavored burst; else fall back to the default rainbow palette.
+    // Big celebratory confetti from roughly above the banner.
     const bRect = els.banner.getBoundingClientRect();
     burstConfetti({
       count: 110,
       origin: { x: bRect.left + bRect.width / 2, y: Math.max(60, bRect.top) },
-      palette: state.target?.colors || null,
     });
     updateHintButton();
     updateMetaButtons();
