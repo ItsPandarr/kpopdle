@@ -121,7 +121,7 @@ function refreshClues({ animateNewlyKnown = true } = {}) {
   const clues = applyHintsToClues(deriveClues(state.guesses), state.hintEvents);
   const visible = VISIBLE_ATTRS[state.entity][state.difficulty];
   const bounds = getNumericBounds(state.entity);
-  const knowns = knownAttrs(clues, bounds);
+  const knowns = knownAttrs(clues, bounds, state.entity);
   const hintAttrs = new Set(state.hintEvents.map((e) => e.attr));
   const newly = new Set();
   if (animateNewlyKnown) {
@@ -474,7 +474,7 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
   // Suppress the entrance animation on restore — only animate new discoveries.
   prevKnownAttrs = new Set();
   const clues0 = applyHintsToClues(deriveClues(state.guesses), state.hintEvents);
-  prevKnownAttrs = knownAttrs(clues0, getNumericBounds(state.entity));
+  prevKnownAttrs = knownAttrs(clues0, getNumericBounds(state.entity), state.entity);
   refreshClues({ animateNewlyKnown: false });
   updateMetaButtons();
 }

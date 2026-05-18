@@ -234,7 +234,9 @@ function fmtGroupSet(info) {
 //   keeps the original behavior of only emitting attrs with a value.
 export function formatClues(clues, visibleAttrs, entity = "group", hintAttrs = new Set(), newlyKnown = new Set(), opts = {}) {
   const { includeEmpty = false, bounds = null } = opts;
-  const confirmed = knownAttrs(clues, bounds);
+  // Pass entity so idol rounds count gender as "confirmed" when binary
+  // elimination has pinned it (excluded.size >= 1 → other gender is known).
+  const confirmed = knownAttrs(clues, bounds, entity);
   const out = [];
   const push = (label, attr, value) => {
     if (value != null) {
@@ -287,8 +289,9 @@ export function formatClues(clues, visibleAttrs, entity = "group", hintAttrs = n
 // Mirrors `attrIsKnown` in hint.js but operates over the whole clues object at once.
 // When `bounds` is provided, a numeric attr is also counted as known when its
 // inferred range collapses against the dataset extremes (e.g. max=1 and the
-// dataset min is 1 → value must be 1).
-export function knownAttrs(clues, bounds = null) {
+// dataset min is 1 → value must be 1). `entity` controls binary-elimination
+// for gender — idol gender is binary, so excluding one value pins the other.
+export function knownAttrs(clues, bounds = null, entity = "group") {
   const out = new Set();
   for (const [attr, info] of [
     ["debut_year", clues.debut_year],
@@ -306,7 +309,13 @@ export function knownAttrs(clues, bounds = null) {
     }
   }
   if (clues.company?.known != null) out.add("company");
-  if (clues.gender?.known != null) out.add("gender");
+  if (clues.gender?.known != null) {
+    out.add("gender");
+  } else if (entity === "idol" && (clues.gender?.excluded?.size ?? 0) >= 1) {
+    // Idols only: one exclusion pins the other half of the binary, so the
+    // clues panel should mark gender as confirmed (✓) just like a direct hit.
+    out.add("gender");
+  }
   if (clues.status?.known != null) out.add("status");
   if (clues.country?.known != null) out.add("country");
   if (clues.nationality?.known != null) out.add("nationality");
