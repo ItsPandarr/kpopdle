@@ -1585,6 +1585,24 @@ body::before {
   text-underline-offset: 2px;
 }
 .app-footer .report-line a:hover { color: var(--text); }
+/* PWA install hint — same look as the report line so it doesn't draw
+   attention until the player intentionally looks for it. */
+.app-footer .install-line {
+  font-size: 0.72rem;
+  opacity: 0.85;
+  margin-top: 0.2rem;
+}
+.app-footer .install-line .link-btn {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.app-footer .install-line .link-btn:hover { color: var(--text); }
 
 /* ─── Give-up button + replay-yesterday link ──────────────────────────────── */
 

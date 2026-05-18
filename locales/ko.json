@@ -238,5 +238,6 @@
   "footer.attribution": "데이터: 위키데이터 + 위키백과 · 계정/서버 없음 · 개인 기록은 localStorage에 저장됩니다.",
   "footer.dataAsOf": "{{date}} 기준 데이터.",
   "footer.report.prompt": "잘못된 데이터를 발견하셨나요?",
-  "footer.report.link": "GitHub에서 수정 요청 보내기 →"
+  "footer.report.link": "GitHub에서 수정 요청 보내기 →",
+  "footer.install": "앱으로 설치 →"
 }

@@ -223,6 +223,12 @@
         <span data-i18n="footer.report.prompt">Spot wrong data?</span>
         <a id="report-link" href="#" target="_blank" rel="noopener noreferrer" data-i18n="footer.report.link" hidden>Open a correction on GitHub →</a>
       </p>
+      <!-- PWA install hint. Hidden until the browser fires beforeinstallprompt
+           (meaning the site is install-eligible AND not already installed).
+           Wired up in main.js init. -->
+      <p class="install-line" hidden>
+        <button id="install-btn" type="button" class="link-btn" data-i18n="footer.install">Install as an app →</button>
+      </p>
     </footer>
 
     <script type="module" src="js/main.js"></script>

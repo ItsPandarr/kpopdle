@@ -238,5 +238,6 @@
   "footer.attribution": "Data: Wikidata + Wikipedia · No accounts, no servers · Personal bests stored in localStorage.",
   "footer.dataAsOf": "Data current as of {{date}}.",
   "footer.report.prompt": "Spot wrong data?",
-  "footer.report.link": "Open a correction on GitHub →"
+  "footer.report.link": "Open a correction on GitHub →",
+  "footer.install": "Install as an app →"
 }

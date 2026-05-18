@@ -1288,6 +1288,8 @@ async function init() {
   els.newRound = $("new-round");
   els.countdown = $("countdown");
   els.stats = $("stats");
+  els.installBtn = $("install-btn");
+  els.installLine = els.installBtn?.parentElement ?? null;
 
   // i18n: load the chosen locale + the English fallback before any text is
   // displayed. applyToDom() then translates every static [data-i18n] element
@@ -1546,6 +1548,51 @@ async function init() {
   if (repo && reportLink) {
     reportLink.href = correctionIssueUrl(repo);
     reportLink.hidden = false;
+  }
+
+  // PWA install hint. Browsers that consider the site install-eligible AND
+  // not already installed (Chrome/Edge/Samsung Internet — Safari doesn't
+  // support this) fire `beforeinstallprompt` shortly after load. We stash
+  // the event, reveal the footer link, then call event.prompt() on click.
+  // After ANY user choice we hide the link AND remember the dismissal so
+  // the same browser doesn't pester on every visit. The browser's own
+  // engagement heuristics already throttle re-firing, but this belt-and-
+  // suspenders ensures a polite hint that never becomes annoying.
+  if (els.installBtn && els.installLine) {
+    let deferredPrompt = null;
+    const dismissed = (() => {
+      try { return localStorage.getItem("kpopdle:installDismissed") === "1"; }
+      catch { return false; }
+    })();
+    if (!dismissed) {
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        els.installLine.hidden = false;
+      });
+    }
+    // If the user installs through the OS / browser UI directly (not via
+    // our button), hide the hint immediately and stop trying.
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      els.installLine.hidden = true;
+      try { localStorage.setItem("kpopdle:installDismissed", "1"); } catch {}
+    });
+    els.installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) {
+        els.installLine.hidden = true;
+        return;
+      }
+      try {
+        deferredPrompt.prompt();
+        // userChoice resolves regardless of accepted/dismissed; either way
+        // we don't want to surface the hint again on this device.
+        await deferredPrompt.userChoice;
+      } catch { /* ignore */ }
+      deferredPrompt = null;
+      els.installLine.hidden = true;
+      try { localStorage.setItem("kpopdle:installDismissed", "1"); } catch {}
+    });
   }
 
   // First-visit onboarding: brand-new players land on a board with no

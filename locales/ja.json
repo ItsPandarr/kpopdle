@@ -238,5 +238,6 @@
   "footer.attribution": "データ: Wikidata + Wikipedia · アカウントなし · 個人記録はlocalStorageに保存されます。",
   "footer.dataAsOf": "{{date}}時点のデータ。",
   "footer.report.prompt": "間違ったデータを見つけましたか？",
-  "footer.report.link": "GitHubで修正を提案 →"
+  "footer.report.link": "GitHubで修正を提案 →",
+  "footer.install": "アプリとしてインストール →"
 }

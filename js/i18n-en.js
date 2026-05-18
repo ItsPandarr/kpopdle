@@ -227,4 +227,5 @@ export default {
   "footer.dataAsOf": "Data current as of {{date}}.",
   "footer.report.prompt": "Spot wrong data?",
   "footer.report.link": "Open a correction on GitHub →",
+  "footer.install": "Install as an app →",
 };
