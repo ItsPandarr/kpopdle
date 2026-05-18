@@ -201,6 +201,44 @@ function appendLearnMoreLink(bannerEl, entity, target) {
   bannerEl.appendChild(a);
 }
 
+// Try the platform's native share sheet first (Web Share API — pops Messages /
+// Mail / Discord / etc. on mobile, plus a small picker on desktop Chrome).
+// Fall back to clipboard copy when the API is missing or the call fails for
+// any reason other than the user dismissing the sheet.
+//
+// Returns one of:
+//   "shared"   — the OS share sheet handled it (or the user cancelled —
+//                we can't distinguish, and we shouldn't show extra feedback
+//                either way because the sheet *was* the feedback).
+//   "copied"   — clipboard fallback succeeded.
+//   "fallback" — both paths failed; caller surfaces the text inline as
+//                a last resort so the user can copy it by hand.
+async function sharePayload({ title, text, url }) {
+  // navigator.share rejects (NotAllowedError) without a transient activation
+  // — so this MUST be called from a click handler, which all our callers are.
+  if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    try {
+      await navigator.share({ title, text, url });
+      return "shared";
+    } catch (err) {
+      // User dismissed the sheet — count as success (no fallback needed).
+      if (err && err.name === "AbortError") return "shared";
+      // Any other error (NotAllowedError, TypeError on bad payload, browser
+      // bug) falls through to clipboard so the user still gets something.
+    }
+  }
+  try {
+    // Combine text + url for the clipboard path — keeps the share string
+    // self-contained when it lands in a chat window.
+    const blob = [text, url].filter(Boolean).join(text && url ? "\n" : "");
+    await navigator.clipboard.writeText(blob || url || text || "");
+    return "copied";
+  } catch {
+    return "fallback";
+  }
+}
+
+// "Copy result" button — wordle-style emoji grid + score + play URL.
 function appendShareButton(bannerEl, shareText) {
   const shareBtn = document.createElement("button");
   shareBtn.className = "share-btn";
@@ -209,13 +247,19 @@ function appendShareButton(bannerEl, shareText) {
   const copiedLabel = t("banner.share.copied");
   shareBtn.textContent = copyLabel;
   shareBtn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(shareText);
+    // shareText already includes the "Play: URL" line, so we hand the whole
+    // thing in as `text` and skip the separate `url` field. Avoids the URL
+    // appearing twice in chat apps that render link previews.
+    const result = await sharePayload({ text: shareText });
+    if (result === "copied") {
       shareBtn.textContent = copiedLabel;
       setTimeout(() => { shareBtn.textContent = copyLabel; }, 1500);
-    } catch {
+    } else if (result === "fallback") {
+      // Both Share API and clipboard failed — show the raw text so the
+      // user can long-press and copy by hand.
       shareBtn.textContent = shareText;
     }
+    // result === "shared": the OS sheet was the feedback, nothing to do.
   });
   bannerEl.appendChild(shareBtn);
 }
@@ -241,11 +285,19 @@ function appendPuzzleShareButton(bannerEl, { entity, target, difficulty, filter 
   const copied = t("banner.share.puzzle.copied");
   btn.textContent = idle;
   btn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(url);
+    // For the puzzle URL we DO use the separate `url` field — chat apps
+    // render link previews from it nicely. We deliberately skip `text` here:
+    // the URL alone is the whole payload (Open Graph tags supply the
+    // preview), and the clipboard fallback writes just the URL so it pastes
+    // cleanly into any chat.
+    const result = await sharePayload({
+      title: t("app.title"),
+      url,
+    });
+    if (result === "copied") {
       btn.textContent = copied;
       setTimeout(() => { btn.textContent = idle; }, 1500);
-    } catch {
+    } else if (result === "fallback") {
       // Surface the URL so the user can copy it manually.
       btn.textContent = url;
     }
