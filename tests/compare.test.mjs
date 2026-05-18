@@ -154,16 +154,23 @@ const MARK = {
   assert.equal(r.company.status, "exact");
 }
 
-// Idol gender is strictly binary — even if a "coed" value somehow snuck into
-// the data, compareIdol must NOT emit "partial" (the partial-match logic only
-// makes sense for groups). For idols, anything other than an exact match is
-// "none".
+// Idol gender comparison is strict exact-match — no partial-match logic
+// (that's a groups-only concept for coed overlap). Holds across the full
+// {boy, girl, nonbinary} vocabulary: anything other than exact equality
+// produces "none".
 {
-  const COED_IDOL = { ...JIMIN, gender: "coed" };
-  const r1 = compareIdol(COED_IDOL, JENNIE);    // coed vs girl → none, not partial
+  const NB_IDOL = { ...JIMIN, gender: "nonbinary" };
+  const r1 = compareIdol(NB_IDOL, JENNIE);                       // nonbinary vs girl
   assert.equal(r1.gender.status, "none");
-  const r2 = compareIdol(JIMIN, { ...JENNIE, gender: "coed" });  // boy vs coed → none
+  const r2 = compareIdol(JIMIN, { ...JENNIE, gender: "nonbinary" }); // boy vs nonbinary
   assert.equal(r2.gender.status, "none");
+  // Self-compare on a nonbinary idol → exact.
+  const r3 = compareIdol(NB_IDOL, NB_IDOL);
+  assert.equal(r3.gender.status, "exact");
+  // Even if a "coed" value somehow snuck into idol data (data error), the
+  // result is still strictly "none" — no partial-match leakage.
+  const COED_IDOL = { ...JIMIN, gender: "coed" };
+  assert.equal(compareIdol(COED_IDOL, JENNIE).gender.status, "none");
 }
 
 console.log("compare.test ok");

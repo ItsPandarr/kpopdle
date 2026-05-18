@@ -3,8 +3,8 @@
 
   "Q122981341": {
     "_label": "Cocona (XG)",
-    "_note": "Cocona is publicly nonbinary. The dataset's idol gender vocab is binary (boy/girl) and can't express that faithfully. We encode 'girl' here because she debuted with and performs in XG (a girl group), which is how the game's gender field operates and how most players will mentally model her for guessing purposes — not as a statement about her identity.",
-    "gender": "girl"
+    "_note": "Cocona is publicly nonbinary. The idol gender vocab carries 'nonbinary' as a first-class value alongside 'boy'/'girl', and the clue / hint / autocomplete pipeline handles it as a third ternary option (two exclusions pin the third by elimination, etc.).",
+    "gender": "nonbinary"
   },
   "Q114690696": {
     "_label": "Hinata (XG)",

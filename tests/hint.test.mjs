@@ -85,25 +85,36 @@ import {
   assert.equal(attrIsKnown("primary_group", clues), false);
 }
 
-// Idol gender is binary — excluding "boy" via a previous wrong-gender guess
-// pins the answer to "girl" by elimination. Group gender is ternary so the
-// same exclusion doesn't pin anything (could be girl or coed).
+// Idol gender is ternary: {boy, girl, nonbinary}. Excluding ANY TWO pins
+// the third by elimination; one exclusion alone still leaves two options.
+// Group gender is also ternary {boy, girl, coed} with the same rule.
 {
-  const cluesBoyExcluded = {
+  const oneExcluded = {
     gender: { known: null, excluded: new Set(["boy"]), impliedCoed: false },
   };
+  const twoExcluded = {
+    gender: { known: null, excluded: new Set(["boy", "girl"]), impliedCoed: false },
+  };
+  // Idol: one exclusion → still two options open.
   assert.equal(
-    attrIsKnown("gender", cluesBoyExcluded, null, "idol"),
-    true,
-    "idol: one exclusion pins the other half of the binary",
+    attrIsKnown("gender", oneExcluded, null, "idol"),
+    false,
+    "idol: one exclusion leaves two options (girl + nonbinary) — not yet pinned",
   );
+  // Idol: two exclusions → third pinned.
   assert.equal(
-    attrIsKnown("gender", cluesBoyExcluded, null, "group"),
+    attrIsKnown("gender", twoExcluded, null, "idol"),
+    true,
+    "idol: two exclusions pin the remaining option (nonbinary)",
+  );
+  // Group: same rule.
+  assert.equal(
+    attrIsKnown("gender", oneExcluded, null, "group"),
     false,
     "group: one exclusion still leaves girl + coed open",
   );
   // Default (no entity arg) behaves like "group" — safe back-compat.
-  assert.equal(attrIsKnown("gender", cluesBoyExcluded), false);
+  assert.equal(attrIsKnown("gender", oneExcluded), false);
 }
 
 // Inferred-knowness: a range that has collapsed to a single value counts as

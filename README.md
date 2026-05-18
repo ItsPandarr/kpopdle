@@ -40,7 +40,7 @@ After any win or loss, two share buttons appear on the banner:
 Debut date, generation (1st–5th), company (with HYBE/SM/JYP/YG parent-family partial matches), member count, gender (boy/girl/coed), status (active/disbanded), country.
 
 ### Idol attributes
-Birth year, debut year (inherited from earliest group), generation, primary group (exact match, or partial when sub-units overlap — e.g. NCT 127 vs NCT Dream both share NCT), gender (male/female — strictly binary; "co-ed" is a group-only concept and excluding one gender pins the other by elimination), nationality (Korean, Japanese, Thai, Australian, Canadian, …), company (inherited from primary group, same parent-family rules as group mode).
+Birth year, debut year (inherited from earliest group), generation, primary group (exact match, or partial when sub-units overlap — e.g. NCT 127 vs NCT Dream both share NCT), gender (male / female / nonbinary — almost all idols in the dataset are binary in practice, but `nonbinary` is a first-class third value for the small number who identify that way; "co-ed" remains a group-only concept), nationality (Korean, Japanese, Thai, Australian, Canadian, …), company (inherited from primary group, same parent-family rules as group mode).
 
 ## Refreshing the dataset
 

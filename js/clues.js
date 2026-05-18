@@ -187,10 +187,16 @@ function fmtGender(info, entity) {
   if (info.known) return label(info.known);
   if (info.impliedCoed) return t(`gender.${kind}.maleorfemale`);
   if (info.excluded.size === 0) return null;
-  // Idol gender is binary (no individual idol is "co-ed"); groups have three
-  // possible values. Pick the universe accordingly so an idol round doesn't
-  // render "Female / Co-ed" as remaining options when "boy" is excluded.
-  const universe = entity === "idol" ? ["boy", "girl"] : ["boy", "girl", "coed"];
+  // Both idol and group gender are ternary, but with different vocabularies:
+  // idol = {boy, girl, nonbinary} (almost everyone is binary, but the
+  // dataset includes idols who identify as nonbinary — e.g. Cocona of XG),
+  // group = {boy, girl, coed} (real groups can have mixed membership). The
+  // remaining-options display works the same way for both: list whatever
+  // hasn't been excluded yet, dropping the universe down to a single label
+  // when only one possibility is left.
+  const universe = entity === "idol"
+    ? ["boy", "girl", "nonbinary"]
+    : ["boy", "girl", "coed"];
   const remaining = universe.filter((g) => !info.excluded.has(g));
   if (remaining.length === 1) return label(remaining[0]);
   if (remaining.length === 2) return remaining.map(label).join(" / ");
@@ -311,9 +317,11 @@ export function knownAttrs(clues, bounds = null, entity = "group") {
   if (clues.company?.known != null) out.add("company");
   if (clues.gender?.known != null) {
     out.add("gender");
-  } else if (entity === "idol" && (clues.gender?.excluded?.size ?? 0) >= 1) {
-    // Idols only: one exclusion pins the other half of the binary, so the
-    // clues panel should mark gender as confirmed (✓) just like a direct hit.
+  } else if (entity === "idol" && (clues.gender?.excluded?.size ?? 0) >= 2) {
+    // Idol gender is one of {boy, girl, nonbinary}. Excluding any TWO of
+    // them leaves the third known by elimination, and the clues panel
+    // should mark it confirmed (✓) just like a direct hit. One exclusion
+    // alone isn't enough — two options are still in play.
     out.add("gender");
   }
   if (clues.status?.known != null) out.add("status");
@@ -325,7 +333,7 @@ export function knownAttrs(clues, bounds = null, entity = "group") {
 
 // Short labels for the "why-not" reasons surfaced by Detective mode.
 function _genderLabel(g, entity) {
-  if (entity === "idol") return ({ boy: "Male", girl: "Female", coed: "Co-ed" })[g] || g;
+  if (entity === "idol") return ({ boy: "Male", girl: "Female", nonbinary: "Nonbinary" })[g] || g;
   return ({ boy: "Boy group", girl: "Girl group", coed: "Co-ed" })[g] || g;
 }
 function _statusLabel(s) {

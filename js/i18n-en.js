@@ -62,6 +62,7 @@ export default {
   "gender.idol.boy": "Male",
   "gender.idol.girl": "Female",
   "gender.idol.coed": "Co-ed",
+  "gender.idol.nonbinary": "Nonbinary",
   "gender.group.maleorfemale": "Boy or Girl (not Co-ed)",
   "gender.idol.maleorfemale": "Male or Female",
   "status.active": "Active",

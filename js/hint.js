@@ -100,11 +100,12 @@ export function attrIsKnown(attr, clues, bounds = null, entity = "group") {
       return clues.company?.known != null;
     case "gender": {
       if (clues.gender?.known != null) return true;
-      // Idol gender is strictly binary. If one of {boy, girl} has been ruled
-      // out by an earlier guess, the answer's gender is known by elimination
-      // — don't waste a hint slot revealing what the player already knows.
-      // (Group gender has three values, so one exclusion isn't a pin.)
-      if (entity === "idol" && (clues.gender?.excluded?.size ?? 0) >= 1) return true;
+      // Idol gender ∈ {boy, girl, nonbinary} (almost always binary in
+      // practice, but the dataset includes nonbinary idols). Excluding
+      // any TWO of the three pins the last — don't waste a hint slot on
+      // what's already known by elimination. Excluding only one still
+      // leaves two options open.
+      if (entity === "idol" && (clues.gender?.excluded?.size ?? 0) >= 2) return true;
       return false;
     }
     case "status":
