@@ -88,6 +88,20 @@ async function buildHTML() {
   );
   // Point the module script at the bundled JS.
   html = html.replace(/js\/main\.js/g, "js/main.min.js");
+  // og:image / twitter:image want absolute URLs — Twitter/X and several
+  // OG validators reject or render-as-broken when the value is a relative
+  // path. When KPOPDLE_URL is set at build time we rewrite the relative
+  // "og-image.png" into a fully-qualified URL. Without the env var, the
+  // relative URL stays put (works fine for direct browser visits, just
+  // not for OG crawlers).
+  const deployUrl = (process.env.KPOPDLE_URL || "").trim();
+  if (deployUrl) {
+    const base = deployUrl.replace(/\/?$/, "/");
+    html = html.replace(
+      /(<meta\s+(?:property|name)="(?:og:image|twitter:image)"\s+content=")og-image\.png(")/g,
+      `$1${base}og-image.png$2`,
+    );
+  }
   // Strip HTML comments (we keep the pre-paint <script> intact since it's
   // delimited by tags, not comments).
   html = html.replace(/<!--[\s\S]*?-->/g, "");
