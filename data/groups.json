@@ -13,7 +13,9 @@
         "Bangtan Sonyeondan",
         "防彈少年團",
         "비티에스",
-        "Bangtan"
+        "Bangtan",
+        "방탄소년단",
+        "방탄"
       ],
       "debut_date": "2013-06-13",
       "debut_year": 2013,
@@ -53,7 +55,8 @@
         "Black Pink",
         "BLΛƆKPIИK",
         "블랙 핑크",
-        "블핑"
+        "블핑",
+        "블랙핑크"
       ],
       "debut_date": "2016-01-01",
       "debut_year": 2016,
@@ -71,7 +74,9 @@
       "id": "Q46134670",
       "name": "Stray Kids",
       "aliases": [
-        "SKZ"
+        "SKZ",
+        "스트레이 키즈",
+        "스키즈"
       ],
       "debut_date": "2017-01-01",
       "debut_year": 2017,
@@ -106,7 +111,8 @@
       "name": "Twice",
       "aliases": [
         "TWICE",
-        "톼이스"
+        "톼이스",
+        "트와이스"
       ],
       "debut_date": "2015-01-01",
       "debut_year": 2015,
@@ -164,7 +170,8 @@
       "id": "Q111381707",
       "name": "Le Sserafim",
       "aliases": [
-        "LE SSERAFIM"
+        "LE SSERAFIM",
+        "르세라핌"
       ],
       "debut_date": "2022-03-28",
       "debut_year": 2022,
@@ -263,7 +270,8 @@
       "name": "Seventeen",
       "aliases": [
         "Seventeen (band)",
-        "SEVENTEEN"
+        "SEVENTEEN",
+        "세븐틴"
       ],
       "debut_date": "2015-05-26",
       "debut_year": 2015,
@@ -284,7 +292,8 @@
         "SNSD",
         "소시",
         "Girls Generation",
-        "So nyeo shsi dae"
+        "So nyeo shsi dae",
+        "소녀시대"
       ],
       "debut_date": "2007-01-01",
       "debut_year": 2007,
@@ -303,7 +312,8 @@
       "name": "NCT",
       "aliases": [
         "Neo Culture Technology",
-        "네오 컬쳐 테크놀로지"
+        "네오 컬쳐 테크놀로지",
+        "엔시티"
       ],
       "debut_date": "2016-01-01",
       "debut_year": 2016,
@@ -437,7 +447,9 @@
       "name": "Tomorrow X Together",
       "aliases": [
         "TXT",
-        "TOMORROW X TOGETHER"
+        "TOMORROW X TOGETHER",
+        "투모로우바이투게더",
+        "투바투"
       ],
       "debut_date": "2019-03-04",
       "debut_year": 2019,
@@ -472,7 +484,9 @@
     {
       "id": "Q17466114",
       "name": "Red Velvet",
-      "aliases": [],
+      "aliases": [
+        "레드벨벳"
+      ],
       "debut_date": "2014-01-01",
       "debut_year": 2014,
       "generation": 3,
@@ -528,7 +542,8 @@
       "id": "Q60732823",
       "name": "Itzy",
       "aliases": [
-        "ITZY"
+        "ITZY",
+        "있지"
       ],
       "debut_date": "2019-02-12",
       "debut_year": 2019,
@@ -627,7 +642,8 @@
       "id": "Q21964258",
       "name": "WJSN",
       "aliases": [
-        "Cosmic Girls"
+        "Cosmic Girls",
+        "우주소녀"
       ],
       "debut_date": "2016-01-01",
       "debut_year": 2016,
@@ -739,7 +755,8 @@
         "LOOΠΔ",
         "이달소",
         "이달의소녀",
-        "Idarui Sonyeo"
+        "Idarui Sonyeo",
+        "이달의 소녀"
       ],
       "debut_date": "2018-01-01",
       "debut_year": 2018,
@@ -811,7 +828,8 @@
       "id": "Q476119",
       "name": "Wonder Girls",
       "aliases": [
-        "WG"
+        "WG",
+        "원더걸스"
       ],
       "debut_date": "2007-01-01",
       "debut_year": 2007,
@@ -845,7 +863,8 @@
       "id": "Q55624444",
       "name": "NCT 127",
       "aliases": [
-        "NCT127"
+        "NCT127",
+        "엔시티 127"
       ],
       "debut_date": "2016-07-07",
       "debut_year": 2016,
@@ -1010,7 +1029,8 @@
       "id": "Q17278068",
       "name": "Mamamoo",
       "aliases": [
-        "MaMaMoO"
+        "MaMaMoO",
+        "마마무"
       ],
       "debut_date": "2014-06-18",
       "debut_year": 2014,
@@ -1029,7 +1049,8 @@
       "name": "Apink",
       "aliases": [
         "A Pink",
-        "A-Pink"
+        "A-Pink",
+        "에이핑크"
       ],
       "debut_date": "2006-11-24",
       "debut_year": 2006,
@@ -1213,7 +1234,8 @@
       "id": "Q61057550",
       "name": "Treasure",
       "aliases": [
-        "TREASURE"
+        "TREASURE",
+        "트레저"
       ],
       "debut_date": "2020-01-01",
       "debut_year": 2020,
@@ -1266,7 +1288,9 @@
     {
       "id": "Q20898046",
       "name": "Day6",
-      "aliases": [],
+      "aliases": [
+        "데이식스"
+      ],
       "debut_date": "2015-01-01",
       "debut_year": 2015,
       "generation": 3,
@@ -1337,7 +1361,8 @@
       "id": "Q124459",
       "name": "Kara",
       "aliases": [
-        "KARA"
+        "KARA",
+        "카라"
       ],
       "debut_date": "2007-03-29",
       "debut_year": 2007,
@@ -1355,7 +1380,8 @@
       "id": "Q18161349",
       "name": "iKon",
       "aliases": [
-        "iKON"
+        "iKON",
+        "아이콘"
       ],
       "debut_date": "2015-01-01",
       "debut_year": 2015,
@@ -1410,7 +1436,8 @@
       "aliases": [
         "GirlFriend",
         "Yeoja Chingu",
-        "Yeojachingu"
+        "Yeojachingu",
+        "여자친구"
       ],
       "debut_date": "2015-01-16",
       "debut_year": 2015,
@@ -1740,7 +1767,8 @@
       "id": "Q389067",
       "name": "After School",
       "aliases": [
-        "애프터 스쿨"
+        "애프터 스쿨",
+        "애프터스쿨"
       ],
       "debut_date": "2009-01-01",
       "debut_year": 2009,

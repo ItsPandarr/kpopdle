@@ -393,7 +393,22 @@ def main() -> None:
     for gid, ov in overrides.items():
         if gid in groups:
             for k, v in ov.items():
-                if v is not None:
+                if k == "extra_aliases":
+                    # Special-cased: extend the existing aliases list rather
+                    # than replacing it. Used to backfill commonly-typed
+                    # Hangul names (e.g. 방탄소년단 for BTS) without losing
+                    # the Wikidata-sourced ones.
+                    existing = groups[gid].get("aliases") or []
+                    extras = list(v or [])
+                    # De-dupe while preserving order
+                    seen = set(existing)
+                    merged = list(existing)
+                    for x in extras:
+                        if x not in seen:
+                            merged.append(x)
+                            seen.add(x)
+                    groups[gid]["aliases"] = merged
+                elif v is not None:
                     groups[gid][k] = v
             if "company" in ov and "company_parent" not in ov:
                 groups[gid]["company_parent"] = company_parent(ov["company"])

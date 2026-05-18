@@ -6,8 +6,25 @@
 
 const MAX_SUGGESTIONS = 8;
 
-function normalize(s) {
-  return (s || "").toLowerCase().trim();
+// Normalize a name/alias/query into a form where superficial differences
+// don't block a match. Specifically:
+//
+//   - NFKD-then-strip-then-NFC pulls combining marks off Latin diacritics
+//     while leaving Hangul precomposed (jamo recompose under NFC), so
+//     "Beyoncé" and "beyonce" hash the same and Hangul stays intact.
+//   - Whitespace is removed entirely, so "Black Pink" matches "blackpink"
+//     and the Hangul alias "블랙 핑크" (with the unhelpful space we got
+//     from Wikidata) matches a user typing "블랙핑크" without one.
+//   - Lowercased for ASCII case-insensitivity.
+//
+// Exported for unit tests.
+export function normalize(s) {
+  return (s || "")
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")  // strip combining marks (accents)
+    .normalize("NFC")                 // recompose Hangul syllables
+    .toLowerCase()
+    .replace(/\s+/g, "");
 }
 
 function rank(group, q) {
@@ -23,7 +40,9 @@ function rank(group, q) {
   return -1;
 }
 
-function findMatches(pool, query) {
+// Exported so tests can drive matching with a controlled pool. (The DOM-bound
+// attachAutocomplete wraps this with input/dropdown plumbing.)
+export function findMatches(pool, query) {
   const q = normalize(query);
   if (!q) return [];
   const scored = [];
