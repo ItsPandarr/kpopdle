@@ -4,6 +4,9 @@ import { compareFor, isWin } from "./compare.js";
 import { targetForDaily, randomTarget, todayUTC, yesterdayUTC } from "./seed.js";
 import { attachAutocomplete } from "./autocomplete.js";
 import { repoUrlFor, correctionIssueUrl } from "./share.js";
+import { readPuzzleFromHash, clearPuzzleFromHash } from "./puzzle.js";
+import * as i18n from "./i18n.js";
+const t = i18n.t;
 import {
   renderHeader,
   renderGuessRow,
@@ -33,6 +36,7 @@ import {
   attachCbToggle,
   attachCalmToggle,
   attachFilterToggle,
+  attachLangToggle,
   attachSettingsMenu,
   applyTheme,
   applyCb,
@@ -74,6 +78,7 @@ const els = {
   cbToggle: null,
   calmToggle: null,
   filterToggle: null,
+  langToggle: null,
   settingsBtn: null,
   settingsPanel: null,
   helpBtn: null,
@@ -101,8 +106,7 @@ const els = {
 let prevKnownAttrs = new Set();
 
 function refreshByline() {
-  const noun = state.entity === "idol" ? "K-pop idol" : "K-pop group";
-  els.byline.textContent = `Guess the ${noun}. New daily puzzle at 00:00 UTC.`;
+  els.byline.textContent = t(state.entity === "idol" ? "app.byline.idol" : "app.byline.group");
 }
 
 let ac = null;
@@ -133,16 +137,16 @@ function refreshClues({ animateNewlyKnown = true } = {}) {
 function updateScoreLine({ bump = false } = {}) {
   const g = state.guesses.length;
   const h = totalHintPenalty(state.hintEvents);
-  // Daily has a fixed cap, so show progress against it ("1/6 guesses"). Endless
-  // is unlimited so we keep the raw count.
   const cap = state.mode === "daily" ? MAX_DAILY_GUESSES[state.difficulty] : null;
-  const countText = cap != null ? `${g}/${cap}` : `${g}`;
-  // When showing /N, always pluralize "guesses" — reads naturally with a denominator.
-  const noun = cap == null && g === 1 ? "guess" : "guesses";
-  const next =
-    h === 0
-      ? `${countText} ${noun}`
-      : `${countText} ${noun} · +${h} hint = ${g + h}`;
+  // Daily shows progress against the cap ("1/6 guesses"); endless shows the raw count.
+  // When a /N denominator is shown, always pluralize — "1/6 guesses" reads better than "1/6 guess".
+  let base;
+  if (cap != null) {
+    base = t("meta.guesses.fraction", { n: g, max: cap });
+  } else {
+    base = t(g === 1 ? "meta.guess" : "meta.guesses", { n: g });
+  }
+  const next = h === 0 ? base : base + t("meta.hint.suffix", { n: h, total: g + h });
   const changed = els.guessCount.textContent !== next;
   els.guessCount.textContent = next;
   if (bump && changed) bumpScore(els.guessCount);
@@ -169,13 +173,13 @@ function updateHintButton() {
   els.hintBtn.hidden = false;
   if (!candidate) {
     els.hintBtn.disabled = true;
-    els.hintBtn.textContent = "Hint (none left)";
+    els.hintBtn.textContent = t("hint.none");
     return;
   }
   els.hintBtn.disabled = false;
   // Show what the next hint would reveal so players can decide if the cost is
   // worth it. Wording is short to keep the button compact.
-  els.hintBtn.textContent = `Hint (+${cost}) · ${prettyLabel(candidate)}`;
+  els.hintBtn.textContent = t("hint.cost", { cost, label: prettyLabel(candidate) });
 }
 
 function onHint() {
@@ -199,39 +203,70 @@ function onHint() {
     cost,
     guessIdxAtClick: state.guesses.length,
   });
-  saveActive(state.entity, state.mode, state.difficulty, {
-    targetId: state.target.id,
-    guessIds: state.guesses.map((x) => x.group.id),
-    hintOrder: state.hintOrder,
-    hintEvents: state.hintEvents,
-    filterMode: state.filterMode,
-  });
+  // Replays + friend's puzzles are practice — don't snapshot progress.
+  if (!state.replayDate && !state.customPuzzle) {
+    saveActive(state.entity, state.mode, state.difficulty, {
+      targetId: state.target.id,
+      guessIds: state.guesses.map((x) => x.group.id),
+      hintOrder: state.hintOrder,
+      hintEvents: state.hintEvents,
+      filterMode: state.filterMode,
+    });
+  }
   refreshClues();
   flashHintReveal(prettyLabel(attr), prettyValue(attr, value, state.entity));
 }
 
 function prettyLabel(attr) {
-  return ATTR_LABEL[attr] || attr;
+  return t(`attr.${attr}`);
 }
 
-// End the current daily as a loss. Shares the same persistence + UI path that
-// running out of guesses takes, so streak / history / banner stay consistent.
+// End the current round as a loss. Three flavors depending on mode:
+//   - daily:  records a daily loss (breaks streak, hits history), uses the
+//             "Out of guesses today" placeholder.
+//   - endless:records a skip in the histogram (no streak/best impact), uses
+//             the standard placeholder so a new round can be started cleanly.
+//   - custom: friend's puzzle — no stats recorded at all. Clears the URL hash
+//             so a refresh / new round doesn't re-trigger the same puzzle.
+// All three share the same banner-render path so the visual feels consistent.
 function forceLoss() {
   if (state.frozen) return;
-  if (state.mode !== "daily") return;
+  if (!state.target) return;
+  const isDaily = state.mode === "daily";
+  const isCustom = !!state.customPuzzle;
   state.lost = true;
   state.frozen = true;
   els.input.disabled = true;
-  els.input.placeholder = state.replayDate
-    ? "Replay finished — start a new round"
-    : "Come back tomorrow for a new daily puzzle";
-  if (!state.replayDate) {
+
+  // Placeholder choice depends on context: daily-done vs replay-done vs
+  // custom-done vs endless (no special done text — the New Round button is
+  // the obvious next step).
+  if (isCustom) {
+    els.input.placeholder = t("input.placeholder.custom.done");
+  } else if (isDaily) {
+    els.input.placeholder = t(state.replayDate ? "input.placeholder.replay.done" : "input.placeholder.daily.done");
+  }
+
+  // Persistence by mode. Replays and custom puzzles are practice — no record.
+  if (!isCustom && !state.replayDate) {
     clearActive(state.entity, state.mode, state.difficulty);
     const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
-    recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries);
+    if (isDaily) {
+      recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries);
+    } else if (state.guesses.length > 0) {
+      // Only bother recording an endless skip if the player actually engaged;
+      // an immediate "show me" from a fresh round isn't worth tracking.
+      recordEndlessSkip(state.entity, state.difficulty, state.target.id, state.guesses.length);
+    }
+  } else if (isCustom) {
+    // Friend's puzzle done — clear the URL so future reloads start fresh.
+    clearPuzzleFromHash(location, history);
   }
+
   const visible = VISIBLE_ATTRS[state.entity][state.difficulty];
+  const bannerMode = isCustom ? "custom" : state.mode;
   renderLossBanner(els.banner, {
+    mode: bannerMode,
     difficulty: state.difficulty,
     entity: state.entity,
     guessCount: state.guesses.length,
@@ -240,8 +275,13 @@ function forceLoss() {
     attrOrder: visible,
     target: state.target,
     dateStr: state.replayDate || todayUTC(),
-    maxGuesses: MAX_DAILY_GUESSES[state.difficulty],
-    suggestions: state.replayDate ? [] : buildDailyCTAs(),
+    // Endless / custom have no guess cap — pass null so the share text + sub
+    // line skip the "/N" suffix.
+    maxGuesses: isDaily ? MAX_DAILY_GUESSES[state.difficulty] : null,
+    filterMode: state.filterMode,
+    suggestions: state.replayDate || isCustom
+      ? buildEndlessCTAs()
+      : isDaily ? buildDailyCTAs() : buildEndlessCTAs(),
   });
   updateHintButton();
   updateMetaButtons();
@@ -251,27 +291,35 @@ function forceLoss() {
 // Show/hide give-up + replay-yesterday based on game state. Called whenever
 // the game transitions (start, win, loss, mode switch).
 function updateMetaButtons() {
-  // Give up: visible only during an active daily round (or a replay round —
-  // a replay player can also bail). Hidden in endless and after win/loss.
+  // Give up: visible during any active round with a target — daily, endless,
+  // replay, or friend's puzzle. Each picks its own confirm text in the click
+  // handler. Hidden after win/loss or before a target is picked.
+  els.giveUpBtn.hidden = state.frozen || !state.target;
+  // Replay yesterday: visible only when in daily mode and not currently in a
+  // replay / custom puzzle.
   const inDaily = state.mode === "daily";
-  els.giveUpBtn.hidden = !inDaily || state.frozen || !state.target;
-  // Replay yesterday: visible only when in daily mode, not currently replaying.
-  els.replayYesterdayBtn.hidden = !inDaily || !!state.replayDate;
-  els.replayYesterdayBtn.textContent = `Replay yesterday's ${state.difficulty}`;
+  els.replayYesterdayBtn.hidden = !inDaily || !!state.replayDate || !!state.customPuzzle;
+  els.replayYesterdayBtn.textContent = t("meta.replay.yesterday", { difficulty: t(`toggle.difficulty.${state.difficulty}`) });
 }
 
 function prettyValue(attr, value, entity) {
-  if (attr === "generation") return `Gen ${value}`;
+  if (attr === "generation") return `${t("attr.generation")} ${value}`;
   if (attr === "gender") {
-    return entity === "idol"
-      ? { boy: "Male", girl: "Female", coed: "Co-ed" }[value] || value
-      : { boy: "Boy group", girl: "Girl group", coed: "Co-ed" }[value] || value;
+    return t(`gender.${entity === "idol" ? "idol" : "group"}.${value}`) || String(value);
   }
-  if (attr === "status") return value === "active" ? "Active" : "Disbanded";
+  if (attr === "status") return t(`status.${value}`) || String(value);
   return String(value);
 }
 
 function pickTarget() {
+  // Friend-supplied custom puzzle: the target is fixed by the share link.
+  // If it's not in the current dataset (link references an entity removed
+  // since the URL was minted), fall through to the normal random pick so
+  // the player isn't stranded on a blank board.
+  if (state.customPuzzle) {
+    const fixed = getById(state.entity, state.customPuzzle.targetId);
+    if (fixed) return fixed;
+  }
   // Use the "complete data" pool for target selection so the puzzle never
   // lands on an entity that's missing one of its visible attribute values.
   // (The autocomplete still uses the full poolFor.)
@@ -288,17 +336,21 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
   resetGame();
   state.replayDate = replayDate; // null for normal play
   // Snapshot the Detective-mode preference for this round. Changing the
-  // setting after this point won't affect the current game.
-  state.filterMode = getFilter() === "on";
+  // setting after this point won't affect the current game. Custom puzzles
+  // override with whatever the link author baked in, so the recipient plays
+  // exactly the same game (toggling detective globally before clicking the
+  // link won't change this round).
+  state.filterMode = state.customPuzzle ? !!state.customPuzzle.filter : getFilter() === "on";
   hideWinBanner(els.banner);
   // Paint the panel with empty placeholders for the current entity/difficulty.
   // refreshClues uses VISIBLE_ATTRS, so the slot set matches the board columns.
   prevKnownAttrs = new Set();
   refreshClues({ animateNewlyKnown: false });
 
-  // Replay rounds bypass the "already played today" check (the puzzle is from
-  // a different date) and don't restore in-progress state (replays are one-shot).
-  if (state.mode === "daily" && !replayDaily && !state.replayDate) {
+  // Replay rounds and friend-supplied custom puzzles bypass the "already
+  // played today" check (their target is a deliberate override) and don't
+  // restore in-progress state (one-shot rounds).
+  if (state.mode === "daily" && !replayDaily && !state.replayDate && !state.customPuzzle) {
     const prev = getDailyStatus(state.entity, state.difficulty);
     if (prev && (prev.won || prev.won === false)) {
       state.target = getById(state.entity, prev.targetId) || pickTarget();
@@ -311,7 +363,7 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
       if (prev.won) {
         const reveal = compareFor(state.entity, state.target, state.target);
         renderGuessRow(els.board, state.target, reveal, state.entity, state.difficulty);
-        els.guessCount.textContent = `Solved today in ${prev.guesses} ${prev.guesses === 1 ? "guess" : "guesses"}`;
+        els.guessCount.textContent = t(prev.guesses === 1 ? "meta.solvedToday.one" : "meta.solvedToday.many", { n: prev.guesses });
         renderWinBanner(els.banner, {
           mode: "daily",
           difficulty: state.difficulty,
@@ -323,11 +375,13 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
           target: state.target,
           dateStr: todayUTC(),
           maxGuesses: MAX_DAILY_GUESSES[state.difficulty],
+          filterMode: state.filterMode,
           suggestions: buildDailyCTAs(),
         });
       } else {
-        els.guessCount.textContent = `Out of guesses today`;
+        els.guessCount.textContent = t("meta.outoftoday");
         renderLossBanner(els.banner, {
+          mode: "daily",
           difficulty: state.difficulty,
           entity: state.entity,
           guessCount: prev.guesses,
@@ -336,11 +390,12 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
           target: state.target,
           dateStr: todayUTC(),
           maxGuesses: MAX_DAILY_GUESSES[state.difficulty],
+          filterMode: state.filterMode,
           suggestions: buildDailyCTAs(),
         });
       }
       els.input.disabled = true;
-      els.input.placeholder = "Come back tomorrow for a new daily puzzle";
+      els.input.placeholder = t("input.placeholder.daily.done");
       els.newRound.hidden = true;
       ac?.setGuessedIds([prev.targetId]);
       updateMetaButtons();
@@ -348,9 +403,9 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
     }
   }
 
-  // Try restoring an in-progress game first. Skip for replays — they're
-  // one-shot rounds that intentionally don't persist across reload.
-  const active = state.replayDate ? null : getActive(state.entity, state.mode, state.difficulty);
+  // Try restoring an in-progress game first. Skip for replays + friend's
+  // puzzles — those are one-shot rounds that intentionally don't persist.
+  const active = (state.replayDate || state.customPuzzle) ? null : getActive(state.entity, state.mode, state.difficulty);
   let restoredGuesses = [];
   if (active && active.targetId) {
     const t = getById(state.entity, active.targetId);
@@ -383,14 +438,16 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
   clearBoard(els.board);
   els.input.disabled = false;
   const pool = poolFor(state.entity, state.difficulty);
-  const noun = state.entity === "idol" ? "K-pop idol" : "K-pop group";
-  const replayTag = state.replayDate ? ` · replay ${state.replayDate}` : "";
-  const filterTag = state.filterMode ? " · detective" : "";
-  els.input.placeholder = `Guess a ${noun}… (${pool.length} possible)${replayTag}${filterTag}`;
+  const baseKey = state.entity === "idol" ? "input.placeholder.idol" : "input.placeholder.group";
+  const replayTag = state.replayDate ? t("input.placeholder.replay.suffix", { date: state.replayDate }) : "";
+  const customTag = state.customPuzzle ? t("input.placeholder.custom.suffix") : "";
+  const filterTag = state.filterMode ? t("input.placeholder.detective.suffix") : "";
+  els.input.placeholder = t(baseKey, { n: pool.length }) + replayTag + customTag + filterTag;
   els.input.value = "";
   els.input.focus();
-  // Replays are one-shot, so show "New round" (returns to today's daily).
-  els.newRound.hidden = state.mode === "daily" && !state.replayDate;
+  // Replays + friend's puzzles are one-shot, so always show "New round".
+  // Standard daily play hides it (clicking it mid-game would be a footgun).
+  els.newRound.hidden = state.mode === "daily" && !state.replayDate && !state.customPuzzle;
 
   // If hintOrder wasn't restored, build it now: least-unique attribute first,
   // most-unique last. Uses the *current* pool so the ordering reflects what
@@ -429,8 +486,8 @@ function onGuess(entity) {
   ac?.setGuessedIds(state.guesses.map((x) => x.group.id));
   // Score line (including "1/6 guesses" daily progress) updates via refreshClues.
   refreshClues();
-  // Replays are practice — don't snapshot progress (reload returns to today's daily).
-  if (!state.replayDate) {
+  // Replays + friend's puzzles are practice — don't snapshot progress.
+  if (!state.replayDate && !state.customPuzzle) {
     saveActive(state.entity, state.mode, state.difficulty, {
       targetId: state.target.id,
       guessIds: state.guesses.map((x) => x.group.id),
@@ -446,19 +503,24 @@ function onGuess(entity) {
     state.won = true;
     state.frozen = true;
     els.input.disabled = true;
-    if (!state.replayDate) clearActive(state.entity, state.mode, state.difficulty);
+    const isCustom = !!state.customPuzzle;
+    if (!state.replayDate && !isCustom) clearActive(state.entity, state.mode, state.difficulty);
     const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
-    const maxGuesses = state.mode === "daily" ? MAX_DAILY_GUESSES[state.difficulty] : null;
-    // Replays are practice — don't touch stats.
-    if (!state.replayDate) {
+    const maxGuesses = state.mode === "daily" && !isCustom ? MAX_DAILY_GUESSES[state.difficulty] : null;
+    // Replays + custom puzzles are practice — don't touch stats.
+    if (!state.replayDate && !isCustom) {
       if (state.mode === "daily") {
         recordDailyWin(state.entity, state.difficulty, state.target.id, totalTries);
       } else {
         recordEndlessWin(state.entity, state.difficulty, state.target.id, totalTries);
       }
     }
+    // Friend's puzzle done — clear the URL so a refresh starts fresh next
+    // time and the share button's "send this to a friend" URL is the canonical
+    // re-share for this target rather than the hash they just played.
+    if (isCustom) clearPuzzleFromHash(location, history);
     renderWinBanner(els.banner, {
-      mode: state.mode,
+      mode: isCustom ? "custom" : state.mode,
       difficulty: state.difficulty,
       entity: state.entity,
       // Display the actual guess count against the cap. Hint penalty is shown
@@ -473,16 +535,21 @@ function onGuess(entity) {
       target: state.target,
       dateStr: state.replayDate || todayUTC(),
       maxGuesses,
+      filterMode: state.filterMode,
       suggestions:
-        state.mode === "endless"               ? buildEndlessCTAs() :
+        isCustom                              ? buildEndlessCTAs() :
+        state.mode === "endless"              ? buildEndlessCTAs() :
         (state.mode === "daily" && !state.replayDate) ? buildDailyCTAs() :
         /* daily replay */                      [],
     });
-    // Big celebratory confetti from roughly above the banner.
+    // Big celebratory confetti from roughly above the banner. When the target
+    // has official colors on file (Wikidata P462 → P465), use them for a
+    // group-flavored burst; else fall back to the default rainbow palette.
     const bRect = els.banner.getBoundingClientRect();
     burstConfetti({
       count: 110,
       origin: { x: bRect.left + bRect.width / 2, y: Math.max(60, bRect.top) },
+      palette: state.target?.colors || null,
     });
     updateHintButton();
     updateMetaButtons();
@@ -497,15 +564,14 @@ function onGuess(entity) {
       state.lost = true;
       state.frozen = true;
       els.input.disabled = true;
-      els.input.placeholder = state.replayDate
-        ? "Replay finished — start a new round"
-        : "Come back tomorrow for a new daily puzzle";
+      els.input.placeholder = t(state.replayDate ? "input.placeholder.replay.done" : "input.placeholder.daily.done");
       if (!state.replayDate) {
         clearActive(state.entity, state.mode, state.difficulty);
         const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
         recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries);
       }
       renderLossBanner(els.banner, {
+        mode: "daily",
         difficulty: state.difficulty,
         entity: state.entity,
         guessCount: state.guesses.length,
@@ -515,6 +581,7 @@ function onGuess(entity) {
         target: state.target,
         dateStr: state.replayDate || todayUTC(),
         maxGuesses: cap,
+        filterMode: state.filterMode,
         suggestions: state.replayDate ? [] : buildDailyCTAs(),
       });
       updateHintButton();
@@ -561,13 +628,13 @@ function buildDailyCTAs() {
     const status = getDailyStatus(state.entity, d);
     if (status && status.won) continue; // already finished today; skip
     ctas.push({
-      label: `Try Daily ${capitalize(d)}`,
+      label: t("banner.cta.dailyDifficulty", { difficulty: t(`toggle.difficulty.${d}`) }),
       kind: "daily",
       onClick: () => goTo({ mode: "daily", difficulty: d }),
     });
   }
   ctas.push({
-    label: `Try Endless ${capitalize(state.difficulty)}`,
+    label: t("banner.cta.endlessDifficulty", { difficulty: t(`toggle.difficulty.${state.difficulty}`) }),
     kind: "endless",
     onClick: () => goTo({ mode: "endless", difficulty: state.difficulty }),
   });
@@ -583,7 +650,7 @@ function buildDailyCTAs() {
 function buildEndlessCTAs() {
   const ctas = [];
   ctas.push({
-    label: "New round",
+    label: t("banner.cta.newround"),
     kind: "endless",
     onClick: () => {
       clearActive(state.entity, state.mode, state.difficulty);
@@ -595,7 +662,7 @@ function buildEndlessCTAs() {
   for (const d of ["easy", "medium", "hard"]) {
     if (d === state.difficulty) continue;
     ctas.push({
-      label: `Try Endless ${capitalize(d)}`,
+      label: t("banner.cta.endlessDifficulty", { difficulty: t(`toggle.difficulty.${d}`) }),
       kind: "endless",
       onClick: () => goTo({ mode: "endless", difficulty: d }),
     });
@@ -603,7 +670,7 @@ function buildEndlessCTAs() {
   const dailyStatus = getDailyStatus(state.entity, state.difficulty);
   if (!dailyStatus || !dailyStatus.won) {
     ctas.push({
-      label: `Try Daily ${capitalize(state.difficulty)}`,
+      label: t("banner.cta.dailyDifficulty", { difficulty: t(`toggle.difficulty.${state.difficulty}`) }),
       kind: "daily",
       onClick: () => goTo({ mode: "daily", difficulty: state.difficulty }),
     });
@@ -613,7 +680,7 @@ function buildEndlessCTAs() {
 
 function tickCountdown() {
   if (els.countdown && state.mode === "daily") {
-    els.countdown.textContent = `Next daily in ${formatCountdownToUTCMidnight()}`;
+    els.countdown.textContent = t("meta.next.daily", { time: formatCountdownToUTCMidnight() });
   } else if (els.countdown) {
     els.countdown.textContent = "";
   }
@@ -624,17 +691,17 @@ function tickCountdown() {
 // (daily only). Bars scale to the largest count so single plays still show.
 function renderHistogram(entity, mode, difficulty) {
   const { distribution, played } = historySummary(entity, mode, difficulty);
+  const modeLbl = t(`toggle.mode.${mode}`);
+  const diffLbl = t(`toggle.difficulty.${difficulty}`);
   if (played === 0) {
-    return `<p class="histogram-empty">No plays yet on ${mode} ${difficulty}.</p>`;
+    return `<p class="histogram-empty">${t("stats.histogram.empty", { mode: modeLbl, difficulty: diffLbl })}</p>`;
   }
   const buckets = [];
   if (mode === "daily") {
     const max = MAX_DAILY_GUESSES[difficulty];
     for (let i = 1; i <= max; i++) buckets.push(String(i));
-    buckets.push("X"); // losses
+    buckets.push("X");
   } else {
-    // Endless has no cap → show whichever guess counts have actually occurred,
-    // followed by an "S" (skip) bucket if the player has abandoned any rounds.
     const seen = Object.keys(distribution)
       .filter((k) => k !== "X" && k !== "S")
       .map(Number)
@@ -651,22 +718,22 @@ function renderHistogram(entity, mode, difficulty) {
       k === "X" ? "histogram-bar is-loss" :
       k === "S" ? "histogram-bar is-skip" :
       "histogram-bar";
-    const outcome =
-      k === "X" ? "no win (loss)" :
-      k === "S" ? "skipped" :
-      `${k} ${k === "1" ? "guess" : "guesses"}`;
+    // ARIA label kept in English — screen readers handle the language attribute
+    // and this is a derived structural label, not a translated UI string. We
+    // could localize it later if needed.
     return `<div class="histogram-row">
       <span class="histogram-key">${k}</span>
-      <div class="${cls}" style="width: ${pct}%" aria-label="${n} ${n === 1 ? "play" : "plays"} ${k === "X" || k === "S" ? "ended " + outcome : "won in " + outcome}"></div>
+      <div class="${cls}" style="width: ${pct}%"></div>
       <span class="histogram-count">${n}</span>
     </div>`;
   });
-  return `<div class="histogram" role="figure" aria-label="${mode} ${difficulty} guess distribution">${rows.join("")}</div>`;
+  return `<div class="histogram" role="figure">${rows.join("")}</div>`;
 }
 
 function renderStats() {
   const s = getStats();
   const bucket = s[state.entity];
+  const entityLabel = t(`toggle.entity.${state.entity}`);
 
   const dailyRows = ["easy", "medium", "hard"].map((d) => {
     const best = bucket.bests[d]?.fewestGuesses ?? "—";
@@ -674,34 +741,38 @@ function renderStats() {
     const bestStreak = bucket.streaks[d]?.best ?? 0;
     const summary = historySummary(state.entity, "daily", d);
     const rateText = summary.winRatePct == null
-      ? `<span class="dim">no plays</span>`
+      ? `<span class="dim">${t("stats.noPlays")}</span>`
       : `${summary.wins}/${summary.played} <span class="dim">(${summary.winRatePct}%)</span>`;
-    return `<dt>${d}</dt><dd>best <b>${best}</b> · streak ${streak} <span class="dim">(best ${bestStreak})</span> · won ${rateText}</dd>`;
+    return `<dt>${t(`toggle.difficulty.${d}`)}</dt><dd>${t("stats.best")} <b>${best}</b> · ${t("stats.streak")} ${streak} <span class="dim">${t("stats.bestStreak", { n: bestStreak })}</span> · ${t("stats.won")} ${rateText}</dd>`;
   });
 
   const endlessRows = ["easy", "medium", "hard"].map((d) => {
     const best = bucket.endless[d]?.bestGuesses ?? "—";
     const played = bucket.endless[d]?.played ?? 0;
-    return `<dt>${d}</dt><dd>best <b>${best}</b> · ${played} ${played === 1 ? "play" : "plays"}</dd>`;
+    const playsText = played === 1 ? t("stats.plays.one", { n: played }) : t("stats.plays.many", { n: played });
+    return `<dt>${t(`toggle.difficulty.${d}`)}</dt><dd>${t("stats.best")} <b>${best}</b> · ${playsText}</dd>`;
   });
 
-  // Histogram for the *current* mode/difficulty — switches with the toggles.
   const hist = renderHistogram(state.entity, state.mode, state.difficulty);
+  const histTitle = t("stats.histogram.title", {
+    mode: t(`toggle.mode.${state.mode}`),
+    difficulty: t(`toggle.difficulty.${state.difficulty}`),
+  });
 
   els.stats.innerHTML = `
-    <h3 class="stats-entity">${state.entity}</h3>
+    <h3 class="stats-entity">${entityLabel}</h3>
     <div class="stats-grid">
       <section class="stats-col">
-        <h4 class="stats-col-title">Daily</h4>
+        <h4 class="stats-col-title">${t("stats.daily")}</h4>
         <dl>${dailyRows.join("")}</dl>
       </section>
       <section class="stats-col">
-        <h4 class="stats-col-title">Endless</h4>
+        <h4 class="stats-col-title">${t("stats.endless")}</h4>
         <dl>${endlessRows.join("")}</dl>
       </section>
     </div>
     <section class="histogram-section">
-      <h4 class="stats-col-title">Guess distribution · ${state.mode} ${state.difficulty}</h4>
+      <h4 class="stats-col-title">${histTitle}</h4>
       ${hist}
     </section>
   `;
@@ -715,6 +786,7 @@ async function init() {
   els.cbToggle = $("cb-toggle");
   els.calmToggle = $("calm-toggle");
   els.filterToggle = $("filter-toggle");
+  els.langToggle = $("lang-toggle");
   els.settingsBtn = $("settings-btn");
   els.settingsPanel = $("settings-panel");
   els.helpBtn = $("help-btn");
@@ -735,6 +807,12 @@ async function init() {
   els.countdown = $("countdown");
   els.stats = $("stats");
 
+  // i18n: load the chosen locale + the English fallback before any text is
+  // displayed. applyToDom() then translates every static [data-i18n] element
+  // in one pass. Dynamic strings (built in JS) use t() inline.
+  await i18n.init();
+  i18n.applyToDom();
+
   await loadAll();
 
   // Restore last selection (entity / mode / difficulty) before wiring toggles so the
@@ -751,11 +829,21 @@ async function init() {
       difficulty: state.difficulty,
     });
 
+  // Helper: if the player navigates away from a friend's puzzle (changes
+  // entity/mode/difficulty), drop the custom-puzzle context and the URL hash
+  // so the new round is a normal one.
+  const exitCustomPuzzle = () => {
+    if (!state.customPuzzle) return;
+    state.customPuzzle = null;
+    clearPuzzleFromHash(location, history);
+  };
+
   attachEntityToggle(els.entityToggle, state.entity, (e) => {
     if (e === state.entity) return;
     state.entity = e;
     setActive(els.entityToggle, e);
     popToggle(els.entityToggle);
+    exitCustomPuzzle();
     persistSelection();
     refreshByline();
     startGame();
@@ -767,6 +855,7 @@ async function init() {
     state.mode = m;
     setActive(els.modeToggle, m);
     popToggle(els.modeToggle);
+    exitCustomPuzzle();
     persistSelection();
     startGame();
     tickCountdown();
@@ -778,6 +867,7 @@ async function init() {
     state.difficulty = d;
     setActive(els.difficultyToggle, d);
     popToggle(els.difficultyToggle);
+    exitCustomPuzzle();
     persistSelection();
     startGame();
     renderStats();
@@ -810,22 +900,36 @@ async function init() {
     saveFilter(v);
     setActive(els.filterToggle, v);
   });
+  // Language toggle: changing reloads the page so every string repaints
+  // cleanly in the new locale (active-game state is restored from localStorage
+  // on reload, so the player doesn't lose mid-round progress).
+  attachLangToggle(els.langToggle, i18n.localePreference(), async (v) => {
+    setActive(els.langToggle, v);
+    await i18n.setLocale(v);
+    location.reload();
+  });
   attachSettingsMenu({ button: els.settingsBtn, panel: els.settingsPanel });
   attachSettingsMenu({ button: els.helpBtn, panel: els.helpPanel });
 
   els.resetStatsBtn.addEventListener("click", () => {
-    if (!confirm("Reset all stats? This clears streaks, history, and any in-progress games. Theme and accessibility preferences are kept. This can't be undone.")) return;
+    if (!confirm(t("settings.reset.confirm"))) return;
     resetAllStats();
     // Re-init the game with a fresh persisted state.
     startGame();
     renderStats();
   });
 
-  // Give-up: ends the current daily as a loss. Endless / replays don't get
-  // this (no streak to break, can just start a new round).
+  // Give-up: reveal the answer and end the round. Confirm text varies by
+  // mode — daily warns about the streak, endless calls it a "skip", custom
+  // just confirms the reveal.
   els.giveUpBtn.addEventListener("click", () => {
     if (state.frozen) return;
-    if (!confirm("Give up? Today's daily counts as a loss and breaks your streak.")) return;
+    const key = state.customPuzzle
+      ? "meta.giveup.confirm.custom"
+      : state.mode === "daily" && !state.replayDate
+      ? "meta.giveup.confirm"
+      : "meta.giveup.confirm.endless";
+    if (!confirm(t(key))) return;
     forceLoss();
   });
 
@@ -853,15 +957,22 @@ async function init() {
   els.newRound.addEventListener("click", () => {
     // Endless: clicking "New round" with guesses already on the board counts
     // as a skip — record it so the histogram reflects the abandonment.
-    // (Daily can't reach New Round mid-game; clicking it during a replay
-    // round doesn't touch stats since replays are practice.)
+    // (Daily can't reach New Round mid-game; clicking it during a replay or
+    // custom puzzle doesn't touch stats since those are practice.)
     if (
       state.mode === "endless" &&
+      !state.customPuzzle &&
       state.guesses.length > 0 &&
       !state.frozen &&
       state.target
     ) {
       recordEndlessSkip(state.entity, state.difficulty, state.target.id, state.guesses.length);
+    }
+    // Custom puzzle finished or abandoned — drop the hash so the next New
+    // Round starts a normal endless round and refreshes don't re-trigger.
+    if (state.customPuzzle) {
+      clearPuzzleFromHash(location, history);
+      state.customPuzzle = null;
     }
     clearActive(state.entity, state.mode, state.difficulty);
     state.target = null;
@@ -870,6 +981,36 @@ async function init() {
   });
 
   els.hintBtn.addEventListener("click", onHint);
+
+  // Custom puzzle from a shared URL? Parse the hash before the first
+  // startGame() so the boot lands directly in the friend's puzzle, with the
+  // right entity/difficulty/detective state and toggles synced. Invalid hash
+  // values are silently ignored (we just start a normal game). The hash
+  // itself stays in the URL until the round ends, so a refresh mid-round
+  // resumes the same puzzle.
+  const puzzle = readPuzzleFromHash(location);
+  if (puzzle) {
+    const candidate = getById(puzzle.entity, puzzle.targetId);
+    if (candidate) {
+      state.entity = puzzle.entity;
+      state.difficulty = puzzle.difficulty;
+      state.mode = "endless";
+      state.customPuzzle = { ...puzzle };
+      // Reflect the puzzle's settings in the toggles so the player can see
+      // what they're playing. We don't persist these as the player's "last
+      // selection" — that happens when they make a real choice.
+      setActive(els.entityToggle, state.entity);
+      setActive(els.modeToggle, state.mode);
+      setActive(els.difficultyToggle, state.difficulty);
+      setActive(els.filterToggle, puzzle.filter ? "on" : "off");
+    } else {
+      // Link points at an entity we don't have (data shifted, or someone
+      // mistyped). Strip the hash and tell the player.
+      clearPuzzleFromHash(location, history);
+      // Defer alert: we want it visible after the page paints, not during init.
+      setTimeout(() => alert(t("puzzle.invalid")), 0);
+    }
+  }
 
   refreshByline();
   startGame();
@@ -884,8 +1025,8 @@ async function init() {
   const asof = getDataAsOfDate();
   const asofEl = document.getElementById("data-asof");
   if (asof && asofEl) {
-    const label = asof.toLocaleDateString(undefined, { month: "long", year: "numeric" });
-    asofEl.textContent = `Data current as of ${label}.`;
+    const label = asof.toLocaleDateString(i18n.locale(), { month: "long", year: "numeric" });
+    asofEl.textContent = t("footer.dataAsOf", { date: label });
   }
 
   // "Report a data correction" footer link → pre-filled GitHub issue. Hidden

@@ -23,6 +23,8 @@
           if (cb === "on") document.documentElement.dataset.cb = "on";
           var cm = localStorage.getItem("kpopdle:calm");
           if (cm === "on") document.documentElement.dataset.calm = "on";
+          var lang = localStorage.getItem("kpopdle:lang");
+          if (lang === "en" || lang === "ko") document.documentElement.lang = lang;
         } catch (e) { /* localStorage blocked — fall back to auto */ }
       })();
     </script>
@@ -31,7 +33,7 @@
     <link rel="stylesheet" href="css/cells.css" />
   </head>
   <body>
-    <a href="#main" class="skip-link">Skip to game</a>
+    <a href="#main" class="skip-link" data-i18n="skiplink">Skip to game</a>
     <header class="app-header">
       <div class="help-wrap">
         <button
@@ -41,6 +43,8 @@
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="help-panel"
+          data-i18n="help.aria"
+          data-i18n-attr="aria-label"
           aria-label="How to play">?</button>
         <div
           id="help-panel"
@@ -48,18 +52,18 @@
           role="dialog"
           aria-labelledby="help-title"
           hidden>
-          <h2 id="help-title">How to play</h2>
-          <p>Guess the hidden K-pop <strong>group</strong> or <strong>idol</strong>. Each guess shows how its attributes compare to the answer.</p>
+          <h2 id="help-title" data-i18n="help.title">How to play</h2>
+          <p data-i18n="help.intro">Guess the hidden K-pop group or idol. Each guess shows how its attributes compare to the answer.</p>
           <ul class="help-legend">
-            <li><span class="legend-cell status-exact">✓</span><span>exact match</span></li>
-            <li><span class="legend-cell status-partial">◐</span><span>partial match (e.g. same parent label)</span></li>
-            <li><span class="legend-cell status-higher">▲</span><span>answer's value is <em>higher</em> than your guess</span></li>
-            <li><span class="legend-cell status-lower">▼</span><span>answer's value is <em>lower</em> than your guess</span></li>
-            <li><span class="legend-cell status-none">✗</span><span>no match</span></li>
+            <li><span class="legend-cell status-exact">✓</span><span data-i18n="help.legend.exact">exact match</span></li>
+            <li><span class="legend-cell status-partial">◐</span><span data-i18n="help.legend.partial">partial match (e.g. same parent label)</span></li>
+            <li><span class="legend-cell status-higher">▲</span><span data-i18n="help.legend.higher">answer's value is higher than your guess</span></li>
+            <li><span class="legend-cell status-lower">▼</span><span data-i18n="help.legend.lower">answer's value is lower than your guess</span></li>
+            <li><span class="legend-cell status-none">✗</span><span data-i18n="help.legend.none">no match</span></li>
           </ul>
-          <p><strong>Daily</strong> gives one shared puzzle per day with a guess limit (Easy 6 · Medium 8 · Hard 10). <strong>Endless</strong> is practice — no cap, fresh target each round.</p>
-          <p><strong>Hints</strong> reveal one attribute at a time. Cost decays as you guess; floor is +1. The button shows which attribute it would reveal.</p>
-          <p>Settings (the gear icon) holds theme, colorblind mode, calm-distractions mode, and detective mode (hides candidates that can't be the answer).</p>
+          <p data-i18n="help.daily.note">Daily gives one shared puzzle per day with a guess limit (Easy 6 · Medium 8 · Hard 10). Endless is practice — no cap, fresh target each round.</p>
+          <p data-i18n="help.hints.note">Hints reveal one attribute at a time. Cost decays as you guess; floor is +1. The button shows which attribute it would reveal.</p>
+          <p data-i18n="help.settings.note">Settings (the gear icon) holds theme, colorblind mode, calm-distractions mode, and detective mode (hides candidates that can't be the answer).</p>
         </div>
       </div>
       <div class="settings-wrap">
@@ -70,6 +74,8 @@
           aria-haspopup="true"
           aria-expanded="false"
           aria-controls="settings-panel"
+          data-i18n="settings.aria"
+          data-i18n-attr="aria-label"
           aria-label="Settings">
           <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
             <path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 4l2.1 1.6-2 3.4-2.5-.7c-.5.4-1 .7-1.6 1l-.4 2.6h-4l-.4-2.6c-.6-.3-1.1-.6-1.6-1l-2.5.7-2-3.4L8.6 12 6.5 10.4l2-3.4 2.5.7c.5-.4 1-.7 1.6-1L13 4h4l.4 2.6c.6.3 1.1.6 1.6 1l2.5-.7 2 3.4L21.4 12z"/>
@@ -79,40 +85,46 @@
           id="settings-panel"
           class="settings-panel"
           role="dialog"
+          data-i18n="settings.aria"
+          data-i18n-attr="aria-label"
           aria-label="Settings"
           hidden>
           <fieldset class="settings-group">
-            <legend>Theme</legend>
+            <legend data-i18n="settings.theme">Theme</legend>
             <div class="toggle-group" id="theme-toggle" role="radiogroup" aria-label="Theme"></div>
           </fieldset>
           <fieldset class="settings-group">
-            <legend>Colorblind mode</legend>
+            <legend data-i18n="settings.cb">Colorblind mode</legend>
             <div class="toggle-group" id="cb-toggle" role="radiogroup" aria-label="Colorblind mode"></div>
-            <p class="settings-hint">Swaps red/green for a deuteranopia-safe palette. Symbols (✓ ◐ ✗ ▲ ▼) are always shown.</p>
+            <p class="settings-hint" data-i18n="settings.cb.hint">Swaps red/green for a deuteranopia-safe palette. Symbols (✓ ◐ ✗ ▲ ▼) are always shown.</p>
           </fieldset>
           <fieldset class="settings-group">
-            <legend>Calm mode</legend>
+            <legend data-i18n="settings.calm">Calm mode</legend>
             <div class="toggle-group" id="calm-toggle" role="radiogroup" aria-label="Calm mode"></div>
-            <p class="settings-hint">Stops animations, shimmering text, and the drifting background. Confetti and entrance flips are disabled.</p>
+            <p class="settings-hint" data-i18n="settings.calm.hint">Stops animations, shimmering text, and the drifting background. Confetti and entrance flips are disabled.</p>
           </fieldset>
           <fieldset class="settings-group">
-            <legend>Detective mode</legend>
+            <legend data-i18n="settings.filter">Detective mode</legend>
             <div class="toggle-group" id="filter-toggle" role="radiogroup" aria-label="Detective mode"></div>
-            <p class="settings-hint">Hides candidates that can't be the answer given clues so far (e.g. wrong company, debuts outside the inferred range). Takes effect on the next puzzle.</p>
+            <p class="settings-hint" data-i18n="settings.filter.hint">Hides candidates that can't be the answer given clues so far (e.g. wrong company, debuts outside the inferred range). Takes effect on the next puzzle.</p>
+          </fieldset>
+          <fieldset class="settings-group">
+            <legend data-i18n="settings.lang">Language</legend>
+            <div class="toggle-group" id="lang-toggle" role="radiogroup" aria-label="Language"></div>
           </fieldset>
           <div class="settings-actions">
-            <button id="reset-stats-btn" type="button" class="reset-stats-btn">Reset all stats</button>
-            <p class="settings-hint">Clears streaks, history, and any in-progress games. Theme and accessibility preferences are kept.</p>
+            <button id="reset-stats-btn" type="button" class="reset-stats-btn" data-i18n="settings.reset">Reset all stats</button>
+            <p class="settings-hint" data-i18n="settings.reset.hint">Clears streaks, history, and any in-progress games. Theme and accessibility preferences are kept.</p>
           </div>
         </div>
       </div>
-      <h1>KPopdle</h1>
+      <h1 data-i18n="app.title">KPopdle</h1>
       <div class="toggles">
         <div class="toggle-group" id="entity-toggle" role="radiogroup" aria-label="Entity"></div>
         <div class="toggle-group" id="mode-toggle" role="radiogroup" aria-label="Mode"></div>
         <div class="toggle-group" id="difficulty-toggle" role="radiogroup" aria-label="Difficulty"></div>
       </div>
-      <p class="byline" id="byline">
+      <p class="byline" id="byline" data-i18n="app.byline.group">
         Guess the K-pop group. New daily puzzle at 00:00 UTC.
       </p>
     </header>
@@ -120,10 +132,10 @@
     <main id="main" class="app-main">
       <section class="banner" id="win-banner" role="status" aria-live="polite" hidden></section>
 
-      <section class="clues-panel" id="clues-panel" aria-label="What we know about the target so far"></section>
+      <section class="clues-panel" id="clues-panel" data-i18n="clues.aria" data-i18n-attr="aria-label" aria-label="What we know about the target so far"></section>
 
       <div class="input-wrap">
-        <label for="guess-input" class="sr-only">Guess a K-pop group or idol</label>
+        <label for="guess-input" class="sr-only" data-i18n="input.label">Guess a K-pop group or idol</label>
         <input
           id="guess-input"
           class="guess-input"
@@ -142,28 +154,29 @@
       <div class="meta">
         <span id="guess-count" aria-live="polite">0 guesses</span>
         <button id="hint-btn" class="hint-btn" type="button">Hint (+4)</button>
-        <button id="give-up-btn" class="give-up-btn" type="button" hidden>Give up</button>
-        <span id="countdown" class="countdown" aria-label="Time until next daily puzzle"></span>
-        <button id="new-round" class="new-round-btn" hidden>New round</button>
+        <button id="give-up-btn" class="give-up-btn" type="button" data-i18n="meta.giveup" hidden>Give up</button>
+        <span id="countdown" class="countdown" data-i18n="meta.next.daily.aria" data-i18n-attr="aria-label" aria-label="Time until next daily puzzle"></span>
+        <button id="new-round" class="new-round-btn" data-i18n="meta.newround" hidden>New round</button>
       </div>
       <p class="meta-extra">
         <button id="replay-yesterday-btn" type="button" class="link-btn" hidden>Replay yesterday's daily</button>
       </p>
 
       <div id="board-header" class="board-header" aria-hidden="true"></div>
-      <div id="board" class="board" aria-label="Guess comparison grid"></div>
+      <div id="board" class="board" data-i18n="board.aria" data-i18n-attr="aria-label" aria-label="Guess comparison grid"></div>
 
       <section class="stats-section">
-        <h2>Your stats</h2>
+        <h2 data-i18n="stats.title">Your stats</h2>
         <div id="stats" class="stats"></div>
       </section>
     </main>
 
     <footer class="app-footer">
-      <p>Data: Wikidata + Wikipedia · No accounts, no servers · Personal bests stored in localStorage.</p>
+      <p data-i18n="footer.attribution">Data: Wikidata + Wikipedia · No accounts, no servers · Personal bests stored in localStorage.</p>
       <p id="data-asof" class="data-asof"></p>
       <p class="report-line">
-        Spot wrong data? <a id="report-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Open a correction on GitHub →</a>
+        <span data-i18n="footer.report.prompt">Spot wrong data?</span>
+        <a id="report-link" href="#" target="_blank" rel="noopener noreferrer" data-i18n="footer.report.link" hidden>Open a correction on GitHub →</a>
       </p>
     </footer>
 

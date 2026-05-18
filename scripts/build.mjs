@@ -119,7 +119,21 @@ async function copyAssets() {
       throw e;
     }
   }
-  console.log("  assets favicon.svg + manifest + sw + data/*.dat copied");
+  // Locale JSON files (English is also bundled inline via js/i18n-en.js so
+  // t() works synchronously; these are fetched at runtime when switching
+  // language). Copy every *.json under locales/.
+  const localesSrc = path.join(ROOT, "locales");
+  const localesDst = path.join(DIST, "locales");
+  await ensureDir(localesDst);
+  const localeFiles = (await fs.readdir(localesSrc)).filter((f) =>
+    f.endsWith(".json"),
+  );
+  for (const f of localeFiles) {
+    await fs.copyFile(path.join(localesSrc, f), path.join(localesDst, f));
+  }
+  console.log(
+    `  assets favicon.svg + manifest + sw + data/*.dat + ${localeFiles.length} locales copied`,
+  );
 }
 
 function fmt(n) {

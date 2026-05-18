@@ -1,5 +1,10 @@
 // Derive what's known about the target from the comparison results so far.
-// Pure: takes a list of { group, comparison } and returns one info object per attribute.
+// Pure: takes a list of { group, comparison } and returns one info object per
+// attribute. The only impurity is the optional i18n hook used by formatClues
+// for display labels (lookup falls back to English keys when called outside
+// the app — e.g. in unit tests).
+
+import { t } from "./i18n.js";
 
 function numericInit() {
   return { min: null, max: null, known: null };
@@ -177,23 +182,21 @@ function fmtRange(info, bound = null) {
 }
 
 function fmtGender(info, entity) {
-  const long =
-    entity === "idol"
-      ? { boy: "Male", girl: "Female", coed: "Co-ed" }
-      : { boy: "Boy group", girl: "Girl group", coed: "Co-ed" };
-  if (info.known) return long[info.known];
-  if (info.impliedCoed) return entity === "idol" ? "Male or Female" : "Boy or Girl (not Co-ed)";
+  const kind = entity === "idol" ? "idol" : "group";
+  const label = (g) => t(`gender.${kind}.${g}`);
+  if (info.known) return label(info.known);
+  if (info.impliedCoed) return t(`gender.${kind}.maleorfemale`);
   if (info.excluded.size === 0) return null;
   const remaining = ["boy", "girl", "coed"].filter((g) => !info.excluded.has(g));
-  if (remaining.length === 1) return long[remaining[0]];
-  if (remaining.length === 2) return remaining.map((g) => long[g]).join(" or ");
+  if (remaining.length === 1) return label(remaining[0]);
+  if (remaining.length === 2) return remaining.map(label).join(" / ");
   return null;
 }
 
 function fmtCompany(info) {
   // Only emit a positive hit. Exclusions accumulate too fast to be useful here.
   if (info.known) return info.known;
-  if (info.knownParent) return `${info.knownParent} family`;
+  if (info.knownParent) return t("company.family", { parent: info.knownParent });
   return null;
 }
 
@@ -212,8 +215,8 @@ function fmtGroupSet(info) {
   // We don't have a name-resolution map at this layer, so partial info is qualitative.
   if (info.sharedCandidateIds.size > 0) {
     return info.sharedCandidateIds.size === 1
-      ? "Shares a group with prior guess"
-      : `Shares a group with prior guesses`;
+      ? t("clues.partialGroup.single")
+      : t("clues.partialGroup.multi");
   }
   return null;
 }
@@ -252,25 +255,26 @@ export function formatClues(clues, visibleAttrs, entity = "group", hintAttrs = n
     }
   };
 
-  if (visibleAttrs.includes("debut_year")) push("Debut", "debut_year", fmtRange(clues.debut_year, bounds?.debut_year));
-  if (visibleAttrs.includes("birth_year")) push("Born", "birth_year", fmtRange(clues.birth_year, bounds?.birth_year));
+  if (visibleAttrs.includes("debut_year")) push(t("attr.debut_year"), "debut_year", fmtRange(clues.debut_year, bounds?.debut_year));
+  if (visibleAttrs.includes("birth_year")) push(t("attr.birth_year"), "birth_year", fmtRange(clues.birth_year, bounds?.birth_year));
   if (visibleAttrs.includes("generation")) {
-    const r = fmtRange(clues.generation, bounds?.generation);
-    push("Gen", "generation", r ? `Gen ${r}` : null);
+    // The label column already shows "Gen" / "세대" — don't repeat it inside
+    // the value, otherwise the panel renders "Gen Gen 3" / "세대 세대 3".
+    push(t("attr.generation"), "generation", fmtRange(clues.generation, bounds?.generation));
   }
-  if (visibleAttrs.includes("company")) push("Company", "company", fmtCompany(clues.company));
-  if (visibleAttrs.includes("member_count")) push("Members", "member_count", fmtRange(clues.member_count, bounds?.member_count));
-  if (visibleAttrs.includes("gender")) push("Gender", "gender", fmtGender(clues.gender, entity));
+  if (visibleAttrs.includes("company")) push(t("attr.company"), "company", fmtCompany(clues.company));
+  if (visibleAttrs.includes("member_count")) push(t("attr.member_count"), "member_count", fmtRange(clues.member_count, bounds?.member_count));
+  if (visibleAttrs.includes("gender")) push(t("attr.gender"), "gender", fmtGender(clues.gender, entity));
   if (visibleAttrs.includes("status")) {
     push(
-      "Status",
+      t("attr.status"),
       "status",
-      fmtEnumKnown(clues.status, (s) => (s === "active" ? "Active" : "Disbanded"))
+      fmtEnumKnown(clues.status, (s) => t(`status.${s}`))
     );
   }
-  if (visibleAttrs.includes("country")) push("Country", "country", clues.country.known || null);
-  if (visibleAttrs.includes("nationality")) push("Nationality", "nationality", clues.nationality.known || null);
-  if (visibleAttrs.includes("primary_group")) push("Group", "primary_group", fmtGroupSet(clues.primary_group));
+  if (visibleAttrs.includes("country")) push(t("attr.country"), "country", clues.country.known || null);
+  if (visibleAttrs.includes("nationality")) push(t("attr.nationality"), "nationality", clues.nationality.known || null);
+  if (visibleAttrs.includes("primary_group")) push(t("attr.primary_group"), "primary_group", fmtGroupSet(clues.primary_group));
 
   return out;
 }

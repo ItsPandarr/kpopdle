@@ -12,8 +12,9 @@
     "serve": "python3 scripts/serve.py 8123",
     "scrape": ".venv/bin/python scripts/scrape.py",
     "encode": "python3 scripts/encode_data.py",
-    "build": "node scripts/build.mjs",
-    "preview": "node scripts/build.mjs && python3 -m http.server 8124 --directory dist"
+    "sync-i18n": "node scripts/sync-i18n-en.mjs",
+    "build": "node scripts/sync-i18n-en.mjs && node scripts/build.mjs",
+    "preview": "node scripts/sync-i18n-en.mjs && node scripts/build.mjs && python3 -m http.server 8124 --directory dist"
   },
   "devDependencies": {
     "esbuild": "^0.28.0"

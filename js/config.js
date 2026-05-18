@@ -10,17 +10,13 @@ export function inPool(entity, difficulty) {
 }
 
 // Attribute columns shown per (entity, difficulty). The name column is implicit.
+// All difficulties show the same column set — what makes Medium/Hard harder is
+// the much larger candidate pool, not column reduction.
+const GROUP_ATTRS = ["debut_year", "generation", "company", "member_count", "gender", "status", "country"];
+const IDOL_ATTRS  = ["birth_year", "debut_year", "generation", "primary_group", "gender", "nationality", "company"];
 export const VISIBLE_ATTRS = {
-  group: {
-    easy:   ["debut_year", "generation", "company", "member_count", "gender", "status", "country"],
-    medium: ["debut_year", "company", "member_count", "gender", "status"],
-    hard:   ["debut_year", "company", "member_count"],
-  },
-  idol: {
-    easy:   ["birth_year", "debut_year", "generation", "primary_group", "gender", "nationality", "company"],
-    medium: ["birth_year", "primary_group", "gender", "nationality", "company"],
-    hard:   ["birth_year", "primary_group", "gender", "nationality"],
-  },
+  group: { easy: GROUP_ATTRS, medium: GROUP_ATTRS, hard: GROUP_ATTRS },
+  idol:  { easy: IDOL_ATTRS,  medium: IDOL_ATTRS,  hard: IDOL_ATTRS  },
 };
 
 export const ATTR_LABEL = {

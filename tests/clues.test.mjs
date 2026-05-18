@@ -179,7 +179,9 @@ const GROUP_BOUNDS = {
   clues.generation.max = 1;
   const lines = formatClues(clues, ["generation"], "group", new Set(), new Set(), { bounds: GROUP_BOUNDS });
   const gen = lines.find((l) => l.label === "Gen");
-  assert.equal(gen.value, "Gen 1", "max-saturates-min collapses to known dataset min");
+  // Value is bare ("1") — the row already shows the "Gen" label, so the
+  // prefix would render as "Gen Gen 1" in the panel.
+  assert.equal(gen.value, "1", "max-saturates-min collapses to known dataset min");
   assert.ok(gen.isConfirmed, "should also be marked confirmed");
 }
 
@@ -189,7 +191,7 @@ const GROUP_BOUNDS = {
   clues.generation.min = 5;
   const lines = formatClues(clues, ["generation"], "group", new Set(), new Set(), { bounds: GROUP_BOUNDS });
   const gen = lines.find((l) => l.label === "Gen");
-  assert.equal(gen.value, "Gen 5");
+  assert.equal(gen.value, "5");
   assert.ok(gen.isConfirmed);
 }
 
@@ -212,7 +214,7 @@ const GROUP_BOUNDS = {
   const clues = emptyClues();
   clues.generation.max = 1;
   const lines = formatClues(clues, ["generation"], "group");
-  assert.equal(lines.find((l) => l.label === "Gen").value, "Gen ≤ 1");
+  assert.equal(lines.find((l) => l.label === "Gen").value, "≤ 1");
 }
 
 // ─── targetMatches (Detective mode candidate filter) ──────────────────────────

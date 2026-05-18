@@ -14,6 +14,11 @@ export const state = {
   // today's, doesn't check daily-already-played, and doesn't write to stats.
   // Used by the "Replay yesterday's daily" feature.
   replayDate: null,
+  // When non-null, the current round is a friend-supplied custom puzzle loaded
+  // from a `#p=...` URL. Same "one-shot, doesn't write stats" semantic as a
+  // replay, but the target was hand-picked by the share-link author. Shape:
+  // { entity, targetId, difficulty, filter }.
+  customPuzzle: null,
   // Captured at startGame from the user's Detective mode preference. Held on
   // state (not re-read every keystroke) so toggling mid-game has no effect
   // until the next puzzle.
@@ -29,6 +34,10 @@ export function resetGame() {
   state.hintOrder = [];
   state.hintEvents = [];
   state.replayDate = null;
+  // Intentionally NOT clearing customPuzzle here: it's set once (from the
+  // shared URL on boot) and lives across the per-round reset until the player
+  // explicitly leaves it (New Round, entity/mode/difficulty change, or
+  // navigation). Clearing here would erase it before startGame can use it.
   state.filterMode = false;
 }
 

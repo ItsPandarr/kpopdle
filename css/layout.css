@@ -512,6 +512,18 @@ body::before {
   100% { transform: translateY(0)    scale(1);    }
 }
 
+/* When the target has official colors on file, --entity-accent gets set on
+   .banner via inline style and .has-entity-accent gets added. The accent
+   shows up as a 4px top stripe + colored outer glow, layered ON TOP of the
+   existing rainbow background. Text + CTA contrast is untouched. */
+.banner.has-entity-accent {
+  box-shadow:
+    inset 0 4px 0 0 var(--entity-accent),
+    0 0 28px color-mix(in srgb, var(--entity-accent) 45%, transparent),
+    0 0 60px color-mix(in srgb, var(--entity-accent) 25%, transparent);
+  border-color: color-mix(in srgb, var(--entity-accent) 70%, transparent);
+}
+
 .banner {
   position: relative;
   background: linear-gradient(
@@ -569,6 +581,25 @@ body::before {
 }
 .share-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
 .share-btn:active { transform: translateY(0); }
+/* Sibling button after the wordle-style "Copy result" — slightly different
+   tint so the player can tell the two share actions apart at a glance. */
+.share-btn-puzzle {
+  margin-left: 0.5rem;
+  background: linear-gradient(90deg, #ffe9f3, #d8e4ff);
+}
+
+/* "This is a friend's puzzle — stats unaffected" note. Small, low-contrast
+   so it doesn't compete with the title; sits above the share buttons. */
+.banner-custom-note {
+  margin: 0.4rem 0 0.6rem;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: rgba(255,255,255,0.78);
+}
+:root[data-theme="light"] .banner-custom-note { color: rgba(42, 26, 46, 0.72); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .banner-custom-note { color: rgba(42, 26, 46, 0.72); }
+}
 
 /* "What's next?" CTAs under the win banner. */
 .banner-ctas {

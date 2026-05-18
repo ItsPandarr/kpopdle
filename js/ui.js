@@ -1,4 +1,5 @@
 import { DIFFICULTIES, MODES, ENTITIES } from "./config.js";
+import { t } from "./i18n.js";
 
 // Render a radio-style toggle group as a set of <button role="radio">.
 // `options` = [{value, label}].
@@ -36,7 +37,7 @@ function renderToggleGroup(rootEl, options, current, onChange) {
 export function attachEntityToggle(rootEl, currentEntity, onChange) {
   renderToggleGroup(
     rootEl,
-    ENTITIES.map((e) => ({ value: e, label: e === "idol" ? "Idol" : "Group" })),
+    ENTITIES.map((e) => ({ value: e, label: t(`toggle.entity.${e}`) })),
     currentEntity,
     onChange,
   );
@@ -45,7 +46,7 @@ export function attachEntityToggle(rootEl, currentEntity, onChange) {
 export function attachModeToggle(rootEl, currentMode, onChange) {
   renderToggleGroup(
     rootEl,
-    MODES.map((m) => ({ value: m, label: m === "daily" ? "Daily" : "Endless" })),
+    MODES.map((m) => ({ value: m, label: t(`toggle.mode.${m}`) })),
     currentMode,
     onChange,
   );
@@ -54,7 +55,7 @@ export function attachModeToggle(rootEl, currentMode, onChange) {
 export function attachDifficultyToggle(rootEl, current, onChange) {
   renderToggleGroup(
     rootEl,
-    DIFFICULTIES.map((d) => ({ value: d, label: d[0].toUpperCase() + d.slice(1) })),
+    DIFFICULTIES.map((d) => ({ value: d, label: t(`toggle.difficulty.${d}`) })),
     current,
     onChange,
   );
@@ -64,45 +65,37 @@ export function attachThemeToggle(rootEl, current, onChange) {
   renderToggleGroup(
     rootEl,
     [
-      { value: "auto", label: "Auto" },
-      { value: "light", label: "Light" },
-      { value: "dark", label: "Dark" },
+      { value: "auto",  label: t("settings.theme.auto") },
+      { value: "light", label: t("settings.theme.light") },
+      { value: "dark",  label: t("settings.theme.dark") },
     ],
     current,
     onChange,
   );
 }
 
+function onOffOptions() {
+  return [
+    { value: "off", label: t("settings.toggle.off") },
+    { value: "on",  label: t("settings.toggle.on") },
+  ];
+}
 export function attachCbToggle(rootEl, current, onChange) {
-  renderToggleGroup(
-    rootEl,
-    [
-      { value: "off", label: "Off" },
-      { value: "on", label: "On" },
-    ],
-    current,
-    onChange,
-  );
+  renderToggleGroup(rootEl, onOffOptions(), current, onChange);
 }
-
 export function attachCalmToggle(rootEl, current, onChange) {
-  renderToggleGroup(
-    rootEl,
-    [
-      { value: "off", label: "Off" },
-      { value: "on", label: "On" },
-    ],
-    current,
-    onChange,
-  );
+  renderToggleGroup(rootEl, onOffOptions(), current, onChange);
 }
-
 export function attachFilterToggle(rootEl, current, onChange) {
+  renderToggleGroup(rootEl, onOffOptions(), current, onChange);
+}
+export function attachLangToggle(rootEl, current, onChange) {
   renderToggleGroup(
     rootEl,
     [
-      { value: "off", label: "Off" },
-      { value: "on", label: "On" },
+      { value: "auto", label: t("settings.lang.auto") },
+      { value: "en",   label: t("settings.lang.en") },
+      { value: "ko",   label: t("settings.lang.ko") },
     ],
     current,
     onChange,
