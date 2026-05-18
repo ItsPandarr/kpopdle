@@ -5,7 +5,6 @@
 
   "Q13580495": { "extra_aliases": ["방탄소년단", "방탄"] },
   "Q25056945": { "extra_aliases": ["블랙핑크"] },
-  "Q282104":   { "extra_aliases": ["빅뱅"] },
   "Q20645861": { "extra_aliases": ["트와이스"] },
   "Q111381707": { "extra_aliases": ["르세라핌"] },
   "Q46134670": { "extra_aliases": ["스트레이 키즈", "스키즈"] },
@@ -16,7 +15,6 @@
   "Q17278068": { "extra_aliases": ["마마무"] },
   "Q17466114": { "extra_aliases": ["레드벨벳"] },
   "Q20153":    { "extra_aliases": ["소녀시대"] },
-  "Q239693":   { "extra_aliases": ["슈퍼주니어"] },
   "Q60732823": { "extra_aliases": ["있지"] },
   "Q171885":   { "extra_aliases": ["투애니원"] },
   "Q21964258": { "extra_aliases": ["우주소녀"] },
@@ -41,7 +39,8 @@
   },
   "Q282104": {
     "name": "BIGBANG",
-    "company": "YG Entertainment"
+    "company": "YG Entertainment",
+    "extra_aliases": ["빅뱅"]
   },
   "Q488272": {
     "name": "Girls' Generation",
@@ -55,7 +54,8 @@
   "Q239693": {
     "name": "Super Junior",
     "company": "SM Entertainment",
-    "gender": "boy"
+    "gender": "boy",
+    "extra_aliases": ["슈퍼주니어"]
   },
   "Q491067": {
     "name": "BTOB",

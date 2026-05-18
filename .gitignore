@@ -53,6 +53,10 @@ scripts/.cache/
 # Atomic-write tempfiles from scrape.py.
 data/*.json.tmp
 
+# scripts/scrape.py also drops compact *.index.json snapshots (id/name/
+# aliases/tier only — handy for grep, not consumed by the app). Untracked.
+data/*.index.json
+
 # Note: data/groups.json and data/idols.json are tracked in the repo
 # (it's fine for the readable JSON to live in source control) but
 # scripts/build.mjs only copies the encoded .dat files into dist/, so the

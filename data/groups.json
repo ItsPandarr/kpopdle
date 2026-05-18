@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-18T01:14:40Z",
+  "generated_at": "2026-05-18T19:24:14Z",
   "tier_thresholds": {
     "easy": 100,
     "medium": 300
@@ -27,6 +27,22 @@
       "status": "active",
       "country": "KR",
       "popularity": 1039837,
+      "tier": "easy"
+    },
+    {
+      "id": "Q123480242",
+      "name": "Katseye",
+      "aliases": [],
+      "debut_date": "2024-01-01",
+      "debut_year": 2024,
+      "generation": 5,
+      "company": "Hybe UMG",
+      "company_parent": null,
+      "member_count": 6,
+      "gender": "girl",
+      "status": "active",
+      "country": "KR",
+      "popularity": 1023921,
       "tier": "easy"
     },
     {
@@ -93,7 +109,9 @@
     {
       "id": "Q282104",
       "name": "BIGBANG",
-      "aliases": [],
+      "aliases": [
+        "빅뱅"
+      ],
       "debut_date": "2006-01-01",
       "debut_year": 2006,
       "generation": 2,
@@ -582,7 +600,8 @@
       "name": "Super Junior",
       "aliases": [
         "SJ",
-        "SUJU"
+        "SUJU",
+        "슈퍼주니어"
       ],
       "debut_date": "2005-11-06",
       "debut_year": 2005,
@@ -744,6 +763,25 @@
       "status": "active",
       "country": "KR",
       "popularity": 46252,
+      "tier": "easy"
+    },
+    {
+      "id": "Q122763643",
+      "name": "GIRLSET",
+      "aliases": [
+        "VCHA",
+        "걸셋"
+      ],
+      "debut_date": "2023-01-01",
+      "debut_year": 2023,
+      "generation": 5,
+      "company": "JYP Entertainment",
+      "company_parent": "JYP Entertainment",
+      "member_count": 4,
+      "gender": "girl",
+      "status": "active",
+      "country": "KR",
+      "popularity": 44569,
       "tier": "easy"
     },
     {
@@ -1838,6 +1876,22 @@
       "tier": "easy"
     },
     {
+      "id": "Q116767949",
+      "name": "MiSaMo",
+      "aliases": [],
+      "debut_date": "2023-01-01",
+      "debut_year": 2023,
+      "generation": 5,
+      "company": "JYP Entertainment",
+      "company_parent": "JYP Entertainment",
+      "member_count": 3,
+      "gender": "girl",
+      "status": "active",
+      "country": "KR",
+      "popularity": 18567,
+      "tier": "easy"
+    },
+    {
       "id": "Q269595",
       "name": "Highlight",
       "aliases": [
@@ -1857,7 +1911,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 18271,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q124362218",
@@ -1875,7 +1929,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 17899,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q483135",
@@ -1898,7 +1952,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 17898,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q117354566",
@@ -2674,6 +2728,24 @@
       "tier": "medium"
     },
     {
+      "id": "Q78297569",
+      "name": "JO1",
+      "aliases": [
+        "제이오원"
+      ],
+      "debut_date": "2019-01-01",
+      "debut_year": 2019,
+      "generation": 4,
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "member_count": 11,
+      "gender": "boy",
+      "status": "active",
+      "country": "KR",
+      "popularity": 10216,
+      "tier": "medium"
+    },
+    {
       "id": "Q63790991",
       "name": "CIX",
       "aliases": [
@@ -3005,6 +3077,24 @@
       "tier": "medium"
     },
     {
+      "id": "Q123859475",
+      "name": "Me:I",
+      "aliases": [
+        "미아이"
+      ],
+      "debut_date": "2024-04-17",
+      "debut_year": 2024,
+      "generation": 5,
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "member_count": 7,
+      "gender": "girl",
+      "status": "active",
+      "country": "KR",
+      "popularity": 7473,
+      "tier": "medium"
+    },
+    {
       "id": "Q307457",
       "name": "BF",
       "aliases": [
@@ -3190,8 +3280,8 @@
       "id": "Q489543",
       "name": "SeeYa",
       "aliases": [
-        "See Ya",
-        "See ya"
+        "See ya",
+        "See Ya"
       ],
       "debut_date": "2006-01-01",
       "debut_year": 2006,
@@ -3203,6 +3293,22 @@
       "status": "active",
       "country": "KR",
       "popularity": 6809,
+      "tier": "medium"
+    },
+    {
+      "id": "Q107248914",
+      "name": "INI",
+      "aliases": [],
+      "debut_date": "2021-01-01",
+      "debut_year": 2021,
+      "generation": 4,
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "member_count": 11,
+      "gender": "boy",
+      "status": "active",
+      "country": "KR",
+      "popularity": 6766,
       "tier": "medium"
     },
     {
@@ -5411,6 +5517,22 @@
       "tier": "medium"
     },
     {
+      "id": "Q116770778",
+      "name": "DXTEEN",
+      "aliases": [],
+      "debut_date": "2023-01-01",
+      "debut_year": 2023,
+      "generation": 5,
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "member_count": 1,
+      "gender": "boy",
+      "status": "active",
+      "country": "KR",
+      "popularity": 1667,
+      "tier": "medium"
+    },
+    {
       "id": "Q62070469",
       "name": "Bvndit",
       "aliases": [
@@ -5427,7 +5549,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 1661,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q490754",
@@ -5443,7 +5565,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 1653,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q24282630",
@@ -5459,7 +5581,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 1647,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q54033722",
@@ -5475,7 +5597,7 @@
       "status": "disbanded",
       "country": "KR",
       "popularity": 1638,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q2404780",
@@ -5491,7 +5613,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 1601,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q63098891",
@@ -5507,7 +5629,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 1575,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q154787",
@@ -5526,7 +5648,7 @@
       "status": "active",
       "country": "KR",
       "popularity": 1555,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q7808559",

@@ -85,11 +85,25 @@ _ANCHOR = """
   } UNION {
     # Manual force-include: K-pop-ecosystem groups whose Wikidata tags don't fit the
     # above (Japan/China based, weird P31, missing English label, etc.).
+    # Note: scope is "groups people would expect to see in a K-pop guessing
+    # game" — produced in K-pop style, by Korean labels (HYBE/SM/JYP/etc.)
+    # or via K-pop survival-show pipelines, even when the members or release
+    # market are Japan/US-centric.
     VALUES ?group {
       wd:Q118178306    # BoyNextDoor (no enLabel, p31=male idol group, SK)
       wd:Q112834233    # &TEAM       (HYBE, Japan-based, J-pop tagged)
       wd:Q60062907     # WayV        (SM, China-based, C-pop tagged)
       wd:Q111419721    # XG          (XGALX, Japan-based, J-pop tagged)
+      wd:Q116767949    # Misamo      (Twice sub-unit, Japan-based)
+      wd:Q123480242    # Katseye     (HYBE × Geffen, US-based)
+      wd:Q122763643    # VCHA/Girlset (JYP USA)
+      wd:Q78297569     # JO1         (Produce 101 Japan winners)
+      wd:Q107248914    # INI         (Produce 101 Japan S2 winners)
+      wd:Q123859475    # ME:I        (Produce 101 Japan The Girls winners)
+      wd:Q116770778    # DXTEEN      (Japan-based, Boys Planet alumni)
+      wd:Q109362306    # BUDDiiS     (Japan-based, K-pop adjacent)
+      wd:Q135921764    # Saja Boys   (fictional KPop Demon Hunters group)
+      wd:Q119025962    # Plave       (Korean virtual idol group)
     }
     ?group wdt:P31 ?type .
   }

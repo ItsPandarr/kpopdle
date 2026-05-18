@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-18T01:15:03Z",
+  "generated_at": "2026-05-18T19:24:55Z",
   "tier_thresholds": {
     "easy": 100,
     "medium": 300
@@ -141,9 +141,9 @@
       "id": "Q21075020",
       "name": "Suga",
       "aliases": [
-        "閔玧其",
         "Agust D",
-        "Min Yoon-gi"
+        "Min Yoon-gi",
+        "閔玧其"
       ],
       "birth_year": 1993,
       "debut_year": 2013,
@@ -187,6 +187,157 @@
       "company": "Big Hit Music",
       "company_parent": "HYBE",
       "popularity": 1039837,
+      "tier": "easy"
+    },
+    {
+      "id": "Q124692767",
+      "name": "Daniela Avanzini",
+      "aliases": [
+        "Daniela",
+        "Daniela Avanzini Llorente",
+        "다니엘라 안드레아 아반지니 요렌테"
+      ],
+      "birth_year": 2004,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q123480242"
+      ],
+      "group_names": [
+        "Katseye"
+      ],
+      "primary_group": "Katseye",
+      "primary_group_id": "Q123480242",
+      "company": "Hybe UMG",
+      "company_parent": null,
+      "popularity": 1023921,
+      "tier": "easy"
+    },
+    {
+      "id": "Q124692773",
+      "name": "Lara Raj",
+      "aliases": [
+        "라라 라자고파란",
+        "Lara Rajagopalan"
+      ],
+      "birth_year": 2005,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q123480242"
+      ],
+      "group_names": [
+        "Katseye"
+      ],
+      "primary_group": "Katseye",
+      "primary_group_id": "Q123480242",
+      "company": "Hybe UMG",
+      "company_parent": null,
+      "popularity": 1023921,
+      "tier": "easy"
+    },
+    {
+      "id": "Q124692741",
+      "name": "Manon Bannerman",
+      "aliases": [],
+      "birth_year": 2002,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q123480242"
+      ],
+      "group_names": [
+        "Katseye"
+      ],
+      "primary_group": "Katseye",
+      "primary_group_id": "Q123480242",
+      "company": "Hybe UMG",
+      "company_parent": null,
+      "popularity": 1023921,
+      "tier": "easy"
+    },
+    {
+      "id": "Q124692787",
+      "name": "Megan Skiendiel",
+      "aliases": [
+        "Megan Meiyok Skiendiel",
+        "메간 메이욕 스킨델"
+      ],
+      "birth_year": 2006,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q123480242"
+      ],
+      "group_names": [
+        "Katseye"
+      ],
+      "primary_group": "Katseye",
+      "primary_group_id": "Q123480242",
+      "company": "Hybe UMG",
+      "company_parent": null,
+      "popularity": 1023921,
+      "tier": "easy"
+    },
+    {
+      "id": "Q124692753",
+      "name": "Sophia Laforteza",
+      "aliases": [
+        "Sophia Elizabeth G. Laforteza",
+        "Sophia Elizabeth Guevara Laforteza",
+        "소피아 엘리자베스 게바라 라포르테자"
+      ],
+      "birth_year": 2002,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Filipino",
+      "group_ids": [
+        "Q123480242"
+      ],
+      "group_names": [
+        "Katseye"
+      ],
+      "primary_group": "Katseye",
+      "primary_group_id": "Q123480242",
+      "company": "Hybe UMG",
+      "company_parent": null,
+      "popularity": 1023921,
+      "tier": "easy"
+    },
+    {
+      "id": "Q124692801",
+      "name": "Yoonchae Jeung",
+      "aliases": [
+        "Yoonchae",
+        "윤채",
+        "Jeung Yoonchae",
+        "정윤채"
+      ],
+      "birth_year": 2007,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Korean",
+      "group_ids": [
+        "Q123480242"
+      ],
+      "group_names": [
+        "Katseye"
+      ],
+      "primary_group": "Katseye",
+      "primary_group_id": "Q123480242",
+      "company": "Hybe UMG",
+      "company_parent": null,
+      "popularity": 1023921,
       "tier": "easy"
     },
     {
@@ -401,11 +552,11 @@
       "id": "Q26707663",
       "name": "Lisa",
       "aliases": [
-        "라리사 마노반",
         "Lalisa Manobal",
         "Lalisa Manoban",
         "Lisa Manobal",
-        "Pranpriya Manobal"
+        "Pranpriya Manobal",
+        "라리사 마노반"
       ],
       "birth_year": 1997,
       "debut_year": 2016,
@@ -571,8 +722,8 @@
       "id": "Q57601775",
       "name": "Hyunjin",
       "aliases": [
-        "Hwang Hyun-jin",
-        "황현진|현진 (2000년 3월)"
+        "황현진|현진 (2000년 3월)",
+        "Hwang Hyun-jin"
       ],
       "birth_year": 2000,
       "debut_year": 2017,
@@ -919,9 +1070,11 @@
       "gender": "girl",
       "nationality": "Japanese",
       "group_ids": [
+        "Q116767949",
         "Q20645861"
       ],
       "group_names": [
+        "MiSaMo",
         "Twice"
       ],
       "primary_group": "Twice",
@@ -944,10 +1097,12 @@
       "gender": "girl",
       "nationality": "Japanese",
       "group_ids": [
+        "Q116767949",
         "Q20645861",
         "Q65061223"
       ],
       "group_names": [
+        "MiSaMo",
         "Twice",
         "K/DA"
       ],
@@ -970,9 +1125,11 @@
       "gender": "girl",
       "nationality": "Japanese",
       "group_ids": [
+        "Q116767949",
         "Q20645861"
       ],
       "group_names": [
+        "MiSaMo",
         "Twice"
       ],
       "primary_group": "Twice",
@@ -1132,7 +1289,7 @@
       "debut_year": 2022,
       "generation": 4,
       "gender": "girl",
-      "nationality": "Vietnamese",
+      "nationality": "Australian",
       "group_ids": [
         "Q113189277"
       ],
@@ -1708,10 +1865,10 @@
       "id": "Q123554439",
       "name": "Rami",
       "aliases": [
-        "Haram",
         "Shin Ha-ram",
         "Shin Haram",
-        "신하람"
+        "신하람",
+        "Haram"
       ],
       "birth_year": 2007,
       "debut_year": 2023,
@@ -2242,9 +2399,9 @@
       "id": "Q21825470",
       "name": "Hoshi",
       "aliases": [
-        "Kwon Soon-young",
         "권순영",
-        "Kwon Hoshi"
+        "Kwon Hoshi",
+        "Kwon Soon-young"
       ],
       "birth_year": 1996,
       "debut_year": 2015,
@@ -2526,7 +2683,7 @@
       "company": "SM Entertainment",
       "company_parent": "SM Entertainment",
       "popularity": 114707,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q233911",
@@ -2554,7 +2711,7 @@
       "company": "SM Entertainment",
       "company_parent": "SM Entertainment",
       "popularity": 114707,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q253619",
@@ -2586,7 +2743,7 @@
       "company": "SM Entertainment",
       "company_parent": "SM Entertainment",
       "popularity": 114707,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q276158",
@@ -2616,7 +2773,7 @@
       "company": "SM Entertainment",
       "company_parent": "SM Entertainment",
       "popularity": 114707,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q240082",
@@ -2644,7 +2801,7 @@
       "company": "SM Entertainment",
       "company_parent": "SM Entertainment",
       "popularity": 114707,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q233385",
@@ -2672,7 +2829,7 @@
       "company": "SM Entertainment",
       "company_parent": "SM Entertainment",
       "popularity": 114707,
-      "tier": "easy"
+      "tier": "medium"
     },
     {
       "id": "Q233894",
@@ -3615,7 +3772,7 @@
       "debut_year": 2012,
       "generation": 3,
       "gender": "boy",
-      "nationality": "Canadian",
+      "nationality": "Chinese",
       "group_ids": [
         "Q494717",
         "Q497815"
@@ -3711,8 +3868,8 @@
       "id": "Q10822003",
       "name": "Suho",
       "aliases": [
-        "김준면",
-        "Kim Joon-myeon"
+        "Kim Joon-myeon",
+        "김준면"
       ],
       "birth_year": 1991,
       "debut_year": 2012,
@@ -3956,11 +4113,11 @@
       "id": "Q22910214",
       "name": "Jeon Somi",
       "aliases": [
-        "Ennik Somi Douma",
-        "에닉 도우마",
-        "全昭弥",
         "Somi",
-        "Ennik Douma"
+        "Ennik Douma",
+        "Ennik Somi Douma",
+        "Jeon So-mi",
+        "에닉 도우마"
       ],
       "birth_year": 2001,
       "debut_year": 2016,
@@ -5199,7 +5356,7 @@
       "debut_year": 2014,
       "generation": 3,
       "gender": "girl",
-      "nationality": "Korean",
+      "nationality": null,
       "group_ids": [
         "Q110310446",
         "Q17466114"
@@ -5736,8 +5893,8 @@
       "id": "Q60870263",
       "name": "Shin Yu-na",
       "aliases": [
-        "유나",
-        "Yuna"
+        "Yuna",
+        "유나"
       ],
       "birth_year": 2003,
       "debut_year": 2019,
@@ -5810,9 +5967,9 @@
       "id": "Q484484",
       "name": "Kim Jong-hyun",
       "aliases": [
-        "Jonghyun",
         "金鐘鉉",
-        "Kim Jong-hyeon"
+        "Kim Jong-hyeon",
+        "Jonghyun"
       ],
       "birth_year": 1990,
       "debut_year": 2008,
@@ -5886,11 +6043,11 @@
       "id": "Q483683",
       "name": "CL",
       "aliases": [
+        "씨　엘",
         "이채린",
         "ChaeLin",
         "Chaelin Lee",
-        "Lee Chae Lin",
-        "Lee Chae-lin"
+        "Lee Chae Lin"
       ],
       "birth_year": 1991,
       "debut_year": 2009,
@@ -6652,11 +6809,11 @@
       "id": "Q492313",
       "name": "Park Jin-young",
       "aliases": [
+        "Jr.",
         "Junior",
         "Park Jin-yeong",
         "진영",
-        "주니어",
-        "JinYoung"
+        "주니어"
       ],
       "birth_year": 1994,
       "debut_year": 2012,
@@ -7360,6 +7517,94 @@
       "tier": "medium"
     },
     {
+      "id": "Q122763924",
+      "name": "Camila Ribeaux",
+      "aliases": [],
+      "birth_year": 2005,
+      "debut_year": 2023,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q122763643"
+      ],
+      "group_names": [
+        "GIRLSET"
+      ],
+      "primary_group": "GIRLSET",
+      "primary_group_id": "Q122763643",
+      "company": "JYP Entertainment",
+      "company_parent": "JYP Entertainment",
+      "popularity": 44569,
+      "tier": "medium"
+    },
+    {
+      "id": "Q122763931",
+      "name": "Kendall Ebeling",
+      "aliases": [],
+      "birth_year": 2006,
+      "debut_year": 2023,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q122763643"
+      ],
+      "group_names": [
+        "GIRLSET"
+      ],
+      "primary_group": "GIRLSET",
+      "primary_group_id": "Q122763643",
+      "company": "JYP Entertainment",
+      "company_parent": "JYP Entertainment",
+      "popularity": 44569,
+      "tier": "medium"
+    },
+    {
+      "id": "Q122763662",
+      "name": "Lexus Vang",
+      "aliases": [],
+      "birth_year": 2005,
+      "debut_year": 2023,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q122763643"
+      ],
+      "group_names": [
+        "GIRLSET"
+      ],
+      "primary_group": "GIRLSET",
+      "primary_group_id": "Q122763643",
+      "company": "JYP Entertainment",
+      "company_parent": "JYP Entertainment",
+      "popularity": 44569,
+      "tier": "medium"
+    },
+    {
+      "id": "Q122763944",
+      "name": "Savanna Collins",
+      "aliases": [],
+      "birth_year": 2006,
+      "debut_year": 2023,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": null,
+      "group_ids": [
+        "Q122763643"
+      ],
+      "group_names": [
+        "GIRLSET"
+      ],
+      "primary_group": "GIRLSET",
+      "primary_group_id": "Q122763643",
+      "company": "JYP Entertainment",
+      "company_parent": "JYP Entertainment",
+      "popularity": 44569,
+      "tier": "medium"
+    },
+    {
       "id": "Q58224261",
       "name": "Choerry",
       "aliases": [
@@ -7719,7 +7964,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q116226147",
@@ -7743,7 +7988,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q117746551",
@@ -7767,7 +8012,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q116226149",
@@ -7792,7 +8037,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q116226143",
@@ -7817,7 +8062,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q116226150",
@@ -7845,7 +8090,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q104723121",
@@ -7872,7 +8117,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q120696543",
@@ -7896,7 +8141,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q116226148",
@@ -7920,7 +8165,7 @@
       "company": "Hybe Labels Japan",
       "company_parent": "HYBE",
       "popularity": 44071,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q137442303",
@@ -7942,7 +8187,7 @@
       "company": "WM Entertainment",
       "company_parent": null,
       "popularity": 43629,
-      "tier": "medium"
+      "tier": "hard"
     },
     {
       "id": "Q493899",
@@ -8307,9 +8552,9 @@
       "id": "Q137292194",
       "name": "Annie Moon",
       "aliases": [
-        "Annie",
         "문서윤",
-        "Moon Seo-yoon"
+        "Moon Seo-yoon",
+        "Annie"
       ],
       "birth_year": 2002,
       "debut_year": 2025,
@@ -10253,11 +10498,11 @@
       "id": "Q132041928",
       "name": "Youngjae",
       "aliases": [
-        "Choi Young-jae",
-        "최영재",
         "Choe Yeong-jae",
         "Choe Yeongjae",
-        "Choi Youngjae"
+        "Choi Youngjae",
+        "Choi Young-jae",
+        "최영재"
       ],
       "birth_year": 2005,
       "debut_year": 2024,
@@ -11598,11 +11843,11 @@
       "id": "Q484886",
       "name": "Park So-yeon",
       "aliases": [
+        "티아라 소연",
+        "朴昭姸",
         "박소연",
         "Soyeon",
-        "박인정",
-        "Park In-jeong",
-        "티아라 소연"
+        "박인정"
       ],
       "birth_year": 1987,
       "debut_year": 2009,
@@ -12537,11 +12782,11 @@
       "id": "Q494992",
       "name": "Nicole Jung",
       "aliases": [
-        "Jeong Yong-ju",
-        "Nicole",
-        "Jung Yong-ju",
-        "Jeong Nicole",
-        "Jeong Yong Joo"
+        "Nicole Jeong",
+        "Nicole Yongju Jung",
+        "니　콜",
+        "니콜 정",
+        "니콜정"
       ],
       "birth_year": 1991,
       "debut_year": 2007,
@@ -12815,11 +13060,11 @@
       "id": "Q126202942",
       "name": "Hina",
       "aliases": [
-        "히나",
         "Jang Na-yeong",
         "Jang Nayeong",
         "Nyang Nyong Nyeong Nyang",
-        "장나영"
+        "장나영",
+        "히나"
       ],
       "birth_year": 2001,
       "debut_year": 2023,
@@ -13427,7 +13672,7 @@
       ],
       "primary_group": "Forestella",
       "primary_group_id": "Q43206739",
-      "company": null,
+      "company": "Beat Interactive",
       "company_parent": null,
       "popularity": 22817,
       "tier": "hard"
@@ -13451,7 +13696,7 @@
       ],
       "primary_group": "Forestella",
       "primary_group_id": "Q43206739",
-      "company": null,
+      "company": "Beat Interactive",
       "company_parent": null,
       "popularity": 22817,
       "tier": "hard"
@@ -13475,7 +13720,7 @@
       ],
       "primary_group": "Forestella",
       "primary_group_id": "Q43206739",
-      "company": "Universal Music Group",
+      "company": "Beat Interactive",
       "company_parent": null,
       "popularity": 22817,
       "tier": "hard"
@@ -13497,7 +13742,7 @@
       ],
       "primary_group": "Forestella",
       "primary_group_id": "Q43206739",
-      "company": null,
+      "company": "Beat Interactive",
       "company_parent": null,
       "popularity": 22817,
       "tier": "hard"
@@ -13657,10 +13902,10 @@
       "id": "Q53316644",
       "name": "Sung Ji-yeon",
       "aliases": [
-        "Jane",
         "Jane Sung",
         "Ji-yeon Sung",
-        "성지연"
+        "성지연",
+        "Jane"
       ],
       "birth_year": 1997,
       "debut_year": 2016,
@@ -14437,10 +14682,10 @@
       "id": "Q464645",
       "name": "Bae Suzy",
       "aliases": [
-        "裵秀智",
         "Suzy",
         "Bae Su-ji",
-        "배수지"
+        "배수지",
+        "裵秀智"
       ],
       "birth_year": 1994,
       "debut_year": 2010,
@@ -14910,11 +15155,11 @@
       "id": "Q5249793",
       "name": "Kim Jung-ah",
       "aliases": [
-        "김정아",
-        "Kim Jeong-a",
-        "Kim Jeong A",
-        "Kim Jeong Ah",
-        "Kim Jeong-ah"
+        "Kim Jeongah",
+        "Kim Jung A",
+        "Kim Jung Ah",
+        "Kim Jung-a",
+        "Kim Junga"
       ],
       "birth_year": 1983,
       "debut_year": 2009,
@@ -15318,10 +15563,10 @@
       "id": "Q29876869",
       "name": "Mimi",
       "aliases": [
+        "김미현",
         "Kim Mi-hyun",
         "Kim Mihyun",
-        "金美賢",
-        "김미현"
+        "金美賢"
       ],
       "birth_year": 1995,
       "debut_year": 2015,
@@ -17041,8 +17286,8 @@
       "id": "Q7696122",
       "name": "Zico",
       "aliases": [
-        "ZICO",
-        "Woo Ji-ho"
+        "Woo Ji-ho",
+        "ZICO"
       ],
       "birth_year": 1992,
       "debut_year": 2011,
@@ -17385,11 +17630,11 @@
       "id": "Q30014943",
       "name": "Aron",
       "aliases": [
-        "Aaron Kwak",
-        "Aron Kwak",
-        "Kwak Young-min",
         "곽영민",
-        "뉴이스트 아론"
+        "뉴이스트 아론",
+        "아론 곽",
+        "Aaron Kwak",
+        "Aron Kwak"
       ],
       "birth_year": 1993,
       "debut_year": 2012,
@@ -17413,11 +17658,11 @@
       "id": "Q19939351",
       "name": "Gong Myoung",
       "aliases": [
+        "Kim Dong-hyeon",
+        "김동현",
         "Gong Myeong",
         "Gong Myung",
-        "孔明",
-        "Kim Dong-hyeon",
-        "김동현"
+        "孔明"
       ],
       "birth_year": 1994,
       "debut_year": 2013,
@@ -18012,9 +18257,9 @@
       "id": "Q16767951",
       "name": "Hani",
       "aliases": [
+        "하니",
         "Ahn Hee-yeon",
-        "安喜延",
-        "하니"
+        "安喜延"
       ],
       "birth_year": 1992,
       "debut_year": 2012,
@@ -18062,11 +18307,11 @@
       "id": "Q16766832",
       "name": "Kang Hye-yeon",
       "aliases": [
+        "Hyeyeon",
         "Dami",
         "강혜연",
         "다미",
-        "혜연",
-        "Hyeyeon"
+        "혜연"
       ],
       "birth_year": 1990,
       "debut_year": 2012,
@@ -19011,11 +19256,11 @@
       "id": "Q27748797",
       "name": "Jo Aram",
       "aliases": [
-        "TRACY",
-        "혜연",
-        "Hyeyeon",
         "Cho Hye-yeon",
-        "조혜연"
+        "조혜연",
+        "Cho A-ram",
+        "Cho Aram",
+        "TRACY"
       ],
       "birth_year": 2000,
       "debut_year": 2016,
@@ -20506,6 +20751,254 @@
       "company": "IST Entertainment",
       "company_parent": null,
       "popularity": 10220,
+      "tier": "hard"
+    },
+    {
+      "id": "Q81305479",
+      "name": "Issei Mamehara",
+      "aliases": [],
+      "birth_year": 2002,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q82563947",
+      "name": "Junki Kono",
+      "aliases": [],
+      "birth_year": 1998,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q82563945",
+      "name": "Keigo Satō",
+      "aliases": [
+        "Keigo Sato",
+        "Keigo Satou",
+        "Sato Keigo",
+        "Satō Keigo",
+        "Satou Keigo"
+      ],
+      "birth_year": 1998,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q80998161",
+      "name": "Ren Kawashiri",
+      "aliases": [],
+      "birth_year": 1997,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q81374843",
+      "name": "Ruki Shiroiwa",
+      "aliases": [],
+      "birth_year": 1997,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q81033759",
+      "name": "Shion Tsurubo",
+      "aliases": [],
+      "birth_year": 2000,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q82563942",
+      "name": "Sho Yonashiro",
+      "aliases": [],
+      "birth_year": 1995,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q81238076",
+      "name": "Shosei Ohira",
+      "aliases": [],
+      "birth_year": 2000,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q81032718",
+      "name": "Sukai Kinjo",
+      "aliases": [],
+      "birth_year": 2000,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q81968448",
+      "name": "Syoya Kimata",
+      "aliases": [],
+      "birth_year": 2000,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
+      "tier": "hard"
+    },
+    {
+      "id": "Q81478890",
+      "name": "Takumi Kawanishi",
+      "aliases": [],
+      "birth_year": 1999,
+      "debut_year": 2019,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q78297569"
+      ],
+      "group_names": [
+        "JO1"
+      ],
+      "primary_group": "JO1",
+      "primary_group_id": "Q78297569",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 10216,
       "tier": "hard"
     },
     {
@@ -22726,6 +23219,181 @@
       "tier": "hard"
     },
     {
+      "id": "Q126066834",
+      "name": "AYANE",
+      "aliases": [
+        "Ayane Takami",
+        "Takami Ayane"
+      ],
+      "birth_year": 2005,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q123859475"
+      ],
+      "group_names": [
+        "Me:I"
+      ],
+      "primary_group": "Me:I",
+      "primary_group_id": "Q123859475",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 7473,
+      "tier": "hard"
+    },
+    {
+      "id": "Q126068829",
+      "name": "KEIKO",
+      "aliases": [
+        "Keiko Shimizu",
+        "Shimizu Keiko"
+      ],
+      "birth_year": 2005,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q123859475"
+      ],
+      "group_names": [
+        "Me:I"
+      ],
+      "primary_group": "Me:I",
+      "primary_group_id": "Q123859475",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 7473,
+      "tier": "hard"
+    },
+    {
+      "id": "Q126067083",
+      "name": "MIU",
+      "aliases": [
+        "Miu Sakurai",
+        "Sakurai Miu"
+      ],
+      "birth_year": 2002,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q123859475"
+      ],
+      "group_names": [
+        "Me:I"
+      ],
+      "primary_group": "Me:I",
+      "primary_group_id": "Q123859475",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 7473,
+      "tier": "hard"
+    },
+    {
+      "id": "Q29635449",
+      "name": "Momona Kasahara",
+      "aliases": [
+        "Kasahara Momona",
+        "MOMONA"
+      ],
+      "birth_year": 2003,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q123859475"
+      ],
+      "group_names": [
+        "Me:I"
+      ],
+      "primary_group": "Me:I",
+      "primary_group_id": "Q123859475",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 7473,
+      "tier": "hard"
+    },
+    {
+      "id": "Q126066683",
+      "name": "RINON",
+      "aliases": [
+        "Rinon Murakami",
+        "Murakami Rinon"
+      ],
+      "birth_year": 2006,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q123859475"
+      ],
+      "group_names": [
+        "Me:I"
+      ],
+      "primary_group": "Me:I",
+      "primary_group_id": "Q123859475",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 7473,
+      "tier": "hard"
+    },
+    {
+      "id": "Q126067576",
+      "name": "SUZU",
+      "aliases": [
+        "Suzu Yamamoto",
+        "Yamamoto Suzu"
+      ],
+      "birth_year": 2006,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q123859475"
+      ],
+      "group_names": [
+        "Me:I"
+      ],
+      "primary_group": "Me:I",
+      "primary_group_id": "Q123859475",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 7473,
+      "tier": "hard"
+    },
+    {
+      "id": "Q126069328",
+      "name": "TSUZUMI",
+      "aliases": [
+        "Tsuzumi Ebihara",
+        "Ebihara Tsuzumi"
+      ],
+      "birth_year": 2007,
+      "debut_year": 2024,
+      "generation": 5,
+      "gender": "girl",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q123859475"
+      ],
+      "group_names": [
+        "Me:I"
+      ],
+      "primary_group": "Me:I",
+      "primary_group_id": "Q123859475",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 7473,
+      "tier": "hard"
+    },
+    {
       "id": "Q16767987",
       "name": "Hyunseong",
       "aliases": [],
@@ -23356,6 +24024,254 @@
       "tier": "hard"
     },
     {
+      "id": "Q107666253",
+      "name": "Fengfan Xu",
+      "aliases": [
+        "허풍범"
+      ],
+      "birth_year": 1998,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Chinese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107667128",
+      "name": "Hiromu Takatsuka",
+      "aliases": [],
+      "birth_year": 1999,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107256277",
+      "name": "Hiroto Nishi",
+      "aliases": [],
+      "birth_year": 1997,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107664293",
+      "name": "Jin Matsuda",
+      "aliases": [],
+      "birth_year": 2002,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107663185",
+      "name": "Kyosuke Fujimaki",
+      "aliases": [],
+      "birth_year": 1999,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107321249",
+      "name": "Masaya Kimura",
+      "aliases": [
+        "Kimura Masaya"
+      ],
+      "birth_year": 1997,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107664383",
+      "name": "Rihito Ikezaki",
+      "aliases": [],
+      "birth_year": 2001,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107258226",
+      "name": "Shogo Tajima",
+      "aliases": [
+        "Tajima Shogo"
+      ],
+      "birth_year": 1998,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107666008",
+      "name": "Takeru Goto",
+      "aliases": [],
+      "birth_year": 1999,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107325491",
+      "name": "Takumi Ozaki",
+      "aliases": [],
+      "birth_year": 1999,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
+      "id": "Q107664675",
+      "name": "Yudai Sano",
+      "aliases": [],
+      "birth_year": 2000,
+      "debut_year": 2021,
+      "generation": 4,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q107248914"
+      ],
+      "group_names": [
+        "INI"
+      ],
+      "primary_group": "INI",
+      "primary_group_id": "Q107248914",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 6766,
+      "tier": "hard"
+    },
+    {
       "id": "Q108261472",
       "name": "Eunji",
       "aliases": [],
@@ -23702,11 +24618,11 @@
       "id": "Q134579898",
       "name": "Yeonjung",
       "aliases": [
+        "연정",
         "Wi Yeon-jeong",
         "Wi Yeon-jung",
         "Wi Yeonjeong",
-        "Wi Yeonjung",
-        "Yeon-jung"
+        "Wi Yeonjung"
       ],
       "birth_year": 2004,
       "debut_year": 2023,
@@ -25396,11 +26312,11 @@
       "id": "Q17403471",
       "name": "Subin",
       "aliases": [
+        "SUVIN",
         "Park Su-bin",
         "박수빈",
         "DALsooobin",
-        "DJ Suvin",
-        "SUVIN"
+        "DJ Suvin"
       ],
       "birth_year": 1994,
       "debut_year": 2011,
@@ -27726,11 +28642,11 @@
       "id": "Q486594",
       "name": "Ryu Hyo-young",
       "aliases": [
+        "Ryu Hyoyoung",
+        "한빛효영",
+        "효영",
         "Jung Woo-yeon",
-        "정우연",
-        "Han Min Hyo Young",
-        "Hyo-young",
-        "Ryu Hyoyoung"
+        "정우연"
       ],
       "birth_year": 1993,
       "debut_year": 2011,
@@ -27997,7 +28913,7 @@
       ],
       "primary_group": "Nature",
       "primary_group_id": "Q56501962",
-      "company": "The Music Works",
+      "company": null,
       "company_parent": null,
       "popularity": 2792,
       "tier": "hard"
@@ -28601,7 +29517,7 @@
       "debut_year": 2023,
       "generation": 5,
       "gender": "boy",
-      "nationality": "Thai",
+      "nationality": null,
       "group_ids": [
         "Q122942333"
       ],
@@ -28619,9 +29535,9 @@
       "id": "Q43110976",
       "name": "Choi Yun-seon",
       "aliases": [
+        "NewSun",
         "최윤선",
-        "New Sun",
-        "NewSun"
+        "New Sun"
       ],
       "birth_year": 1997,
       "debut_year": 2014,
@@ -28837,7 +29753,7 @@
       ],
       "primary_group": "Chakra",
       "primary_group_id": "Q623822",
-      "company": "Shimty Company",
+      "company": null,
       "company_parent": null,
       "popularity": 2371,
       "tier": "hard"
@@ -29634,11 +30550,11 @@
       "id": "Q488034",
       "name": "Lee Ahyumi",
       "aliases": [
-        "Ayumi Itō",
-        "Yumi Ito",
-        "Yumi Itō",
-        "Yumi Itou",
-        "Ayumi Ito"
+        "ICONIQ",
+        "리아유미",
+        "이등아유미",
+        "이아유미",
+        "이토 유미"
       ],
       "birth_year": 1984,
       "debut_year": 2001,
@@ -29913,6 +30829,34 @@
       "tier": "hard"
     },
     {
+      "id": "Q124097470",
+      "name": "Kōshin Terao",
+      "aliases": [
+        "Koshin Terao",
+        "Koushin Terao",
+        "Terao Koshin",
+        "Terao Kōshin",
+        "Terao Koushin"
+      ],
+      "birth_year": 2003,
+      "debut_year": 2023,
+      "generation": 5,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q116770778"
+      ],
+      "group_names": [
+        "DXTEEN"
+      ],
+      "primary_group": "DXTEEN",
+      "primary_group_id": "Q116770778",
+      "company": "Lapone Entertainment",
+      "company_parent": null,
+      "popularity": 1667,
+      "tier": "hard"
+    },
+    {
       "id": "Q64039138",
       "name": "Jungwoo",
       "aliases": [
@@ -30080,7 +31024,7 @@
       ],
       "primary_group": "Clon",
       "primary_group_id": "Q490754",
-      "company": "Rock Records",
+      "company": null,
       "company_parent": null,
       "popularity": 1653,
       "tier": "hard"
@@ -32009,10 +32953,10 @@
       "id": "Q62984007",
       "name": "Kim Si-on",
       "aliases": [
-        "Sion",
-        "시온",
         "Ryua",
-        "류아"
+        "류아",
+        "Sion",
+        "시온"
       ],
       "birth_year": 1998,
       "debut_year": 2018,
@@ -33340,9 +34284,9 @@
       "id": "Q60668841",
       "name": "Bang Hyun-ah",
       "aliases": [
-        "Lin Ah",
         "Lina",
-        "린아"
+        "린아",
+        "Lin Ah"
       ],
       "birth_year": 1991,
       "debut_year": 2014,
@@ -33382,7 +34326,7 @@
       ],
       "primary_group": "BeBe Mignon",
       "primary_group_id": "Q6874910",
-      "company": "Happy Face Entertainment",
+      "company": null,
       "company_parent": null,
       "popularity": 0,
       "tier": "hard"
@@ -33511,7 +34455,7 @@
       ],
       "primary_group": "4 Tomorrow",
       "primary_group_id": "Q6875258",
-      "company": "Mystic Entertainment",
+      "company": null,
       "company_parent": null,
       "popularity": 0,
       "tier": "hard"
@@ -33692,7 +34636,7 @@
       ],
       "primary_group": "Bom & Hi",
       "primary_group_id": "Q18238823",
-      "company": "YG Entertainment",
+      "company": null,
       "company_parent": null,
       "popularity": 0,
       "tier": "hard"
@@ -33800,8 +34744,8 @@
       "id": "Q73803089",
       "name": "Park Hyun-min",
       "aliases": [
-        "Hyunmin",
-        "현민"
+        "현민",
+        "Hyunmin"
       ],
       "birth_year": 2001,
       "debut_year": 2017,
