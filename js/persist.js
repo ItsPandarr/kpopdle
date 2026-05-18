@@ -88,6 +88,51 @@ export function getDailyStatus(entity, difficulty, date = todayUTC()) {
   return entry;
 }
 
+// Last-N-days daily archive for the given (entity, difficulty). Each entry
+// describes whether that day was played and the outcome — used by the stats
+// panel's "last 14 days" strip so the player can spot missed days and tap
+// to replay them. Replays don't touch stats (handled in main.js).
+//
+// `today` is injectable for testing; defaults to wall-clock UTC. `days`
+// controls window length (default 14).
+//
+// Returns newest-first: index 0 is today, index 1 is yesterday, etc.
+export function getDailyArchive(entity, difficulty, days = 14, today = todayUTC()) {
+  const s = read();
+  const bucket = s[entity];
+  // Index daily-mode history by date for O(1) lookup. The history array can
+  // contain both daily and endless entries; we filter to the (entity, mode,
+  // difficulty) tuple. Newest-first is the natural order of the array, so
+  // the first hit per date wins (which is what we want if a day was somehow
+  // replayed locally and pushed twice).
+  const byDate = new Map();
+  for (const h of bucket.history || []) {
+    if (h.mode !== "daily") continue;
+    if (h.difficulty !== difficulty) continue;
+    // The history entry's `entity` should already match because we're reading
+    // from bucket = s[entity], but double-check defensively.
+    if (h.entity && h.entity !== entity) continue;
+    if (!byDate.has(h.date)) byDate.set(h.date, h);
+  }
+  const out = [];
+  const todayDate = new Date(today + "T00:00:00Z");
+  for (let i = 0; i < days; i++) {
+    const d = new Date(todayDate);
+    d.setUTCDate(d.getUTCDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const entry = byDate.get(dateStr);
+    out.push({
+      date: dateStr,
+      isToday: dateStr === today,
+      played: !!entry,
+      won: entry?.won ?? null,
+      guesses: entry?.guesses ?? null,
+      targetId: entry?.targetId ?? null,
+    });
+  }
+  return out;
+}
+
 export function recordDailyLoss(entity, difficulty, targetId, guessCount, date = todayUTC()) {
   const s = read();
   const bucket = s[entity];

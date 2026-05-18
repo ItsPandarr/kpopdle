@@ -14,7 +14,7 @@ globalThis.localStorage = (() => {
   };
 })();
 
-const { summarizeHistory, getStats, recordDailyWin, recordDailyLoss } = await import("../js/persist.js");
+const { summarizeHistory, getStats, recordDailyWin, recordDailyLoss, getDailyArchive } = await import("../js/persist.js");
 
 function resetStorage() {
   globalThis.localStorage.clear();
@@ -213,6 +213,83 @@ function streakOf(entity = "group", difficulty = "easy") {
   assert.equal(getStats().group.streaks.easy.current, 2);
   assert.equal(getStats().idol.streaks.easy.current, 0);
   assert.equal(getStats().group.streaks.hard.current, 0);
+}
+
+// ─── getDailyArchive ────────────────────────────────────────────────────────
+//
+// Produces a newest-first window of (up to N) daily-mode entries for the
+// given (entity, difficulty). Played days carry their result + targetId;
+// unplayed days are surfaced as a placeholder so the player can see the
+// gap and click to replay. `today` is injectable for stable tests.
+
+// Empty history → today + N-1 unplayed past days.
+{
+  resetStorage();
+  const a = getDailyArchive("group", "easy", 5, "2026-05-18");
+  assert.equal(a.length, 5);
+  assert.deepEqual(a.map((r) => r.date), [
+    "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14",
+  ]);
+  assert.equal(a[0].isToday, true);
+  assert.equal(a.every((r, i) => i === 0 || r.isToday === false), true);
+  assert.equal(a.every((r) => r.played === false), true);
+}
+
+// Mixed history: win, loss, skipped days; correct status per row.
+{
+  resetStorage();
+  recordDailyWin("group", "easy", "Q1", 3, "2026-05-14");
+  // 2026-05-15: skipped
+  recordDailyLoss("group", "easy", "Q2", 6, "2026-05-16");
+  // 2026-05-17: skipped
+  recordDailyWin("group", "easy", "Q3", 4, "2026-05-18");
+  const a = getDailyArchive("group", "easy", 5, "2026-05-18");
+  assert.equal(a[0].date, "2026-05-18");
+  assert.equal(a[0].played, true);
+  assert.equal(a[0].won, true);
+  assert.equal(a[0].guesses, 4);
+  assert.equal(a[0].targetId, "Q3");
+
+  assert.equal(a[1].date, "2026-05-17");
+  assert.equal(a[1].played, false, "skipped day shows up as not-played");
+
+  assert.equal(a[2].date, "2026-05-16");
+  assert.equal(a[2].played, true);
+  assert.equal(a[2].won, false, "loss recorded correctly");
+  assert.equal(a[2].targetId, "Q2");
+
+  assert.equal(a[3].date, "2026-05-15");
+  assert.equal(a[3].played, false);
+
+  assert.equal(a[4].date, "2026-05-14");
+  assert.equal(a[4].played, true);
+  assert.equal(a[4].won, true);
+  assert.equal(a[4].targetId, "Q1");
+}
+
+// Filters by (entity, difficulty): another difficulty's history doesn't bleed in.
+{
+  resetStorage();
+  recordDailyWin("group", "easy",   "Q-easy",   3, "2026-05-17");
+  recordDailyWin("group", "medium", "Q-medium", 4, "2026-05-17");
+  recordDailyWin("group", "hard",   "Q-hard",   5, "2026-05-17");
+  recordDailyWin("idol",  "easy",   "Q-idol",   2, "2026-05-17");
+
+  const easy = getDailyArchive("group", "easy", 2, "2026-05-18");
+  assert.equal(easy[1].targetId, "Q-easy", "group/easy archive only sees group/easy plays");
+
+  const medium = getDailyArchive("group", "medium", 2, "2026-05-18");
+  assert.equal(medium[1].targetId, "Q-medium");
+
+  const idolEasy = getDailyArchive("idol", "easy", 2, "2026-05-18");
+  assert.equal(idolEasy[1].targetId, "Q-idol");
+}
+
+// Day window defaults to 14 entries.
+{
+  resetStorage();
+  const a = getDailyArchive("group", "easy");
+  assert.equal(a.length, 14);
 }
 
 console.log("persist.test ok");

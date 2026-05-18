@@ -50,6 +50,7 @@ import {
   recordEndlessWin,
   recordEndlessSkip,
   getStats,
+  getDailyArchive,
   getActive,
   saveActive,
   clearActive,
@@ -766,6 +767,8 @@ function renderStats() {
     difficulty: t(`toggle.difficulty.${state.difficulty}`),
   });
 
+  const archiveHtml = renderArchive(state.entity, state.difficulty);
+
   els.stats.innerHTML = `
     <h3 class="stats-entity">${entityLabel}</h3>
     <div class="stats-grid">
@@ -782,7 +785,126 @@ function renderStats() {
       <h4 class="stats-col-title">${histTitle}</h4>
       ${hist}
     </section>
+    ${archiveHtml}
   `;
+
+  // Wire up click-to-replay on each archive row. Today's row is non-
+  // interactive (it's the current game); past days call into the same
+  // replay path the "Replay yesterday" button uses, which is stats-neutral.
+  for (const row of els.stats.querySelectorAll(".archive-row.is-clickable")) {
+    row.addEventListener("click", () => {
+      const date = row.dataset.date;
+      if (!date) return;
+      replayArchivedDaily(date);
+    });
+  }
+}
+
+// Build the "last 14 days" strip. Per row:
+//   - Date label, formatted in the current locale (weekday + short month/day).
+//   - Status icon: ✓ won, ✗ lost, ● today (in-progress / unplayed), ⊘ skipped.
+//   - Score: e.g. "3/6", "X/6" for losses, "—" for skipped, blank for today.
+//   - Target name when known (i.e. the player already played that day —
+//     showing it for skipped days would spoil the answer).
+// Today's row is never interactive (clicking it is a no-op); past days are
+// clickable to replay.
+function renderArchive(entity, difficulty) {
+  const archive = getDailyArchive(entity, difficulty);
+  const cap = MAX_DAILY_GUESSES[difficulty];
+  const locale = i18n.locale();
+  const rows = archive.map((row) => {
+    // Date label: "Mon, May 17" / "5월 17일 (월)" depending on locale.
+    // Force timeZone=UTC so the label matches the daily seed's UTC date —
+    // otherwise a player west of UTC would see the previous day on every row.
+    const d = new Date(row.date + "T00:00:00Z");
+    const dateLabel = d.toLocaleDateString(locale, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+
+    let icon, score, name;
+    if (row.isToday && !row.played) {
+      icon = `<span class="archive-icon is-today" aria-label="${t("stats.archive.today.aria")}">●</span>`;
+      score = `<span class="dim">${t("stats.archive.today")}</span>`;
+      name = "";
+    } else if (!row.played) {
+      icon = `<span class="archive-icon is-skip" aria-label="${t("stats.archive.skipped.aria")}">⊘</span>`;
+      score = `<span class="dim">${t("stats.archive.missed")}</span>`;
+      name = "";
+    } else if (row.won) {
+      icon = `<span class="archive-icon is-win" aria-label="${t("stats.archive.won.aria")}">✓</span>`;
+      score = `${row.guesses}/${cap}`;
+      const targetName = nameOf(entity, row.targetId);
+      name = targetName ? `<span class="archive-name">${escapeHTML(targetName)}</span>` : "";
+    } else {
+      icon = `<span class="archive-icon is-loss" aria-label="${t("stats.archive.lost.aria")}">✗</span>`;
+      score = `X/${cap}`;
+      const targetName = nameOf(entity, row.targetId);
+      name = targetName ? `<span class="archive-name">${escapeHTML(targetName)}</span>` : "";
+    }
+
+    // Today is never replayable from the archive (it's already the active
+    // game — the regular "New round" / play flow handles it). Past days
+    // are clickable.
+    const clickable = !row.isToday;
+    const klass = ["archive-row"];
+    if (clickable) klass.push("is-clickable");
+    if (row.isToday) klass.push("is-today-row");
+    if (row.played && row.won === false) klass.push("is-loss-row");
+
+    return `<li class="${klass.join(" ")}" data-date="${row.date}"${clickable ? ` tabindex="0" role="button" aria-label="${t("stats.archive.replay.aria", { date: dateLabel })}"` : ""}>
+      ${icon}<span class="archive-date">${dateLabel}</span>${score ? `<span class="archive-score">${score}</span>` : ""}${name}
+    </li>`;
+  });
+
+  return `
+    <section class="archive-section">
+      <h4 class="stats-col-title">${t("stats.archive.title", { difficulty: t(`toggle.difficulty.${difficulty}`) })}</h4>
+      <ul class="archive-list">${rows.join("")}</ul>
+      <p class="archive-hint dim">${t("stats.archive.hint")}</p>
+    </section>
+  `;
+}
+
+function nameOf(entity, id) {
+  if (!id) return null;
+  return getById(entity, id)?.name ?? null;
+}
+
+// Tiny HTML-escape for target names we're injecting into the archive markup.
+// K-pop names usually contain no special characters but defensively encode
+// in case a future dataset has an ampersand or quote (e.g. "Stray Kids & ...").
+function escapeHTML(s) {
+  return String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+// Replay a specific past date from the archive. Switches to daily mode if
+// the player happened to be in endless / custom, and clears any active
+// in-progress state so the replay starts cleanly. Replays don't touch
+// stats — same one-shot semantic as the "Replay yesterday" button.
+function replayArchivedDaily(dateStr) {
+  // If they were in a custom puzzle, drop it (and its hash) — they're
+  // leaving the custom round to revisit a past daily.
+  if (state.customPuzzle) {
+    state.customPuzzle = null;
+    clearPuzzleFromHash(location, history);
+  }
+  // Make sure we're on Daily; the archive only makes sense from there but
+  // the player may have been browsing stats from endless.
+  if (state.mode !== "daily") {
+    state.mode = "daily";
+    setActive(els.modeToggle, "daily");
+    saveLastSelection({ entity: state.entity, mode: "daily", difficulty: state.difficulty });
+  }
+  startGame({ replayDate: dateStr });
+  renderStats();
+  // Scroll the board into view so the player sees the new round, since the
+  // archive sits below the fold in the stats panel.
+  els.board?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 async function init() {
