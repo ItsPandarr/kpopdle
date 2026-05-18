@@ -13,6 +13,7 @@
     "scrape": ".venv/bin/python scripts/scrape.py",
     "encode": "python3 scripts/encode_data.py",
     "sync-i18n": "node scripts/sync-i18n-en.mjs",
+    "render-og": "python3 scripts/render_og.py",
     "build": "node scripts/sync-i18n-en.mjs && node scripts/build.mjs",
     "preview": "node scripts/sync-i18n-en.mjs && node scripts/build.mjs && python3 -m http.server 8124 --directory dist"
   },

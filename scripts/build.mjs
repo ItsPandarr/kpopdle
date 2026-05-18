@@ -104,6 +104,15 @@ async function copyAssets() {
   for (const f of ["favicon.svg", "manifest.webmanifest", "sw.js"]) {
     await fs.copyFile(path.join(ROOT, f), path.join(DIST, f));
   }
+  // og-image.png is optional: if it's missing (e.g. fresh clone, Pillow
+  // not installed locally), skip rather than fail. Social previews will
+  // degrade to title+description only, which still renders fine.
+  try {
+    await fs.copyFile(path.join(ROOT, "og-image.png"), path.join(DIST, "og-image.png"));
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e;
+    console.warn("  (og-image.png missing — run 'npm run render-og' to generate)");
+  }
   await ensureDir(path.join(DIST, "data"));
   for (const f of ["groups.dat", "idols.dat"]) {
     const src = path.join(ROOT, "data", f);
@@ -132,7 +141,7 @@ async function copyAssets() {
     await fs.copyFile(path.join(localesSrc, f), path.join(localesDst, f));
   }
   console.log(
-    `  assets favicon.svg + manifest + sw + data/*.dat + ${localeFiles.length} locales copied`,
+    `  assets favicon.svg + og-image + manifest + sw + data/*.dat + ${localeFiles.length} locales copied`,
   );
 }
 
