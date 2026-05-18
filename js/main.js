@@ -1544,10 +1544,14 @@ async function init() {
   // Override at deploy time by setting <meta name="kpopdle:repo" content="...">.
   const repoOverride = document.querySelector('meta[name="kpopdle:repo"]')?.content?.trim() || null;
   const repo = repoUrlFor(location, repoOverride);
+  const reportLine = document.getElementById("report-line");
   const reportLink = document.getElementById("report-link");
-  if (repo && reportLink) {
+  if (repo && reportLink && reportLine) {
+    // Reveal the whole "Spot wrong data? Open a correction on GitHub →"
+    // line as a unit. Hiding only the link leaves the orphan prompt text
+    // on screen with no answer, which reads as a dangling question.
     reportLink.href = correctionIssueUrl(repo);
-    reportLink.hidden = false;
+    reportLine.hidden = false;
   }
 
   // PWA install hint. Browsers that consider the site install-eligible AND
