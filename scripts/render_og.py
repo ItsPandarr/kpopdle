@@ -334,14 +334,18 @@ def main() -> None:
     # so it sits above the visual mid-line of the title block.
     draw_lightstick(draw, cx=260, cy=290, scale=120)
 
-    # Wordmark + tagline on the right.
+    # Wordmark + tagline + call-to-action on the right.
     title_font = find_font(140, bold=True)
     tag_font = find_font(46, bold=False)
-    accent_font = find_font(32, bold=True)
+    cta_font = find_font(48, bold=True)
 
     title = "KPopdle"
     tagline = "Guess the K-pop group or idol."
-    sub = "New daily puzzle at 00:00 UTC."
+    # Plain CTA text — the "arrow" is drawn as a filled triangle below
+    # so we don't depend on font glyph coverage (Helvetica Neue Bold
+    # doesn't ship U+2192 → and typographic chevrons like › render too
+    # thin next to bold text).
+    cta = "Play today's puzzle"
 
     title_x = 470
     title_y = 220
@@ -355,7 +359,9 @@ def main() -> None:
 
     draw.text((title_x, title_y), title, font=title_font, fill=TEXT_FG)
     draw.text((title_x, title_y + 165), tagline, font=tag_font, fill=TEXT_FG)
-    draw.text((title_x, title_y + 222), sub, font=tag_font, fill=TEXT_DIM)
+    # CTA in the brand pink, bold + a hair larger than the tagline so it
+    # reads as the actionable line.
+    draw.text((title_x, title_y + 222), cta, font=cta_font, fill=BULB_MID)
 
     # Small accent line on the bottom — a hint of the wordle-grid emoji row
     # so the card communicates "guessing game" at a glance.
