@@ -1,7 +1,7 @@
 {
   "app.title": "KPopdle",
-  "app.byline.group": "K-팝 그룹을 맞춰보세요. 매일 00:00 UTC에 새 퍼즐이 열립니다.",
-  "app.byline.idol":  "K-팝 아이돌을 맞춰보세요. 매일 00:00 UTC에 새 퍼즐이 열립니다.",
+  "app.byline.group": "K-팝 그룹을 맞춰보세요. 매일 현지 시각 {{time}}에 새 퍼즐이 열립니다.",
+  "app.byline.idol":  "K-팝 아이돌을 맞춰보세요. 매일 현지 시각 {{time}}에 새 퍼즐이 열립니다.",
 
   "input.placeholder.group": "K-팝 그룹 입력… ({{n}}개 중)",
   "input.placeholder.idol":  "K-팝 아이돌 입력… ({{n}}명 중)",

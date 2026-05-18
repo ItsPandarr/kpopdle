@@ -116,8 +116,30 @@ const els = {
 // used to drive entrance animations.
 let prevKnownAttrs = new Set();
 
+// Compute when the next daily UNLOCKS in the player's local timezone, as a
+// short string like "7:00 PM" / "오후 7:00" / "19:00". The daily roll is
+// always at 00:00 UTC; this just formats that moment in local time using
+// the locale's clock convention (12-h vs 24-h).
+//
+// We build a Date at the next 00:00 UTC (rather than today's) so DST
+// transitions land on the correct side. Same numeric clock face either
+// way, but using a forward-looking instant makes the intent explicit:
+// "this is the time the NEXT new puzzle drops, in your local time".
+function formatDailyResetTime(locale) {
+  const now = new Date();
+  const nextReset = new Date(now);
+  nextReset.setUTCHours(24, 0, 0, 0);   // next 00:00 UTC, even if past today's
+  try {
+    return nextReset.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  } catch {
+    // Older runtimes / unusual locale strings — fall back to UTC HH:00.
+    return "00:00 UTC";
+  }
+}
+
 function refreshByline() {
-  els.byline.textContent = t(state.entity === "idol" ? "app.byline.idol" : "app.byline.group");
+  const time = formatDailyResetTime(i18n.locale());
+  els.byline.textContent = t(state.entity === "idol" ? "app.byline.idol" : "app.byline.group", { time });
 }
 
 let ac = null;

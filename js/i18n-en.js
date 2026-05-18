@@ -7,8 +7,8 @@
 // render don't need to wait on fetch("locales/en.json").
 export default {
   "app.title": "KPopdle",
-  "app.byline.group": "Guess the K-pop group. New daily puzzle at 00:00 UTC.",
-  "app.byline.idol": "Guess the K-pop idol. New daily puzzle at 00:00 UTC.",
+  "app.byline.group": "Guess the K-pop group. New daily puzzle at {{time}} your time.",
+  "app.byline.idol": "Guess the K-pop idol. New daily puzzle at {{time}} your time.",
   "input.placeholder.group": "Guess a K-pop group… ({{n}} possible)",
   "input.placeholder.idol": "Guess a K-pop idol… ({{n}} possible)",
   "input.placeholder.replay.suffix": " · replay {{date}}",

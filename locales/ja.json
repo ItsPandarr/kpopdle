@@ -1,7 +1,7 @@
 {
   "app.title": "KPopdle",
-  "app.byline.group": "K-POPグループを当てよう。毎日UTC 0:00に新しいパズルが登場！",
-  "app.byline.idol":  "K-POPアイドルを当てよう。毎日UTC 0:00に新しいパズルが登場！",
+  "app.byline.group": "K-POPグループを当てよう。毎日 {{time}} (現地時刻) に新しいパズルが登場！",
+  "app.byline.idol":  "K-POPアイドルを当てよう。毎日 {{time}} (現地時刻) に新しいパズルが登場！",
 
   "input.placeholder.group": "K-POPグループを入力… ({{n}}件)",
   "input.placeholder.idol":  "K-POPアイドルを入力… ({{n}}人)",
