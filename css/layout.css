@@ -288,6 +288,14 @@ body::before {
   color: var(--muted);
   font-size: 0.85rem;
 }
+/* Idol's primary group, shown after the name to disambiguate stage-name
+   collisions (e.g. two "Soobin"s in TXT vs WJSN). Subdued so the eye still
+   reads "Soobin" first, with the group as context. */
+.ac-group {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
 .ac-tier {
   margin-left: auto;
   font-size: 0.7rem;

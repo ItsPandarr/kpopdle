@@ -74,7 +74,10 @@ export function totalHintPenalty(events) {
 // dataset extreme (e.g. max <= dataset_min ⇒ value must be the dataset min).
 // `bounds` is the same `getNumericBounds()` shape used by the clue formatter —
 // optional; without it the saturation check is skipped.
-export function attrIsKnown(attr, clues, bounds = null) {
+// `entity` ("group" | "idol") controls binary-elimination logic for gender —
+// idol gender is binary, so excluding one value pins the other; group gender
+// has three possible values so exclusion of one doesn't pin anything yet.
+export function attrIsKnown(attr, clues, bounds = null, entity = "group") {
   switch (attr) {
     case "debut_year":
     case "generation":
@@ -95,8 +98,15 @@ export function attrIsKnown(attr, clues, bounds = null) {
     }
     case "company":
       return clues.company?.known != null;
-    case "gender":
-      return clues.gender?.known != null;
+    case "gender": {
+      if (clues.gender?.known != null) return true;
+      // Idol gender is strictly binary. If one of {boy, girl} has been ruled
+      // out by an earlier guess, the answer's gender is known by elimination
+      // — don't waste a hint slot revealing what the player already knows.
+      // (Group gender has three values, so one exclusion isn't a pin.)
+      if (entity === "idol" && (clues.gender?.excluded?.size ?? 0) >= 1) return true;
+      return false;
+    }
     case "status":
       return clues.status?.known != null;
     case "country":
@@ -110,13 +120,13 @@ export function attrIsKnown(attr, clues, bounds = null) {
   }
 }
 
-export function nextHintAttr({ order, events, clues, visibleAttrs, target, bounds = null }) {
+export function nextHintAttr({ order, events, clues, visibleAttrs, target, bounds = null, entity = "group" }) {
   if (!target) return null;
   const revealed = new Set(events.map((e) => e.attr));
   for (const attr of order) {
     if (!visibleAttrs.includes(attr)) continue;
     if (revealed.has(attr)) continue;
-    if (attrIsKnown(attr, clues, bounds)) continue;
+    if (attrIsKnown(attr, clues, bounds, entity)) continue;
     const value = hintValueFor(attr, target);
     if (value === null || value === undefined || value === "") continue;
     return attr;

@@ -83,7 +83,11 @@ export function compareIdol(guess, target) {
     debut_year: numeric(guess.debut_year, target.debut_year),
     generation: numeric(guess.generation, target.generation),
     primary_group: groupSetCompare(guess, target),
-    gender: genderCompare(guess.gender, target.gender),
+    // Idol gender is strictly binary (no individual person is "co-ed" — that
+    // term only applies to groups composed of male+female members). Use the
+    // exact-only comparator so partial-match logic, which is meaningful for
+    // groups, never kicks in for idols.
+    gender: enumExact(guess.gender, target.gender),
     nationality: enumExact(guess.nationality, target.nationality),
     company: companyCompare(guess, target),
   };

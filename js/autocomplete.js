@@ -80,6 +80,17 @@ export function attachAutocomplete({ input, dropdown, getPool, onCommit, getReas
       nameEl.textContent = g.name;
       li.appendChild(nameEl);
 
+      // Idols only: 20 stage names in the dataset are shared by 2-3 different
+      // people (e.g. three "Nana"s, two "Soobin"s — TXT *and* WJSN). Show the
+      // primary group inline so the dropdown row is unambiguous before the
+      // player commits. Groups don't have this problem; skip there.
+      if (g.primary_group) {
+        const groupEl = document.createElement("span");
+        groupEl.className = "ac-group";
+        groupEl.textContent = g.primary_group;
+        li.appendChild(groupEl);
+      }
+
       const alias = whichAlias(g, input.value);
       if (alias) {
         const aliasEl = document.createElement("span");

@@ -154,4 +154,16 @@ const MARK = {
   assert.equal(r.company.status, "exact");
 }
 
+// Idol gender is strictly binary — even if a "coed" value somehow snuck into
+// the data, compareIdol must NOT emit "partial" (the partial-match logic only
+// makes sense for groups). For idols, anything other than an exact match is
+// "none".
+{
+  const COED_IDOL = { ...JIMIN, gender: "coed" };
+  const r1 = compareIdol(COED_IDOL, JENNIE);    // coed vs girl → none, not partial
+  assert.equal(r1.gender.status, "none");
+  const r2 = compareIdol(JIMIN, { ...JENNIE, gender: "coed" });  // boy vs coed → none
+  assert.equal(r2.gender.status, "none");
+}
+
 console.log("compare.test ok");

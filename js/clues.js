@@ -187,7 +187,11 @@ function fmtGender(info, entity) {
   if (info.known) return label(info.known);
   if (info.impliedCoed) return t(`gender.${kind}.maleorfemale`);
   if (info.excluded.size === 0) return null;
-  const remaining = ["boy", "girl", "coed"].filter((g) => !info.excluded.has(g));
+  // Idol gender is binary (no individual idol is "co-ed"); groups have three
+  // possible values. Pick the universe accordingly so an idol round doesn't
+  // render "Female / Co-ed" as remaining options when "boy" is excluded.
+  const universe = entity === "idol" ? ["boy", "girl"] : ["boy", "girl", "coed"];
+  const remaining = universe.filter((g) => !info.excluded.has(g));
   if (remaining.length === 1) return label(remaining[0]);
   if (remaining.length === 2) return remaining.map(label).join(" / ");
   return null;

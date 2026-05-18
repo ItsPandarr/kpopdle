@@ -13,7 +13,7 @@
 // Bump this whenever a shipped JS/CSS module changes — old caches get pruned
 // in `activate`, so users see fresh code on the next reload after the SW
 // updates. Without a bump, stale-while-revalidate keeps the old version.
-const VERSION = "kpopdle-v13";
+const VERSION = "kpopdle-v14";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

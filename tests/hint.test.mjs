@@ -85,6 +85,27 @@ import {
   assert.equal(attrIsKnown("primary_group", clues), false);
 }
 
+// Idol gender is binary — excluding "boy" via a previous wrong-gender guess
+// pins the answer to "girl" by elimination. Group gender is ternary so the
+// same exclusion doesn't pin anything (could be girl or coed).
+{
+  const cluesBoyExcluded = {
+    gender: { known: null, excluded: new Set(["boy"]), impliedCoed: false },
+  };
+  assert.equal(
+    attrIsKnown("gender", cluesBoyExcluded, null, "idol"),
+    true,
+    "idol: one exclusion pins the other half of the binary",
+  );
+  assert.equal(
+    attrIsKnown("gender", cluesBoyExcluded, null, "group"),
+    false,
+    "group: one exclusion still leaves girl + coed open",
+  );
+  // Default (no entity arg) behaves like "group" — safe back-compat.
+  assert.equal(attrIsKnown("gender", cluesBoyExcluded), false);
+}
+
 // Inferred-knowness: a range that has collapsed to a single value counts as
 // known even without info.known being set. This is the regression case where
 // guessing a Gen 5 and a Gen 3 idol pins generation to 4 — the hint button
