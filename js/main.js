@@ -1052,9 +1052,22 @@ async function init() {
 
 // PWA: register the service worker so the game works offline after first
 // load. No-op on environments that don't support service workers (e.g. some
-// in-app webviews).
+// in-app webviews). Skipped on localhost / *.local — during development the
+// SW's stale-while-revalidate cache hides freshly-edited code on reload, and
+// the offline benefit is irrelevant when you're already running the dev
+// server. Production hosts (everything else) get the SW as normal.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
+    const host = (location.hostname || "").toLowerCase();
+    const isDev = host === "localhost" || host === "127.0.0.1" || host.endsWith(".local") || host === "";
+    if (isDev) {
+      // Also unregister any SW from a previous (pre-this-change) dev session
+      // so the next reload doesn't keep serving stale cached assets.
+      navigator.serviceWorker.getRegistrations()
+        .then((regs) => Promise.all(regs.map((r) => r.unregister())))
+        .catch(() => { /* swallow */ });
+      return;
+    }
     navigator.serviceWorker.register("./sw.js").catch(() => { /* swallow */ });
   });
 }

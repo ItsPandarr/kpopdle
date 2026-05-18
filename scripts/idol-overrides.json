@@ -1,0 +1,29 @@
+{
+  "_comment": "Manual overrides for idols where Wikidata yields missing or wrong values. Keyed by Q-ID. Only the keys you supply are overridden; everything else from the scrape is kept. Applied at the very end of the idol build, after gender inference and member rollup.",
+
+  "Q122981341": {
+    "_label": "Cocona (XG)",
+    "_note": "Cocona is publicly nonbinary. The dataset's idol gender vocab is binary (boy/girl) and can't express that faithfully. We encode 'girl' here because she debuted with and performs in XG (a girl group), which is how the game's gender field operates and how most players will mentally model her for guessing purposes — not as a statement about her identity.",
+    "gender": "girl"
+  },
+  "Q114690696": {
+    "_label": "Hinata (XG)",
+    "gender": "girl"
+  },
+  "Q122981309": {
+    "_label": "Maya (XG)",
+    "gender": "girl"
+  },
+  "Q137442303": {
+    "_label": "Wumuti (xlov)",
+    "gender": "boy"
+  },
+  "Q138519169": {
+    "_label": "Geonu (JUST B)",
+    "gender": "boy"
+  },
+  "Q138519696": {
+    "_label": "Sangwoo (JUST B)",
+    "gender": "boy"
+  }
+}

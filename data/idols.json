@@ -4491,7 +4491,7 @@
       "birth_year": 2005,
       "debut_year": 2022,
       "generation": 4,
-      "gender": null,
+      "gender": "girl",
       "nationality": "Japanese",
       "group_ids": [
         "Q111419721"
@@ -4516,7 +4516,7 @@
       "birth_year": 2002,
       "debut_year": 2022,
       "generation": 4,
-      "gender": null,
+      "gender": "girl",
       "nationality": null,
       "group_ids": [
         "Q111419721"
@@ -4593,7 +4593,7 @@
       "birth_year": 2005,
       "debut_year": 2022,
       "generation": 4,
-      "gender": null,
+      "gender": "girl",
       "nationality": null,
       "group_ids": [
         "Q111419721"
@@ -7929,7 +7929,7 @@
       "birth_year": 1999,
       "debut_year": 2025,
       "generation": 5,
-      "gender": null,
+      "gender": "boy",
       "nationality": "Chinese",
       "group_ids": [
         "Q131624412"
@@ -22374,7 +22374,7 @@
       "birth_year": null,
       "debut_year": 2021,
       "generation": 4,
-      "gender": null,
+      "gender": "boy",
       "nationality": "Korean",
       "group_ids": [
         "Q107548399"
@@ -22446,7 +22446,7 @@
       "birth_year": null,
       "debut_year": 2021,
       "generation": 4,
-      "gender": null,
+      "gender": "boy",
       "nationality": "Korean",
       "group_ids": [
         "Q107548399"

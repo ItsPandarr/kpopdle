@@ -146,6 +146,24 @@ def load_overrides() -> dict:
     return {k: v for k, v in data.items() if not k.startswith("_")}
 
 
+def load_idol_overrides() -> dict:
+    """Per-idol manual overrides keyed by Q-ID. Same shape as group overrides;
+    only the keys present override (everything else from the scrape is kept).
+    Comment fields (anything starting with "_") are stripped."""
+    path = Path(__file__).parent / "idol-overrides.json"
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text())
+    out = {}
+    for k, v in data.items():
+        if k.startswith("_"):
+            continue
+        # Drop comment-style keys inside individual entries too (e.g. "_label", "_note")
+        clean = {kk: vv for kk, vv in v.items() if not kk.startswith("_")}
+        out[k] = clean
+    return out
+
+
 def parse_year(iso: str | None) -> int | None:
     if not iso:
         return None
@@ -570,6 +588,13 @@ SELECT ?idol ?alias WHERE {{
             "popularity": popularity,
             "tier": "hard",
         })
+
+    # Apply manual per-idol overrides (gender backfills, name fixes, etc.).
+    # Done before sort/tier so any popularity changes still bucket correctly.
+    idol_overrides = load_idol_overrides()
+    for x in idols:
+        if x["id"] in idol_overrides:
+            x.update(idol_overrides[x["id"]])
 
     # Sort by popularity desc, then name.
     idols.sort(key=lambda x: (-(x.get("popularity") or 0), x["name"]))

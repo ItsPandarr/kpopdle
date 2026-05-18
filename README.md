@@ -1,6 +1,8 @@
 # KPopdle
 
-A Loldle-style guessing game for K-pop groups. Pure static site — no backend, no accounts, no analytics. Personal bests live in your browser's localStorage.
+A Loldle-style guessing game for K-pop groups and idols. Pure static site — no backend, no accounts, no analytics. Personal bests live in your browser's localStorage.
+
+UI is available in **English** and **한국어** (auto-detected from `navigator.language`, manually overridable from Settings).
 
 ## Run it
 
@@ -15,23 +17,34 @@ ES modules require an http(s) origin — opening `index.html` via `file://` will
 ## Play
 
 - **Entity**: pick **Group** (guess the band) or **Idol** (guess the individual member). Each mode has its own attribute set and personal bests.
-- **Daily**: one shared target per UTC day. Same entity + difficulty + date = same target across every player and browser.
-- **Endless**: random target per round. Hit "New round" to reroll.
-- **Difficulty** changes both the candidate pool size and the number of attribute columns:
-  - **Easy** — top 100 most popular entities, full attribute set.
-  - **Medium** — top 300, fewer columns.
-  - **Hard** — all entities, minimal columns.
-- Type to autocomplete; arrow keys + Enter pick a suggestion.
+- **Daily**: one shared target per UTC day. Same entity + difficulty + date = same target across every player and browser. Guess cap: easy 6 / medium 8 / hard 10.
+- **Endless**: random target per round. No guess cap. Hit "New round" to reroll or "Give up" to reveal.
+- **Difficulty** only scales the candidate pool — every difficulty shows the full attribute set:
+  - **Easy** — top 100 most popular entities.
+  - **Medium** — top 300.
+  - **Hard** — all entities.
+- Type to autocomplete; arrow keys + Enter pick a suggestion. In idol mode, the dropdown shows each idol's primary group inline (italic) since 20+ stage names are shared across multiple people (e.g. three "Nana"s, two "Soobin"s — TXT *and* WJSN).
+- **Hints** (gear in the score line) reveal one attribute at a time at a small guess-cost.
+- **Detective mode** (Settings) hides candidates that can't be the answer given accumulated clues.
+- **Calm mode** (Settings) stops animations, shimmer, confetti, and the drifting background.
+- **Colorblind mode** (Settings) swaps the red/green palette for a deuteranopia-safe one. Symbols (✓ ◐ ✗ ▲ ▼) are always shown.
+
+### Sharing a puzzle
+
+After any win or loss, two share buttons appear on the banner:
+
+- **Copy result** — a Wordle-style emoji grid + numbers, for boasting in chat.
+- **Send this puzzle to a friend** — copies a URL like `…/#p=g.Q13580495.m.0` that boots the recipient directly into the same target as a one-off endless round. Recipient's stats and streaks aren't affected; the hash clears itself once the puzzle ends.
 
 ### Group attributes
 Debut date, generation (1st–5th), company (with HYBE/SM/JYP/YG parent-family partial matches), member count, gender (boy/girl/coed), status (active/disbanded), country.
 
 ### Idol attributes
-Birth year, debut year (inherited from earliest group), generation, primary group (exact match, or partial when sub-units overlap — e.g. NCT 127 vs NCT Dream both share NCT), gender (male/female), nationality (Korean, Japanese, Thai, Australian, Canadian, …), company (inherited from primary group, same parent-family rules as group mode).
+Birth year, debut year (inherited from earliest group), generation, primary group (exact match, or partial when sub-units overlap — e.g. NCT 127 vs NCT Dream both share NCT), gender (male/female — strictly binary; "co-ed" is a group-only concept and excluding one gender pins the other by elimination), nationality (Korean, Japanese, Thai, Australian, Canadian, …), company (inherited from primary group, same parent-family rules as group mode).
 
 ## Refreshing the dataset
 
-The dataset (`data/groups.json` + `data/groups.index.json`) is pre-built and committed. To regenerate from source:
+The dataset (`data/groups.json` + `data/idols.json`, plus their encoded `.dat` counterparts) is pre-built and committed. To regenerate from source:
 
 ```bash
 python3 -m venv .venv
@@ -95,39 +108,57 @@ KPopdle/
 ├── js/                     # ES modules, loaded as <script type="module">
 │   ├── main.js             # boot + wiring
 │   ├── config.js           # tier rules, visible attrs per difficulty
-│   ├── data.js             # fetch(data/groups.json)
+│   ├── data.js             # fetch(data/groups.json + data/idols.json)
 │   ├── seed.js             # cyrb53 hash + UTC date helpers (pure)
 │   ├── compare.js          # per-attribute comparison (pure)
+│   ├── clues.js            # derives & formats the "Known so far" panel (pure)
+│   ├── hint.js             # hint cost, ordering, attr-known logic (pure)
+│   ├── share.js            # emoji grid + clipboard text + URL helpers (pure)
+│   ├── puzzle.js           # custom-puzzle URL hash encode/decode (pure)
+│   ├── i18n.js             # tiny synchronous t() + locale loader
+│   ├── i18n-en.js          # English fallback bundled inline (auto-generated)
 │   ├── autocomplete.js     # tier-restricted prefix/alias/substring search
 │   ├── render.js           # the only DOM writer
 │   ├── state.js            # in-memory session state
 │   ├── persist.js          # the only localStorage writer
-│   └── ui.js               # toggles + countdown
+│   └── ui.js               # toggles + settings popover + countdown
+├── locales/                # en.json + ko.json (UI translations)
 ├── data/                   # generated; commit to repo
-└── scripts/                # offline scrape pipeline (Python)
+└── scripts/                # offline scrape pipeline (Python) + build helpers (Node)
 ```
 
-The pure modules (`compare.js`, `seed.js`) have unit tests under `tests/`. The rest is UI plumbing.
+Pure modules (`compare`, `seed`, `clues`, `hint`, `share`, `puzzle`) have unit tests under `tests/`. The rest is UI plumbing.
 
 ## Tests
 
 ```bash
-npm test                    # node tests/compare.test.mjs && node tests/seed.test.mjs
+npm test                    # node --test tests/*.test.mjs (currently 7 suites: clues, compare, hint, persist, puzzle, seed, share)
 ```
 
-(`package.json` declares `"type": "module"` so the `.js` files run as ESM under Node.)
+(`package.json` declares `"type": "module"` so the `.js` files run as ESM under Node 20+.)
 
 ## Persistence
 
-All in `localStorage` under the single key `kpopdle:v2`:
+Game data is in `localStorage` under `kpopdle:v2`, with one bucket per entity (`group`, `idol`):
 
 - `daily[difficulty]` — last played date, guess count, target id for "already played today" detection.
 - `streaks[difficulty]` — current and best daily streak.
 - `bests[difficulty]` — fewest guesses ever recorded.
 - `endless[difficulty]` — plays + best guess count.
-- `history` — last 100 results.
+- `active[mode][difficulty]` — in-progress round (guesses + hint reveals + detective flag) so a reload mid-game resumes seamlessly.
+- `history` — last 100 results (including endless skips and give-ups).
 
-Clear localStorage to start over.
+Preferences are split into their own keys so resetting stats doesn't wipe your theme:
+
+- `kpopdle:theme` — `auto` / `light` / `dark`
+- `kpopdle:cb` — colorblind palette on/off
+- `kpopdle:calm` — reduced-motion mode on/off
+- `kpopdle:filter` — detective mode on/off
+- `kpopdle:lang` — `auto` / `en` / `ko`
+- `kpopdle:lastSelection` — last entity/mode/difficulty combo, restored on reload
+- `kpopdle:visited` — first-visit help-modal flag
+
+"Reset all stats" (Settings) clears just `kpopdle:v2`; preferences are kept.
 
 ## Hosting
 
@@ -177,11 +208,35 @@ npm run build      # produces dist/ with the new encoded data
 
 Both the human-readable `.json` and the encoded `.dat` files are tracked in the repo. Only the `.dat` files are copied into `dist/` — that's the light obfuscation that keeps the answer out of the Network tab on the deployed site. The `.json` files are useful for diffing data changes, manual inspection, or re-encoding with a different key.
 
+## Internationalization
+
+The UI ships English (bundled inline so `t()` works synchronously from import time) plus a fetch-loaded Korean translation. Entity names stay romanized in every locale — only chrome (labels, buttons, banners, settings, help, footer) is translated.
+
+```
+locales/
+├── en.json           # source of truth (147 keys)
+└── ko.json           # 한국어
+```
+
+`js/i18n-en.js` mirrors `locales/en.json` and is **auto-generated** by `scripts/sync-i18n-en.mjs` — never hand-edit it. The generator runs as a pre-step of `npm run build` and `npm run preview`, or invoke directly:
+
+```sh
+npm run sync-i18n
+```
+
+To add a new locale:
+
+1. Copy `locales/en.json` to `locales/<code>.json` and translate the values.
+2. Add the code to `SUPPORTED` in `js/i18n.js`.
+3. Add a button label entry in `attachLangToggle` (`js/ui.js`).
+
+The language toggle lives in **Settings → Language**. Changing it triggers a `location.reload()` so every dynamic string repaints cleanly in the new locale; the in-progress round is restored from localStorage on reload, so the player doesn't lose progress.
+
 ## Roadmap
 
 - Album / single mode.
 - Hiatus detection.
-- Optional "today's target spoiler" link after losing patience.
+- More locales (Japanese, Spanish).
 
 ## License
 
