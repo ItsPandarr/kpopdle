@@ -4,6 +4,9 @@
   "description": "Loldle-style K-pop group guessing game. Pure static site.",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "node --test tests/",
     "serve": "python3 scripts/serve.py 8123",
