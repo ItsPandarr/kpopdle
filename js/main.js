@@ -1,8 +1,9 @@
-import { loadAll, poolFor, getById, getNumericBounds, getDataAsOfDate } from "./data.js";
+import { loadAll, poolFor, targetPoolFor, getById, getNumericBounds, getDataAsOfDate } from "./data.js";
 import { state, resetGame, recordGuess } from "./state.js";
 import { compareFor, isWin } from "./compare.js";
 import { targetForDaily, randomTarget, todayUTC, yesterdayUTC } from "./seed.js";
 import { attachAutocomplete } from "./autocomplete.js";
+import { repoUrlFor, correctionIssueUrl } from "./share.js";
 import {
   renderHeader,
   renderGuessRow,
@@ -271,7 +272,10 @@ function prettyValue(attr, value, entity) {
 }
 
 function pickTarget() {
-  const pool = poolFor(state.entity, state.difficulty);
+  // Use the "complete data" pool for target selection so the puzzle never
+  // lands on an entity that's missing one of its visible attribute values.
+  // (The autocomplete still uses the full poolFor.)
+  const pool = targetPoolFor(state.entity, state.difficulty);
   if (state.mode === "daily") {
     // replayDate, if set, supplies the seed date (yesterday's puzzle, etc.).
     const dateStr = state.replayDate || todayUTC();
@@ -469,7 +473,10 @@ function onGuess(entity) {
       target: state.target,
       dateStr: state.replayDate || todayUTC(),
       maxGuesses,
-      suggestions: state.mode === "daily" && !state.replayDate ? buildDailyCTAs() : [],
+      suggestions:
+        state.mode === "endless"               ? buildEndlessCTAs() :
+        (state.mode === "daily" && !state.replayDate) ? buildDailyCTAs() :
+        /* daily replay */                      [],
     });
     // Big celebratory confetti from roughly above the banner.
     const bRect = els.banner.getBoundingClientRect();
@@ -564,6 +571,43 @@ function buildDailyCTAs() {
     kind: "endless",
     onClick: () => goTo({ mode: "endless", difficulty: state.difficulty }),
   });
+  return ctas;
+}
+
+// "What's next?" chips after an endless win. Mirror the daily flow:
+//   - Primary: another endless round at the same difficulty (the obvious
+//     next action — "play again").
+//   - The two other endless difficulties.
+//   - Cross-promotion: today's daily at the current difficulty, but only if
+//     the player hasn't already won it.
+function buildEndlessCTAs() {
+  const ctas = [];
+  ctas.push({
+    label: "New round",
+    kind: "endless",
+    onClick: () => {
+      clearActive(state.entity, state.mode, state.difficulty);
+      state.target = null;
+      startGame();
+      renderStats();
+    },
+  });
+  for (const d of ["easy", "medium", "hard"]) {
+    if (d === state.difficulty) continue;
+    ctas.push({
+      label: `Try Endless ${capitalize(d)}`,
+      kind: "endless",
+      onClick: () => goTo({ mode: "endless", difficulty: d }),
+    });
+  }
+  const dailyStatus = getDailyStatus(state.entity, state.difficulty);
+  if (!dailyStatus || !dailyStatus.won) {
+    ctas.push({
+      label: `Try Daily ${capitalize(state.difficulty)}`,
+      kind: "daily",
+      onClick: () => goTo({ mode: "daily", difficulty: state.difficulty }),
+    });
+  }
   return ctas;
 }
 
@@ -842,6 +886,17 @@ async function init() {
   if (asof && asofEl) {
     const label = asof.toLocaleDateString(undefined, { month: "long", year: "numeric" });
     asofEl.textContent = `Data current as of ${label}.`;
+  }
+
+  // "Report a data correction" footer link → pre-filled GitHub issue. Hidden
+  // when we can't determine the repo (e.g. localhost dev with no override).
+  // Override at deploy time by setting <meta name="kpopdle:repo" content="...">.
+  const repoOverride = document.querySelector('meta[name="kpopdle:repo"]')?.content?.trim() || null;
+  const repo = repoUrlFor(location, repoOverride);
+  const reportLink = document.getElementById("report-link");
+  if (repo && reportLink) {
+    reportLink.href = correctionIssueUrl(repo);
+    reportLink.hidden = false;
   }
 
   // First-visit onboarding: brand-new players land on a board with no

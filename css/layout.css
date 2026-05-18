@@ -1193,6 +1193,16 @@ body::before {
   opacity: 0.75;
   font-size: 0.72rem;
 }
+.app-footer .report-line {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+.app-footer .report-line a {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.app-footer .report-line a:hover { color: var(--text); }
 
 /* ─── Give-up button + replay-yesterday link ──────────────────────────────── */
 

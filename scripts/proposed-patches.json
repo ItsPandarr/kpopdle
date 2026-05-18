@@ -1,0 +1,533 @@
+[
+  {
+    "kind": "group",
+    "id": "Q97191757",
+    "name": "WEi",
+    "title": "WEi",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q485028",
+    "name": "M.I.L.K.",
+    "title": "Milk (South Korean group)",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q487111",
+    "name": "Myname",
+    "title": "Myname",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q626245",
+    "name": "Roo'ra",
+    "title": "Roo'ra",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "company",
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q98754857",
+    "name": "Refund Sisters",
+    "title": "Refund Sisters",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q483706",
+    "name": "The Grace",
+    "title": "The Grace (group)",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q487219",
+    "name": "Koyote",
+    "title": "Koyote",
+    "patch": {
+      "gender": "coed"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q483806",
+    "name": "Coed School",
+    "title": "Coed School",
+    "patch": {
+      "gender": "coed"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q7853796",
+    "name": "Turbo",
+    "title": "Turbo (South Korean band)",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q21012399",
+    "name": "Up10tion",
+    "title": "Up10tion",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q18381082",
+    "name": "Berry Good",
+    "title": "Berry Good",
+    "patch": {
+      "company": "{{flatlist|*Asia Bridge"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q107440050",
+    "name": "Even of Day",
+    "title": "Day6 (Even of Day)",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q11247148",
+    "name": "Black Beat",
+    "title": "Black Beat",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q124047881",
+    "name": "Golden Girls",
+    "title": "Golden Girls (girl group)",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q2902030",
+    "name": "Super Junior-K.R.Y.",
+    "title": "Super Junior-K.R.Y.",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q497931",
+    "name": "Diva",
+    "title": "Diva (South Korean group)",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q18551384",
+    "name": "Hi Suhyun",
+    "title": "Hi Suhyun",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q490754",
+    "name": "Clon",
+    "title": "Clon (duo)",
+    "patch": {
+      "company": "Hyun Jin Young"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q626127",
+    "name": "Monday Kiz",
+    "title": "Monday Kiz (band)",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q3645423",
+    "name": "Brown Eyes",
+    "title": "Brown Eyes (band)",
+    "patch": {
+      "company": "Brown Eyed Soul"
+    },
+    "missing": [
+      "company",
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q56534357",
+    "name": "Kenta Sanggyun",
+    "title": "Kenta Sanggyun",
+    "patch": {
+      "company": "JBJ"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q12621310",
+    "name": "Two Two",
+    "title": "Two Two",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q27917125",
+    "name": "Bastarz",
+    "title": "Bastarz",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q124217470",
+    "name": "YGIG",
+    "title": "YGIG",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q16097960",
+    "name": "2NB",
+    "title": "2NB",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q3818212",
+    "name": "S.O.S",
+    "title": "SOS (Indonesian group)",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q7668078",
+    "name": "T.T.Ma",
+    "title": "T.T.Ma",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q7395331",
+    "name": "S",
+    "title": "S (South Korean band)",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q12609404",
+    "name": "Wanted",
+    "title": "Wanted (band)",
+    "patch": {
+      "gender": "boy"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q26196703",
+    "name": "Nine Muses A",
+    "title": "Nine Muses A",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "gender"
+    ]
+  },
+  {
+    "kind": "group",
+    "id": "Q12609630",
+    "name": "Wink",
+    "title": "Wink (South Korean group)",
+    "patch": {
+      "gender": "girl"
+    },
+    "missing": [
+      "company",
+      "gender"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q17478642",
+    "name": "Wendy",
+    "title": "Wendy (singer)",
+    "patch": {
+      "nationality": "Korean"
+    },
+    "missing": [
+      "nationality"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q112189953",
+    "name": "Kang Hyung-ho",
+    "title": "Kang Hyung-ho",
+    "patch": {
+      "company": "Universal Music Group"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q116705085",
+    "name": "Jonghyeong",
+    "title": "Jonghyeong",
+    "patch": {
+      "company": ":ko:동요엔터테인먼트"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q111693305",
+    "name": "Lee Kyoung-yoon",
+    "title": "Kyoungyoon",
+    "patch": {
+      "company": ":ko:동요엔터테인먼트"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q26260697",
+    "name": "Kim So-hee",
+    "title": "Kim So-hee (singer, born 1995)",
+    "patch": {
+      "company": "The Music Works"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q47545137",
+    "name": "Yongsin Wongpanitnont",
+    "title": "Yongsin Wongpanitnont",
+    "patch": {
+      "nationality": "Thai"
+    },
+    "missing": [
+      "nationality"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q490101",
+    "name": "Hwangbo",
+    "title": "Hwangbo",
+    "patch": {
+      "company": "Shimty Company"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q485018",
+    "name": "Yuri",
+    "title": "Yuri (singer, born 1976)",
+    "patch": {
+      "company": "KT Corporation"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q63967134",
+    "name": "Kim Tae-rin",
+    "title": "Kim Tae-rin",
+    "patch": {
+      "company": "JTG"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q6411575",
+    "name": "Koo Jun-yup",
+    "title": "Koo Jun-yup",
+    "patch": {
+      "company": "Rock Records"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q22808297",
+    "name": "Ben",
+    "title": "Ben (South Korean singer)",
+    "patch": {
+      "company": "Happy Face Entertainment"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q485672",
+    "name": "Gain",
+    "title": "Gain (singer)",
+    "patch": {
+      "company": "Mystic Entertainment"
+    },
+    "missing": [
+      "company"
+    ]
+  },
+  {
+    "kind": "idol",
+    "id": "Q24945",
+    "name": "Lee Hi",
+    "title": "Lee Hi",
+    "patch": {
+      "company": "YG Entertainment"
+    },
+    "missing": [
+      "company"
+    ]
+  }
+]

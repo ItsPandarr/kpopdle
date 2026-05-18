@@ -6,6 +6,10 @@
     <title>KPopdle</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
+    <!-- Repo URL used to build the "Report a data correction" link in the footer.
+         Leave blank to auto-derive from a *.github.io host; override here for
+         custom domains. Example: https://github.com/your-user/kpopdle -->
+    <meta name="kpopdle:repo" content="" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#1a1a22" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#faf6fb" media="(prefers-color-scheme: light)" />
@@ -158,6 +162,9 @@
     <footer class="app-footer">
       <p>Data: Wikidata + Wikipedia · No accounts, no servers · Personal bests stored in localStorage.</p>
       <p id="data-asof" class="data-asof"></p>
+      <p class="report-line">
+        Spot wrong data? <a id="report-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Open a correction on GitHub →</a>
+      </p>
     </footer>
 
     <script type="module" src="js/main.js"></script>

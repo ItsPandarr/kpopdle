@@ -1,4 +1,4 @@
-import { inPool } from "./config.js";
+import { inPool, VISIBLE_ATTRS } from "./config.js";
 import { unscramble } from "./scramble.js";
 
 const _entities = { group: null, idol: null };
@@ -39,6 +39,20 @@ export function getById(entity, id) {
 
 export function poolFor(entity, difficulty) {
   return _entities[entity].filter((e) => inPool(e, difficulty));
+}
+
+// Subset of the difficulty pool eligible to be the puzzle target. Same tier
+// inclusion as poolFor, but additionally requires the entity to have a value
+// for every visible attribute at this difficulty. Without this filter the
+// daily seed could land on an entry with `company: null` (e.g. Forestella),
+// which produces an empty COMPANY column in every guess row AND a dead-end
+// hint button — the player has no way to learn the answer. The autocomplete
+// keeps using the full pool so players can still type these as guesses.
+export function targetPoolFor(entity, difficulty) {
+  const visible = VISIBLE_ATTRS[entity]?.[difficulty] || [];
+  return _entities[entity].filter(
+    (e) => inPool(e, difficulty) && visible.every((a) => e[a] != null && e[a] !== ""),
+  );
 }
 
 // Cached per-entity numeric bounds, used by the clue formatter to suppress

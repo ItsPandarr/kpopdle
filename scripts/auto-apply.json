@@ -1,0 +1,128 @@
+[
+  {
+    "kind": "idol",
+    "id": "Q17478642",
+    "name": "Wendy",
+    "title": "Wendy (singer)",
+    "patch": {
+      "nationality": "Korean"
+    },
+    "missing": [
+      "nationality"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q112189953",
+    "name": "Kang Hyung-ho",
+    "title": "Kang Hyung-ho",
+    "patch": {
+      "company": "Universal Music Group"
+    },
+    "missing": [
+      "company"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q26260697",
+    "name": "Kim So-hee",
+    "title": "Kim So-hee (singer, born 1995)",
+    "patch": {
+      "company": "The Music Works"
+    },
+    "missing": [
+      "company"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q47545137",
+    "name": "Yongsin Wongpanitnont",
+    "title": "Yongsin Wongpanitnont",
+    "patch": {
+      "nationality": "Thai"
+    },
+    "missing": [
+      "nationality"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q490101",
+    "name": "Hwangbo",
+    "title": "Hwangbo",
+    "patch": {
+      "company": "Shimty Company"
+    },
+    "missing": [
+      "company"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q6411575",
+    "name": "Koo Jun-yup",
+    "title": "Koo Jun-yup",
+    "patch": {
+      "company": "Rock Records"
+    },
+    "missing": [
+      "company"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q22808297",
+    "name": "Ben",
+    "title": "Ben (South Korean singer)",
+    "patch": {
+      "company": "Happy Face Entertainment"
+    },
+    "missing": [
+      "company"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q485672",
+    "name": "Gain",
+    "title": "Gain (singer)",
+    "patch": {
+      "company": "Mystic Entertainment"
+    },
+    "missing": [
+      "company"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  },
+  {
+    "kind": "idol",
+    "id": "Q24945",
+    "name": "Lee Hi",
+    "title": "Lee Hi",
+    "patch": {
+      "company": "YG Entertainment"
+    },
+    "missing": [
+      "company"
+    ],
+    "_confidence": "high",
+    "_issues": []
+  }
+]

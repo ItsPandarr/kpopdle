@@ -5199,7 +5199,7 @@
       "debut_year": 2014,
       "generation": 3,
       "gender": "girl",
-      "nationality": null,
+      "nationality": "Korean",
       "group_ids": [
         "Q110310446",
         "Q17466114"
@@ -13475,7 +13475,7 @@
       ],
       "primary_group": "Forestella",
       "primary_group_id": "Q43206739",
-      "company": null,
+      "company": "Universal Music Group",
       "company_parent": null,
       "popularity": 22817,
       "tier": "hard"
@@ -27997,7 +27997,7 @@
       ],
       "primary_group": "Nature",
       "primary_group_id": "Q56501962",
-      "company": null,
+      "company": "The Music Works",
       "company_parent": null,
       "popularity": 2792,
       "tier": "hard"
@@ -28601,7 +28601,7 @@
       "debut_year": 2023,
       "generation": 5,
       "gender": "boy",
-      "nationality": null,
+      "nationality": "Thai",
       "group_ids": [
         "Q122942333"
       ],
@@ -28837,7 +28837,7 @@
       ],
       "primary_group": "Chakra",
       "primary_group_id": "Q623822",
-      "company": null,
+      "company": "Shimty Company",
       "company_parent": null,
       "popularity": 2371,
       "tier": "hard"
@@ -30080,7 +30080,7 @@
       ],
       "primary_group": "Clon",
       "primary_group_id": "Q490754",
-      "company": null,
+      "company": "Rock Records",
       "company_parent": null,
       "popularity": 1653,
       "tier": "hard"
@@ -33382,7 +33382,7 @@
       ],
       "primary_group": "BeBe Mignon",
       "primary_group_id": "Q6874910",
-      "company": null,
+      "company": "Happy Face Entertainment",
       "company_parent": null,
       "popularity": 0,
       "tier": "hard"
@@ -33511,7 +33511,7 @@
       ],
       "primary_group": "4 Tomorrow",
       "primary_group_id": "Q6875258",
-      "company": null,
+      "company": "Mystic Entertainment",
       "company_parent": null,
       "popularity": 0,
       "tier": "hard"
@@ -33692,7 +33692,7 @@
       ],
       "primary_group": "Bom & Hi",
       "primary_group_id": "Q18238823",
-      "company": null,
+      "company": "YG Entertainment",
       "company_parent": null,
       "popularity": 0,
       "tier": "hard"

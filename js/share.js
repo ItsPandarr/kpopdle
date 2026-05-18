@@ -115,3 +115,50 @@ export function currentPlayUrl(loc = typeof location === "undefined" ? null : lo
   const path = (loc.pathname || "/").replace(/index\.html$/i, "");
   return `${loc.origin}${path}`;
 }
+
+// Derive the canonical github.com URL for the repo hosting this site, given
+// the current location. Two paths:
+//   - Explicit override via the <meta name="kpopdle:repo"> tag (used for
+//     custom domains).
+//   - Auto-detect for github.io: "<user>.github.io/<repo>/" → github.com/<user>/<repo>;
+//     "<user>.github.io/" → github.com/<user>/<user>.github.io.
+// Returns null when we can't determine it (e.g. running on localhost without
+// an override) — the caller hides the "Report" link in that case.
+export function repoUrlFor(loc = typeof location === "undefined" ? null : location,
+                            overrideRepo = null) {
+  if (overrideRepo) return overrideRepo.replace(/\/+$/, "");
+  if (!loc) return null;
+  const host = (loc.hostname || "").toLowerCase();
+  const m = host.match(/^([a-z0-9-]+)\.github\.io$/);
+  if (!m) return null;
+  const user = m[1];
+  // First non-empty path segment is the project name, if any.
+  const seg = (loc.pathname || "/").split("/").filter(Boolean)[0];
+  const repo = seg || `${user}.github.io`;
+  return `https://github.com/${user}/${repo}`;
+}
+
+// Build a pre-filled "data correction" GitHub issue URL. `context` is an
+// optional partial — name/field/value/source — to pre-populate the body
+// where the player would otherwise have to type it. Anything missing is
+// left as a placeholder so the player can fill it in.
+export function correctionIssueUrl(repoUrl, context = {}) {
+  if (!repoUrl) return null;
+  const { entity = "", name = "", field = "", currentValue = "", source = "" } = context;
+  const lines = [
+    "**Entity:** " + (entity ? entity[0].toUpperCase() + entity.slice(1) : "(group or idol)"),
+    "**Name:** " + (name || "(name of the group/idol)"),
+    "**Field:** " + (field || "(company / gender / debut_year / nationality / member_count / ...)"),
+    "**Current value (what the app shows):** " + (currentValue || "(leave blank if missing)"),
+    "**Suggested value:** ",
+    "**Source:** " + (source || "(Wikipedia URL or other reference)"),
+    "",
+    "**Notes (optional):**",
+    "",
+  ];
+  const url = new URL(`${repoUrl}/issues/new`);
+  url.searchParams.set("title", "Data correction: ");
+  url.searchParams.set("labels", "data");
+  url.searchParams.set("body", lines.join("\n"));
+  return url.toString();
+}

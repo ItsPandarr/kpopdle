@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-import { emojiGridFor, wikipediaUrlFor, answerLabel, hintTag, buildShareText, currentPlayUrl } from "../js/share.js";
+import { emojiGridFor, wikipediaUrlFor, answerLabel, hintTag, buildShareText, currentPlayUrl, repoUrlFor, correctionIssueUrl } from "../js/share.js";
 
 // ─── emojiGridFor ──────────────────────────────────────────────────────────────
 
@@ -189,5 +189,66 @@ assert.equal(
 
 // Missing location object → null (defensive for non-browser environments).
 assert.equal(currentPlayUrl(null), null);
+
+// ─── repoUrlFor ────────────────────────────────────────────────────────────────
+
+// Explicit override always wins; trailing slashes stripped.
+assert.equal(
+  repoUrlFor({ hostname: "example.com", pathname: "/" }, "https://github.com/x/y/"),
+  "https://github.com/x/y",
+);
+
+// Project page: user.github.io/repo/ → github.com/user/repo
+assert.equal(
+  repoUrlFor({ hostname: "someone.github.io", pathname: "/kpopdle/" }),
+  "https://github.com/someone/kpopdle",
+);
+
+// User page: user.github.io (no project segment) → github.com/user/user.github.io
+assert.equal(
+  repoUrlFor({ hostname: "someone.github.io", pathname: "/" }),
+  "https://github.com/someone/someone.github.io",
+);
+
+// Non-github host without an override → null (footer link stays hidden).
+assert.equal(repoUrlFor({ hostname: "localhost", pathname: "/" }), null);
+assert.equal(repoUrlFor({ hostname: "example.com", pathname: "/" }), null);
+
+// Missing location → null.
+assert.equal(repoUrlFor(null), null);
+
+// ─── correctionIssueUrl ────────────────────────────────────────────────────────
+
+// No repo → null.
+assert.equal(correctionIssueUrl(null), null);
+
+// Builds a /issues/new URL with title + body + labels params.
+{
+  const url = correctionIssueUrl("https://github.com/someone/kpopdle");
+  assert.ok(url.startsWith("https://github.com/someone/kpopdle/issues/new?"));
+  const u = new URL(url);
+  assert.equal(u.searchParams.get("title"), "Data correction: ");
+  assert.equal(u.searchParams.get("labels"), "data");
+  const body = u.searchParams.get("body");
+  assert.ok(body.includes("**Field:**"));
+  assert.ok(body.includes("**Source:**"));
+}
+
+// Context fields land in the body where provided.
+{
+  const url = correctionIssueUrl("https://github.com/someone/kpopdle", {
+    entity: "group",
+    name: "BTS",
+    field: "company",
+    currentValue: "Big Hit Music",
+    source: "https://en.wikipedia.org/wiki/BTS",
+  });
+  const body = new URL(url).searchParams.get("body");
+  assert.ok(body.includes("**Entity:** Group"));
+  assert.ok(body.includes("**Name:** BTS"));
+  assert.ok(body.includes("**Field:** company"));
+  assert.ok(body.includes("**Current value (what the app shows):** Big Hit Music"));
+  assert.ok(body.includes("https://en.wikipedia.org/wiki/BTS"));
+}
 
 console.log("share.test ok");
