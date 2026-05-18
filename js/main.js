@@ -74,6 +74,9 @@ import {
   markAchievement,
   getRecentEndlessTargets,
   pushRecentEndlessTarget,
+  exportStats,
+  importStats,
+  parseImportedStats,
   markVisited,
   historySummary,
 } from "./persist.js";
@@ -1066,6 +1069,160 @@ function showAchievementToast(id) {
   }, 3600);
 }
 
+// ─── Stats export / import ──────────────────────────────────────────────────
+
+// Show the player's encoded stats in a read-only textarea so they can copy
+// it to another browser or device. Empty case (never played) renders a
+// note instead of a copyable code.
+function openExportStatsModal() {
+  const code = exportStats();
+  const prev = document.activeElement;
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  const card = document.createElement("div");
+  card.className = "modal-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-modal", "true");
+
+  card.innerHTML = `
+    <h3 class="modal-title">${escapeHTML(t("settings.export"))}</h3>
+    <p class="modal-message">${escapeHTML(code ? t("export.hint") : t("export.empty"))}</p>
+    ${code ? `<textarea class="modal-code" readonly aria-label="${escapeHTML(t("settings.export"))}">${escapeHTML(code)}</textarea>` : ""}
+    <div class="modal-actions">
+      ${code ? `<button type="button" class="modal-btn modal-confirm" id="export-copy-btn">${escapeHTML(t("export.copy"))}</button>` : ""}
+      <button type="button" class="modal-btn modal-cancel" id="export-close-btn">${escapeHTML(t("achievements.close"))}</button>
+    </div>
+  `;
+  backdrop.appendChild(card);
+  document.body.appendChild(backdrop);
+
+  function close() {
+    if (!backdrop.parentNode) return;
+    backdrop.remove();
+    document.removeEventListener("keydown", onKey, true);
+    if (prev && typeof prev.focus === "function") {
+      try { prev.focus(); } catch { /* ignore */ }
+    }
+  }
+  function onKey(e) { if (e.key === "Escape") { e.preventDefault(); close(); } }
+  document.addEventListener("keydown", onKey, true);
+
+  const closeBtn = card.querySelector("#export-close-btn");
+  const copyBtn = card.querySelector("#export-copy-btn");
+  const textarea = card.querySelector(".modal-code");
+  closeBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+  if (copyBtn && textarea) {
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(code);
+        copyBtn.textContent = t("banner.share.copied");
+        setTimeout(() => { copyBtn.textContent = t("export.copy"); }, 1500);
+      } catch {
+        // Clipboard blocked — fall back to selecting the textarea so the user
+        // can ctrl/cmd-C manually.
+        textarea.focus();
+        textarea.select();
+      }
+    });
+  }
+  requestAnimationFrame(() => (copyBtn || closeBtn).focus());
+}
+
+// Paste-target modal. On submit, parse → preview summary → confirm
+// (destructive) → write → reload. Parse failures surface a localized
+// error inline rather than closing the modal.
+function openImportStatsModal() {
+  const prev = document.activeElement;
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  const card = document.createElement("div");
+  card.className = "modal-card";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-modal", "true");
+
+  card.innerHTML = `
+    <h3 class="modal-title">${escapeHTML(t("settings.import"))}</h3>
+    <p class="modal-message">${escapeHTML(t("import.hint"))}</p>
+    <textarea class="modal-code" id="import-textarea" aria-label="${escapeHTML(t("settings.import"))}" placeholder="${escapeHTML(t("import.placeholder"))}"></textarea>
+    <p class="modal-error" id="import-error" hidden></p>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn modal-cancel" id="import-cancel-btn">${escapeHTML(t("modal.cancel"))}</button>
+      <button type="button" class="modal-btn modal-confirm is-destructive" id="import-submit-btn">${escapeHTML(t("settings.import"))}</button>
+    </div>
+  `;
+  backdrop.appendChild(card);
+  document.body.appendChild(backdrop);
+
+  function close() {
+    if (!backdrop.parentNode) return;
+    backdrop.remove();
+    document.removeEventListener("keydown", onKey, true);
+    if (prev && typeof prev.focus === "function") {
+      try { prev.focus(); } catch { /* ignore */ }
+    }
+  }
+  function onKey(e) { if (e.key === "Escape") { e.preventDefault(); close(); } }
+  document.addEventListener("keydown", onKey, true);
+
+  const cancelBtn = card.querySelector("#import-cancel-btn");
+  const submitBtn = card.querySelector("#import-submit-btn");
+  const textarea = card.querySelector("#import-textarea");
+  const errorP = card.querySelector("#import-error");
+
+  cancelBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+
+  submitBtn.addEventListener("click", async () => {
+    errorP.hidden = true;
+    const code = textarea.value;
+    let parsed;
+    try {
+      parsed = parseImportedStats(code);
+    } catch (err) {
+      errorP.textContent = t(`import.error.${err.message}`) || t("import.error.unknown");
+      errorP.hidden = false;
+      return;
+    }
+    // Build a short summary so the user knows what they're about to overwrite.
+    const summary = describeImportedStats(parsed);
+    close();
+    const ok = await showConfirm({
+      message: t("import.confirm", { summary }),
+      confirmLabel: t("settings.import"),
+      destructive: true,
+    });
+    if (!ok) return;
+    try {
+      importStats(code);
+    } catch {
+      // Storage write failed (private mode, quota?) — surface an alert.
+      // Rare enough that we don't bother with i18n here.
+      alert(t("import.error.write"));
+      return;
+    }
+    location.reload();
+  });
+
+  requestAnimationFrame(() => textarea.focus());
+}
+
+// One-line summary string built from a parsed (but not yet applied) stats
+// blob — used in the import-confirm message so the user sees what's about
+// to overwrite their current stats.
+function describeImportedStats(s) {
+  const dailyWins = (s.group?.totals?.dailyWins || 0) + (s.idol?.totals?.dailyWins || 0);
+  let bestStreak = 0;
+  for (const e of ["group", "idol"]) {
+    const streaks = s[e]?.streaks || {};
+    for (const d of Object.keys(streaks)) {
+      if (streaks[d].best > bestStreak) bestStreak = streaks[d].best;
+    }
+  }
+  const achievements = Object.keys(s.achievements || {}).length;
+  return t("import.summary", { wins: dailyWins, streak: bestStreak, achievements });
+}
+
 // Tiny HTML-escape for target names we're injecting into the archive markup.
 // K-pop names usually contain no special characters but defensively encode
 // in case a future dataset has an ampersand or quote (e.g. "Stray Kids & ...").
@@ -1115,6 +1272,8 @@ async function init() {
   els.helpPanel = $("help-panel");
   els.achievementsBtn = $("achievements-btn");
   els.resetStatsBtn = $("reset-stats-btn");
+  els.exportStatsBtn = $("export-stats-btn");
+  els.importStatsBtn = $("import-stats-btn");
   els.giveUpBtn = $("give-up-btn");
   els.replayYesterdayBtn = $("replay-yesterday-btn");
   els.byline = $("byline");
@@ -1254,6 +1413,9 @@ async function init() {
     startGame();
     renderStats();
   });
+
+  els.exportStatsBtn?.addEventListener("click", openExportStatsModal);
+  els.importStatsBtn?.addEventListener("click", openImportStatsModal);
 
   // Give-up: reveal the answer and end the round. Confirm text varies by
   // mode — daily warns about the streak, endless calls it a "skip", custom

@@ -23,6 +23,9 @@ const {
   getRecentEndlessTargets,
   pushRecentEndlessTarget,
   RECENT_ENDLESS_CAP,
+  exportStats,
+  importStats,
+  parseImportedStats,
 } = await import("../js/persist.js");
 
 function resetStorage() {
@@ -360,6 +363,61 @@ function streakOf(entity = "group", difficulty = "easy") {
   pushRecentEndlessTarget("group", "");
   pushRecentEndlessTarget("group", undefined);
   assert.deepEqual(getRecentEndlessTargets("group"), ["Q1"]);
+}
+
+// ─── export / import roundtrip ─────────────────────────────────────────────
+
+// Empty storage → no exportable code yet.
+{
+  resetStorage();
+  assert.equal(exportStats(), null);
+}
+
+// Record a win, export, reset, import → state is restored exactly.
+{
+  resetStorage();
+  recordDailyWin("group", "easy", "Q1", 3, "2026-05-15");
+  recordDailyWin("group", "easy", "Q2", 4, "2026-05-16");
+  recordDailyWin("idol",  "hard", "Q3", 5, "2026-05-17");
+  const before = getStats();
+
+  const code = exportStats();
+  assert.equal(typeof code, "string");
+  assert.ok(code.length > 0);
+
+  // Wipe + import
+  resetStorage();
+  assert.deepEqual(getStats().group.totals, { dailyWins: 0, dailyLosses: 0, endlessWins: 0, endlessSkips: 0 });
+  importStats(code);
+
+  const after = getStats();
+  assert.deepEqual(after.group.totals, before.group.totals, "group totals roundtripped");
+  assert.deepEqual(after.idol.totals,  before.idol.totals,  "idol totals roundtripped");
+  assert.equal(after.group.streaks.easy.best, before.group.streaks.easy.best);
+}
+
+// parseImportedStats throws a code-specific Error.message on each failure mode.
+{
+  resetStorage();
+  for (const [code, expected] of [
+    ["",                "empty"],
+    ["   ",             "empty"],
+    ["not-base64-!@#",  "scramble"],
+  ]) {
+    let msg = null;
+    try { parseImportedStats(code); } catch (e) { msg = e.message; }
+    assert.equal(msg, expected, `expected error.message=${expected} for code=${JSON.stringify(code)}`);
+  }
+}
+
+// Wrong-version blob → "version" error.
+{
+  // Build a valid-base64-scrambled payload but with version: 1.
+  const { scramble } = await import("../js/scramble.js");
+  const fake = scramble(JSON.stringify({ version: 1, foo: "bar" }));
+  let msg = null;
+  try { parseImportedStats(fake); } catch (e) { msg = e.message; }
+  assert.equal(msg, "version");
 }
 
 console.log("persist.test ok");

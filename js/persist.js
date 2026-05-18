@@ -402,6 +402,51 @@ export function resetAllStats() {
   } catch { /* localStorage blocked */ }
 }
 
+// ─── Export / Import ──────────────────────────────────────────────────────
+//
+// The scrambled localStorage blob is base64 + a fixed XOR mask — already
+// suitable for copy-paste through any chat or notes app. Export hands it
+// out as-is; import validates the round trip before overwriting.
+
+// Return the player's stats blob as a string suitable for copy-paste,
+// or null if there's nothing to export.
+export function exportStats() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw && raw.trim().length > 0 ? raw : null;
+  } catch { return null; }
+}
+
+// Validate an imported code without applying it. Returns the parsed stats
+// object on success; throws an Error with a code-safe `.message` if the
+// input is empty, can't be unscrambled, isn't valid JSON, or carries an
+// unexpected version.
+export function parseImportedStats(code) {
+  if (typeof code !== "string" || code.trim().length === 0) {
+    throw new Error("empty");
+  }
+  let plain;
+  try { plain = unscramble(code.trim()); } catch { throw new Error("scramble"); }
+  let obj;
+  try { obj = JSON.parse(plain); } catch { throw new Error("json"); }
+  if (!obj || typeof obj !== "object") throw new Error("shape");
+  if (obj.version !== 2) throw new Error("version");
+  return obj;
+}
+
+// Apply a previously-validated stats code. Idempotent across reloads —
+// after this, getStats() returns what was just imported. The caller
+// (main.js) typically reloads the page right after so every in-memory
+// piece resyncs with the imported blob.
+export function importStats(code) {
+  parseImportedStats(code);  // re-validates; throws on bad input
+  try {
+    localStorage.setItem(STORAGE_KEY, code.trim());
+  } catch (e) {
+    throw new Error("write");
+  }
+}
+
 // First-visit detection: drives the auto-open of the help modal so brand-new
 // players aren't dropped into a blank board with no explanation.
 export function hasVisited() {

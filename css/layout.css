@@ -1273,6 +1273,41 @@ body::before {
   line-height: 1.45;
   color: var(--text, #e9e9f0);
 }
+/* Copy/paste textarea inside the export+import modals. Monospace so the
+   scrambled base64 reads like the code it is; sized small enough to fit
+   most modals without scrolling but tall enough to show a few lines for
+   long stats. */
+.modal-code {
+  display: block;
+  width: 100%;
+  min-height: 6.5em;
+  margin: 0 0 0.6rem;
+  padding: 0.5rem 0.7rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text);
+  background: var(--surface-2, rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  resize: vertical;
+  word-break: break-all;
+}
+.modal-error {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 0.85rem;
+  color: #c04848;
+}
+
+/* Settings panel row containing the two side-by-side stats actions
+   (Export / Import) so they don't stack vertically. */
+.settings-action-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
