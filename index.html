@@ -13,6 +13,10 @@
     <!-- Explicit index,follow so a misconfigured X-Robots-Tag header
          elsewhere in the deploy stack can't accidentally noindex us. -->
     <meta name="robots" content="index,follow" />
+    <!-- Ownership verification for the alldle.com Wordle-clone directory.
+         Static token — alldle's crawler reads this once to confirm the
+         submitter controls the deploy. -->
+    <meta name="alldle-verify" content="3quzpImw0UDKlhdrezCz3P0a9mqHyLYA" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#1a1a22" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#faf6fb" media="(prefers-color-scheme: light)" />
