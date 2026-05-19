@@ -114,9 +114,21 @@ async function buildHTML() {
 }
 
 async function copyAssets() {
-  // Root-level static files used as-is in production.
-  for (const f of ["favicon.svg", "manifest.webmanifest", "sw.js"]) {
-    await fs.copyFile(path.join(ROOT, f), path.join(DIST, f));
+  // Root-level static files used as-is in production. CNAME is the
+  // GitHub Pages custom-domain marker — `actions/upload-pages-artifact`
+  // looks for it at the artifact root and configures the Pages CDN to
+  // serve the bundle at that hostname instead of `<user>.github.io/...`.
+  // Skipped silently if missing so a fresh clone (no custom domain yet)
+  // still builds cleanly.
+  const optional = new Set(["CNAME"]);
+  for (const f of ["favicon.svg", "manifest.webmanifest", "sw.js", "CNAME"]) {
+    const src = path.join(ROOT, f);
+    try {
+      await fs.copyFile(src, path.join(DIST, f));
+    } catch (e) {
+      if (optional.has(f) && e.code === "ENOENT") continue;
+      throw e;
+    }
   }
   // SEO: robots.txt straight through, sitemap.xml with a single <loc>
   // substitution. The source ships https://example.com/ as a placeholder;
