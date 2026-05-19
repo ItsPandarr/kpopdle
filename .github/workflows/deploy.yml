@@ -19,6 +19,16 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Opt every JavaScript-based action (upload-artifact, download-artifact,
+# etc.) into the Node 24 runtime ahead of GitHub's June 2026 cutover.
+# Until then the runners default to Node 20, which fires deprecation
+# warnings on actions/upload-artifact@v4 and download-artifact@v4 even
+# though those are the latest released versions. Setting the var
+# workflow-wide is GitHub's documented opt-in path and avoids having to
+# chase per-action releases as they migrate.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build:
     runs-on: ubuntu-latest
