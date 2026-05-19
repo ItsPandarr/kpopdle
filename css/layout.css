@@ -1541,8 +1541,13 @@ body::before {
   background: var(--surface-2, rgba(255,255,255,0.05));
   outline: none;
 }
-.archive-row.is-today-row {
+/* "Current round" highlight — the row matching whatever date the player is
+   currently on. Defaults to today (live daily); shifts to the replay-date
+   row when the player is mid-replay. So at any moment, exactly one row in
+   the archive has the accent tint and the player can find their place. */
+.archive-row.is-current-row {
   background: color-mix(in srgb, var(--accent, #ff5fa2) 8%, transparent);
+  box-shadow: inset 3px 0 0 var(--accent, #ff5fa2);
 }
 .archive-icon {
   font-weight: 700;

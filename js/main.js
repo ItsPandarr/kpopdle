@@ -970,6 +970,11 @@ function renderArchive(entity, difficulty) {
   const archive = getDailyArchive(entity, difficulty);
   const cap = MAX_DAILY_GUESSES[difficulty];
   const locale = i18n.locale();
+  // The "current" row is whatever date the player is on right now — either
+  // today (live daily) or the date of an in-progress replay. Used to drive
+  // the visual highlight so the player can tell at a glance which row in
+  // the archive matches the board above.
+  const currentDate = state.replayDate || todayUTC();
   const rows = archive.map((row) => {
     // Date label: "Mon, May 17" / "5월 17일 (월)" depending on locale.
     // Force timeZone=UTC so the label matches the daily seed's UTC date —
@@ -1013,6 +1018,7 @@ function renderArchive(entity, difficulty) {
     const klass = ["archive-row"];
     if (clickable) klass.push("is-clickable");
     if (row.isToday) klass.push("is-today-row");
+    if (row.date === currentDate) klass.push("is-current-row");
     if (row.played && row.won === false) klass.push("is-loss-row");
 
     return `<li class="${klass.join(" ")}" data-date="${row.date}"${clickable ? ` tabindex="0" role="button" aria-label="${t("stats.archive.replay.aria", { date: dateLabel })}"` : ""}>
