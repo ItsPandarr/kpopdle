@@ -489,17 +489,48 @@ function startGame({ replayDaily = false, replayDate = null, forceTargetId = nul
       renderHeader(els.header, state.entity, state.difficulty);
       clearBoard(els.board);
       const visible = VISIBLE_ATTRS[state.entity][state.difficulty];
-      if (prev.won) {
+
+      // Restore the actual guess sequence from the history entry's stored
+      // guessIds. Without this, navigating away from a finished daily and
+      // coming back wipes the board down to just the answer row, which feels
+      // like the player lost their solve. Legacy saves (pre-history-guessIds
+      // feature) fall back to the single reveal row for wins, empty for
+      // losses — same behavior the old code shipped.
+      const entry = getDailyHistoryEntry(state.entity, state.difficulty, todayUTC());
+      const storedGuessIds = entry && Array.isArray(entry.guessIds) ? entry.guessIds : null;
+      const restoredGuesses = [];
+      if (storedGuessIds && storedGuessIds.length > 0) {
+        for (const id of storedGuessIds) {
+          const g = getById(state.entity, id);
+          if (!g) continue;
+          const cmp = compareFor(state.entity, g, state.target);
+          recordGuess(g, cmp);
+          renderGuessRow(els.board, g, cmp, state.entity, state.difficulty, { animate: false });
+          restoredGuesses.push({ group: g, comparison: cmp });
+        }
+      } else if (prev.won) {
+        // Legacy fallback: only the target ID survives, so reveal that.
         const reveal = compareFor(state.entity, state.target, state.target);
         renderGuessRow(els.board, state.target, reveal, state.entity, state.difficulty);
+        restoredGuesses.push({ group: state.target, comparison: reveal });
+      }
+      // Refresh clues + autocomplete exclusions from the restored guess set
+      // so the panel reflects what the player learned (modulo hints — those
+      // aren't fully persisted in the history record, just their count).
+      ac?.setGuessedIds(state.guesses.map((x) => x.group.id));
+      prevKnownAttrs = new Set();
+      const clues0 = applyHintsToClues(deriveClues(state.guesses), state.hintEvents);
+      prevKnownAttrs = knownAttrs(clues0, getNumericBounds(state.entity), state.entity);
+      refreshClues({ animateNewlyKnown: false });
+
+      if (prev.won) {
         els.guessCount.textContent = t(prev.guesses === 1 ? "meta.solvedToday.one" : "meta.solvedToday.many", { n: prev.guesses });
         renderWinBanner(els.banner, {
           mode: "daily",
           difficulty: state.difficulty,
           entity: state.entity,
           guessCount: prev.guesses,
-          // No persisted board → emoji grid only shows the single revealed row.
-          guesses: [{ group: state.target, comparison: reveal }],
+          guesses: restoredGuesses,
           attrOrder: visible,
           target: state.target,
           dateStr: todayUTC(),
@@ -514,7 +545,7 @@ function startGame({ replayDaily = false, replayDate = null, forceTargetId = nul
           difficulty: state.difficulty,
           entity: state.entity,
           guessCount: prev.guesses,
-          guesses: [], // not persisted with the loss record
+          guesses: restoredGuesses,
           attrOrder: visible,
           target: state.target,
           dateStr: todayUTC(),
@@ -526,7 +557,6 @@ function startGame({ replayDaily = false, replayDate = null, forceTargetId = nul
       els.input.disabled = true;
       els.input.placeholder = t("input.placeholder.daily.done");
       els.newRound.hidden = true;
-      ac?.setGuessedIds([prev.targetId]);
       updateMetaButtons();
       return;
     }
