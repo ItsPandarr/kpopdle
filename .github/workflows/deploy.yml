@@ -60,6 +60,18 @@ jobs:
           # The build script emits the production bundle here.
           path: ./dist
 
+      # Same bundle, uploaded as a plain artifact for downstream non-Pages
+      # deploys (itch.io). The Pages-specific artifact above is a tarball
+      # in a special channel; this one is a normal directory upload that
+      # actions/download-artifact can fetch into a working dist/ in one
+      # step. Tiny (~200 KB) — the duplication cost is negligible.
+      - name: Upload plain dist artifact (for itch.io)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+          retention-days: 1
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -70,3 +82,55 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  # Mirror the build to itch.io alongside GitHub Pages so the game has a
+  # second discoverable home. Runs in parallel with the Pages deploy — they
+  # ship the same `dist/` bundle and neither blocks the other.
+  #
+  # Requires an `ITCH_API_KEY` repo secret with a token from
+  # https://itch.io/user/settings/api-keys. The credential-check step
+  # below short-circuits the rest of the job with a green tick when the
+  # secret is unset, so forks (which won't have it) don't produce red
+  # failures on every push.
+  deploy-itch:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for itch.io credentials
+        id: check
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCH_API_KEY }}
+        run: |
+          if [ -n "$BUTLER_API_KEY" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::ITCH_API_KEY secret not set; skipping itch.io deploy."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download dist artifact
+        if: steps.check.outputs.ok == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # Butler is itch.io's official CLI for HTML5 pushes. Stable URL
+      # straight from itch.io's own CDN (broth.itch.zone); single-binary,
+      # zero npm deps, ~6 MB download.
+      - name: Install butler
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip
+          chmod +x butler
+          ./butler -V
+
+      # Push the dist to the `html5` channel on pandarr/kpopdle. Butler
+      # patches deltas after the first push, so subsequent runs upload
+      # only changed blocks of the bundle (typically a few KB).
+      - name: Push to itch.io
+        if: steps.check.outputs.ok == 'true'
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCH_API_KEY }}
+        run: ./butler push dist pandarr/kpopdle:html5
