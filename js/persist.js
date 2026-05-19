@@ -24,6 +24,11 @@ const DEFAULT_ENTITY_STATE = () => ({
   active: {
     daily: EMPTY_DIFF_MAP(),
     endless: EMPTY_DIFF_MAP(),
+    // Archive replay rounds. Shape: replays[difficulty][date] = { targetId,
+    // guessIds, hintOrder, hintEvents, filterMode }. Lets the player tab
+    // between several in-progress replays without losing state. Cleaned up
+    // alongside history when dates age past ARCHIVE_DAYS.
+    replays: EMPTY_DIFF_MAP(),
   },
 });
 
@@ -83,9 +88,16 @@ function read() {
     }
     for (const e of ENTITIES) {
       if (!parsed[e]) parsed[e] = DEFAULT_ENTITY_STATE();
-      if (!parsed[e].active) parsed[e].active = { daily: EMPTY_DIFF_MAP(), endless: EMPTY_DIFF_MAP() };
+      if (!parsed[e].active) parsed[e].active = { daily: EMPTY_DIFF_MAP(), endless: EMPTY_DIFF_MAP(), replays: EMPTY_DIFF_MAP() };
       if (!parsed[e].active.daily) parsed[e].active.daily = EMPTY_DIFF_MAP();
       if (!parsed[e].active.endless) parsed[e].active.endless = EMPTY_DIFF_MAP();
+      if (!parsed[e].active.replays) parsed[e].active.replays = EMPTY_DIFF_MAP();
+      // Ensure each difficulty bucket exists as a date-keyed map.
+      for (const d of DIFFICULTIES) {
+        if (!parsed[e].active.replays[d] || typeof parsed[e].active.replays[d] !== "object") {
+          parsed[e].active.replays[d] = {};
+        }
+      }
       // Streaks gained a `freezeUsed` field in the streak-freeze feature.
       // Older blobs don't have it — default to false so the player's next
       // missed day gets the freebie they wouldn't have had under the old rule.
@@ -280,7 +292,7 @@ export function recordDailyLoss(entity, difficulty, targetId, guessCount, date =
     guessIds: Array.isArray(opts.guessIds) ? opts.guessIds.slice() : [],
     won: false,
   });
-  trimHistory(bucket, date);
+  trimStorageForDate(s, entity, date);
   write(s);
 }
 
@@ -341,8 +353,16 @@ export function recordDailyWin(entity, difficulty, targetId, guessCount, date = 
     guessIds: Array.isArray(opts.guessIds) ? opts.guessIds.slice() : [],
     won: true,
   });
-  trimHistory(bucket, date);
+  trimStorageForDate(s, entity, date);
   write(s);
+}
+
+// Run all of the date-based and cap-based prunes for a single bucket +
+// the full state's replay cache. Called from every record* path so storage
+// can't grow unboundedly.
+function trimStorageForDate(s, entity, today) {
+  trimHistory(s[entity], today);
+  pruneOldReplays(s, today);
 }
 
 // Trim a history array after a new record. Two cuts:
@@ -587,6 +607,60 @@ export function clearActive(entity, mode, difficulty) {
   }
 }
 
+// ─── Active archive replays ────────────────────────────────────────────────
+//
+// Replays from the daily archive (or "Replay yesterday") used to be
+// memory-only — making a guess mid-replay and then tapping a different
+// archive row lost the progress. These helpers persist replay state per
+// (entity, difficulty, date) so the player can tab between several
+// in-progress replays without losing work.
+
+export function getActiveReplay(entity, difficulty, date) {
+  const s = read();
+  return s[entity]?.active?.replays?.[difficulty]?.[date] || null;
+}
+
+export function saveActiveReplay(entity, difficulty, date, { targetId, guessIds, hintOrder, hintEvents, filterMode }) {
+  const s = read();
+  if (!s[entity]?.active?.replays?.[difficulty]) return;  // schema missing — defensive
+  s[entity].active.replays[difficulty][date] = {
+    targetId,
+    guessIds,
+    hintOrder,
+    hintEvents,
+    filterMode,
+  };
+  write(s);
+}
+
+export function clearActiveReplay(entity, difficulty, date) {
+  const s = read();
+  if (s[entity]?.active?.replays?.[difficulty]?.[date]) {
+    delete s[entity].active.replays[difficulty][date];
+    write(s);
+  }
+}
+
+// Prune replay states whose date has aged past ARCHIVE_DAYS. Called from
+// trimHistory so it runs on every record* path — entries can't outlive
+// the archive that surfaces them.
+function pruneOldReplays(s, today) {
+  const cutoff = new Date(today + "T00:00:00Z");
+  cutoff.setUTCDate(cutoff.getUTCDate() - ARCHIVE_DAYS);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  for (const e of ENTITIES) {
+    const replays = s[e]?.active?.replays;
+    if (!replays) continue;
+    for (const d of DIFFICULTIES) {
+      const byDate = replays[d];
+      if (!byDate) continue;
+      for (const date of Object.keys(byDate)) {
+        if (date < cutoffStr) delete byDate[date];
+      }
+    }
+  }
+}
+
 // Endless skip: the player abandoned a round mid-game by clicking "New round".
 // Doesn't move bests / streaks (endless has no streak), but counts in the
 // guess-distribution histogram as a separate "S" bucket so the player can see
@@ -611,7 +685,7 @@ export function recordEndlessSkip(entity, difficulty, targetId, guessCount, opts
     won: false,
     skipped: true,
   });
-  trimHistory(bucket, todayUTC());
+  trimStorageForDate(s, entity, todayUTC());
   write(s);
 }
 
@@ -638,6 +712,6 @@ export function recordEndlessWin(entity, difficulty, targetId, guessCount, opts 
     generation: opts.generation ?? null,
     won: true,
   });
-  trimHistory(bucket, todayUTC());
+  trimStorageForDate(s, entity, todayUTC());
   write(s);
 }

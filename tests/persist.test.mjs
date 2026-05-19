@@ -28,6 +28,9 @@ const {
   exportStats,
   importStats,
   parseImportedStats,
+  getActiveReplay,
+  saveActiveReplay,
+  clearActiveReplay,
 } = await import("../js/persist.js");
 
 function resetStorage() {
@@ -435,6 +438,66 @@ function streakOf(entity = "group", difficulty = "easy") {
   assert.equal(getDailyHistoryEntry("group", "easy", "2026-05-16"), null);
   assert.equal(getDailyHistoryEntry("group", "hard", "2026-05-17"), null);
   assert.equal(getDailyHistoryEntry("idol",  "easy", "2026-05-17"), null);
+}
+
+// ─── Active replay state ───────────────────────────────────────────────────
+//
+// Replays from the daily archive persist mid-round state per (entity,
+// difficulty, date) so the player can tab between several in-progress
+// replays without losing work.
+
+// Empty by default; save+get round-trip preserves the snapshot.
+{
+  resetStorage();
+  assert.equal(getActiveReplay("group", "easy", "2026-05-15"), null);
+  saveActiveReplay("group", "easy", "2026-05-15", {
+    targetId: "Q-T",
+    guessIds: ["Q1", "Q2"],
+    hintOrder: ["debut_year", "gender"],
+    hintEvents: [{ attr: "debut_year", value: 2013, cost: 4, guessIdxAtClick: 0 }],
+    filterMode: true,
+  });
+  const r = getActiveReplay("group", "easy", "2026-05-15");
+  assert.ok(r);
+  assert.equal(r.targetId, "Q-T");
+  assert.deepEqual(r.guessIds, ["Q1", "Q2"]);
+  assert.deepEqual(r.hintOrder, ["debut_year", "gender"]);
+  assert.equal(r.hintEvents.length, 1);
+  assert.equal(r.filterMode, true);
+}
+
+// Per (entity, difficulty, date) isolation — saving group/easy doesn't bleed
+// into idol/easy or group/medium or the same combo on a different date.
+{
+  resetStorage();
+  saveActiveReplay("group", "easy", "2026-05-15", { targetId: "Q1", guessIds: ["A"], hintOrder: [], hintEvents: [], filterMode: false });
+  assert.deepEqual(getActiveReplay("group", "easy", "2026-05-15")?.guessIds, ["A"]);
+  assert.equal(getActiveReplay("idol",  "easy", "2026-05-15"), null);
+  assert.equal(getActiveReplay("group", "medium", "2026-05-15"), null);
+  assert.equal(getActiveReplay("group", "easy", "2026-05-14"), null);
+}
+
+// clearActiveReplay drops just that one entry.
+{
+  resetStorage();
+  saveActiveReplay("group", "easy", "2026-05-15", { targetId: "Q1", guessIds: ["A"], hintOrder: [], hintEvents: [], filterMode: false });
+  saveActiveReplay("group", "easy", "2026-05-16", { targetId: "Q2", guessIds: ["B"], hintOrder: [], hintEvents: [], filterMode: false });
+  clearActiveReplay("group", "easy", "2026-05-15");
+  assert.equal(getActiveReplay("group", "easy", "2026-05-15"), null);
+  assert.ok(getActiveReplay("group", "easy", "2026-05-16"));
+}
+
+// Replay states older than ARCHIVE_DAYS get pruned on the next record* call
+// (via the same trim path that prunes history entries).
+{
+  resetStorage();
+  // 25 days before our recording-date — outside the archive window.
+  saveActiveReplay("group", "easy", "2026-04-22", { targetId: "Q-old", guessIds: ["A"], hintOrder: [], hintEvents: [], filterMode: false });
+  saveActiveReplay("group", "easy", "2026-05-10", { targetId: "Q-fresh", guessIds: ["B"], hintOrder: [], hintEvents: [], filterMode: false });
+  // Recording for today triggers trimStorageForDate → prunes the old replay.
+  recordDailyWin("group", "easy", "Q-today", 3, "2026-05-17", { guessIds: ["X"] });
+  assert.equal(getActiveReplay("group", "easy", "2026-04-22"), null, "25-day-old replay pruned");
+  assert.ok(getActiveReplay("group", "easy", "2026-05-10"), "7-day-old replay survives");
 }
 
 // ─── export / import roundtrip ─────────────────────────────────────────────
