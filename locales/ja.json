@@ -136,6 +136,8 @@
   "stats.archive.missed": "未プレイ",
   "stats.archive.today.aria": "今日のパズル、進行中",
   "stats.archive.skipped.aria": "この日はプレイしませんでした",
+  "stats.archive.inprogress": "進行中",
+  "stats.archive.inprogress.aria": "進行中 — 推測を始めましたがまだ終わっていません",
   "stats.archive.won.aria": "クリア",
   "stats.archive.lost.aria": "推測回数を使い切り",
   "stats.archive.replay.aria": "{{date}} のデイリーをリプレイ",

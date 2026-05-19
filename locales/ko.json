@@ -136,6 +136,8 @@
   "stats.archive.missed": "놓침",
   "stats.archive.today.aria": "오늘의 퍼즐, 진행 중",
   "stats.archive.skipped.aria": "이 날은 플레이하지 않았어요",
+  "stats.archive.inprogress": "진행 중",
+  "stats.archive.inprogress.aria": "진행 중 — 추측을 시작했지만 아직 끝나지 않았어요",
   "stats.archive.won.aria": "성공",
   "stats.archive.lost.aria": "기회 소진",
   "stats.archive.replay.aria": "{{date}} 데일리 다시 풀기",

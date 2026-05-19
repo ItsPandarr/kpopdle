@@ -228,6 +228,10 @@ export function getDailyArchive(entity, difficulty, days = ARCHIVE_DAYS, today =
     if (h.entity && h.entity !== entity) continue;
     if (!byDate.has(h.date)) byDate.set(h.date, h);
   }
+  // For the in-progress flag we peek at the live active states alongside the
+  // history lookup: today's active daily, and the per-date active replays.
+  const activeToday = bucket.active?.daily?.[difficulty];
+  const replaysByDifficulty = bucket.active?.replays?.[difficulty] || {};
   const out = [];
   const todayDate = new Date(today + "T00:00:00Z");
   for (let i = 0; i < days; i++) {
@@ -235,13 +239,35 @@ export function getDailyArchive(entity, difficulty, days = ARCHIVE_DAYS, today =
     d.setUTCDate(d.getUTCDate() - i);
     const dateStr = d.toISOString().slice(0, 10);
     const entry = byDate.get(dateStr);
+    const isToday = dateStr === today;
+    // In-progress detection. For today's row: live in-progress daily that
+    // hasn't been recorded yet (no history entry). For past rows: an
+    // in-progress replay with at least one guess on file — even if the
+    // day was originally played and has a history entry, the in-progress
+    // replay takes display priority since clicking the row resumes it.
+    let inProgress = false;
+    let inProgressGuesses = 0;
+    if (isToday) {
+      if (activeToday?.targetId && (activeToday.guessIds?.length || 0) > 0 && !entry) {
+        inProgress = true;
+        inProgressGuesses = activeToday.guessIds.length;
+      }
+    } else {
+      const r = replaysByDifficulty[dateStr];
+      if (r?.targetId && (r.guessIds?.length || 0) > 0) {
+        inProgress = true;
+        inProgressGuesses = r.guessIds.length;
+      }
+    }
     out.push({
       date: dateStr,
-      isToday: dateStr === today,
+      isToday,
       played: !!entry,
       won: entry?.won ?? null,
       guesses: entry?.guesses ?? null,
       targetId: entry?.targetId ?? null,
+      inProgress,
+      inProgressGuesses,
     });
   }
   return out;

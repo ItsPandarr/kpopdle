@@ -1554,10 +1554,11 @@ body::before {
   font-size: 1.05em;
   text-align: center;
 }
-.archive-icon.is-win   { color: #4caf72; }
-.archive-icon.is-loss  { color: #c04848; }
-.archive-icon.is-today { color: var(--accent, #ff5fa2); }
-.archive-icon.is-skip  { color: var(--muted, #8e8e9f); }
+.archive-icon.is-win      { color: #4caf72; }
+.archive-icon.is-loss     { color: #c04848; }
+.archive-icon.is-today    { color: var(--accent, #ff5fa2); }
+.archive-icon.is-skip     { color: var(--muted, #8e8e9f); }
+.archive-icon.is-progress { color: var(--accent-2, #6f88ff); }
 .archive-date {
   font-variant-numeric: tabular-nums;
 }

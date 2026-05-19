@@ -440,6 +440,64 @@ function streakOf(entity = "group", difficulty = "easy") {
   assert.equal(getDailyHistoryEntry("idol",  "easy", "2026-05-17"), null);
 }
 
+// ─── Archive in-progress detection ─────────────────────────────────────────
+//
+// A row is flagged inProgress when there's an active-replay (or live
+// active daily for today) with at least one guess on file. The flag
+// drives the "in progress" archive label and the icon swap.
+
+// Past date with a saved replay carrying guesses → inProgress flag set.
+{
+  resetStorage();
+  saveActiveReplay("group", "easy", "2026-05-15", {
+    targetId: "Q-T",
+    guessIds: ["Q1", "Q2"],
+    hintOrder: [],
+    hintEvents: [],
+    filterMode: false,
+  });
+  const archive = getDailyArchive("group", "easy", 5, "2026-05-17");
+  const may15 = archive.find((r) => r.date === "2026-05-15");
+  assert.ok(may15);
+  assert.equal(may15.inProgress, true);
+  assert.equal(may15.inProgressGuesses, 2);
+}
+
+// Empty replay (saved but no guesses yet) does NOT count as in-progress.
+{
+  resetStorage();
+  saveActiveReplay("group", "easy", "2026-05-15", {
+    targetId: "Q-T",
+    guessIds: [],
+    hintOrder: [],
+    hintEvents: [],
+    filterMode: false,
+  });
+  const a = getDailyArchive("group", "easy", 5, "2026-05-17");
+  assert.equal(a.find((r) => r.date === "2026-05-15").inProgress, false);
+}
+
+// In-progress takes display priority even when the date was previously
+// played: the row still surfaces as inProgress=true so click routing
+// resumes the active replay rather than showing the past-guesses modal.
+{
+  resetStorage();
+  recordDailyWin("group", "easy", "Q-old-target", 3, "2026-05-15", {
+    guessIds: ["X", "Y", "Z"],
+  });
+  saveActiveReplay("group", "easy", "2026-05-15", {
+    targetId: "Q-old-target",
+    guessIds: ["Q1"],
+    hintOrder: [],
+    hintEvents: [],
+    filterMode: false,
+  });
+  const may15 = getDailyArchive("group", "easy", 5, "2026-05-17")
+    .find((r) => r.date === "2026-05-15");
+  assert.equal(may15.played, true,    "played flag still reflects history");
+  assert.equal(may15.inProgress, true,"in-progress takes display priority");
+}
+
 // ─── Active replay state ───────────────────────────────────────────────────
 //
 // Replays from the daily archive persist mid-round state per (entity,

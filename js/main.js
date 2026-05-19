@@ -988,7 +988,15 @@ function renderArchive(entity, difficulty) {
     });
 
     let icon, score, name;
-    if (row.isToday && !row.played) {
+    if (row.inProgress) {
+      // Player has at least one guess on this date but hasn't finished —
+      // could be today's live daily mid-round, or a past day's replay
+      // they're tabbing through. Click resumes via the active-replay
+      // path. Hide the target name so we don't spoil the answer.
+      icon = `<span class="archive-icon is-progress" aria-label="${t("stats.archive.inprogress.aria")}">◐</span>`;
+      score = `<span class="dim">${t("stats.archive.inprogress")}</span>`;
+      name = "";
+    } else if (row.isToday && !row.played) {
       icon = `<span class="archive-icon is-today" aria-label="${t("stats.archive.today.aria")}">●</span>`;
       score = `<span class="dim">${t("stats.archive.today")}</span>`;
       name = "";
