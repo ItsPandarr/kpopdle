@@ -61,107 +61,115 @@
   <body>
     <a href="#main" class="skip-link" data-i18n="skiplink">Skip to game</a>
     <header class="app-header">
-      <div class="help-wrap">
-        <button
-          id="help-btn"
-          class="help-btn"
-          type="button"
-          aria-haspopup="true"
-          aria-expanded="false"
-          aria-controls="help-panel"
-          data-i18n="help.aria"
-          data-i18n-attr="aria-label"
-          aria-label="How to play">?</button>
-        <div
-          id="help-panel"
-          class="help-panel"
-          role="dialog"
-          aria-labelledby="help-title"
-          hidden>
-          <h2 id="help-title" data-i18n="help.title">How to play</h2>
-          <p data-i18n="help.intro">Guess the hidden K-pop group or idol. Each guess shows how its attributes compare to the answer.</p>
-          <ul class="help-legend">
-            <li><span class="legend-cell status-exact">✓</span><span data-i18n="help.legend.exact">exact match</span></li>
-            <li><span class="legend-cell status-partial">◐</span><span data-i18n="help.legend.partial">partial match (e.g. same parent label)</span></li>
-            <li><span class="legend-cell status-higher">▲</span><span data-i18n="help.legend.higher">answer's value is higher than your guess</span></li>
-            <li><span class="legend-cell status-lower">▼</span><span data-i18n="help.legend.lower">answer's value is lower than your guess</span></li>
-            <li><span class="legend-cell status-none">✗</span><span data-i18n="help.legend.none">no match</span></li>
-          </ul>
-          <p data-i18n="help.daily.note">Daily gives one shared puzzle per day with a guess limit (Easy 6 · Medium 8 · Hard 10). Endless is practice — no cap, fresh target each round.</p>
-          <p data-i18n="help.hints.note">Hints reveal one attribute at a time. Cost decays as you guess; floor is +1. The button shows which attribute it would reveal.</p>
-          <p data-i18n="help.settings.note">Settings (the gear icon) holds theme, colorblind mode, calm-distractions mode, and detective mode (hides candidates that can't be the answer).</p>
+      <!-- Title bar: help on the left, title centered, achievements + settings on
+           the right. All three live in document flow (not absolute-positioned to
+           the page corners) so embedded contexts like itch.io's iframe — whose
+           own chrome lives at the iframe edges — can't overlay them. -->
+      <div class="header-titlebar">
+        <div class="help-wrap">
+          <button
+            id="help-btn"
+            class="help-btn"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="help-panel"
+            data-i18n="help.aria"
+            data-i18n-attr="aria-label"
+            aria-label="How to play">?</button>
+          <div
+            id="help-panel"
+            class="help-panel"
+            role="dialog"
+            aria-labelledby="help-title"
+            hidden>
+            <h2 id="help-title" data-i18n="help.title">How to play</h2>
+            <p data-i18n="help.intro">Guess the hidden K-pop group or idol. Each guess shows how its attributes compare to the answer.</p>
+            <ul class="help-legend">
+              <li><span class="legend-cell status-exact">✓</span><span data-i18n="help.legend.exact">exact match</span></li>
+              <li><span class="legend-cell status-partial">◐</span><span data-i18n="help.legend.partial">partial match (e.g. same parent label)</span></li>
+              <li><span class="legend-cell status-higher">▲</span><span data-i18n="help.legend.higher">answer's value is higher than your guess</span></li>
+              <li><span class="legend-cell status-lower">▼</span><span data-i18n="help.legend.lower">answer's value is lower than your guess</span></li>
+              <li><span class="legend-cell status-none">✗</span><span data-i18n="help.legend.none">no match</span></li>
+            </ul>
+            <p data-i18n="help.daily.note">Daily gives one shared puzzle per day with a guess limit (Easy 6 · Medium 8 · Hard 10). Endless is practice — no cap, fresh target each round.</p>
+            <p data-i18n="help.hints.note">Hints reveal one attribute at a time. Cost decays as you guess; floor is +1. The button shows which attribute it would reveal.</p>
+            <p data-i18n="help.settings.note">Settings (the gear icon) holds theme, colorblind mode, calm-distractions mode, and detective mode (hides candidates that can't be the answer).</p>
+          </div>
         </div>
-      </div>
-      <button
-        id="achievements-btn"
-        class="achievements-btn"
-        type="button"
-        aria-haspopup="dialog"
-        data-i18n="achievements.aria"
-        data-i18n-attr="aria-label"
-        aria-label="Achievements">
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
-          <path fill="currentColor" d="M18 4V3H6v1H2v3c0 2.3 1.7 4.2 3.9 4.5.6 2.3 2.5 4 4.8 4.4V18H7v2h10v-2h-3.7v-2.1c2.3-.4 4.2-2.1 4.8-4.4C20.3 11.2 22 9.3 22 7V4h-4zM4 7V6h2v3.4C4.8 9 4 8.1 4 7zm16 0c0 1.1-.8 2-2 2.4V6h2v1z"/>
-        </svg>
-      </button>
-      <div class="settings-wrap">
-        <button
-          id="settings-btn"
-          class="settings-btn"
-          type="button"
-          aria-haspopup="true"
-          aria-expanded="false"
-          aria-controls="settings-panel"
-          data-i18n="settings.aria"
-          data-i18n-attr="aria-label"
-          aria-label="Settings">
-          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
-            <path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 4l2.1 1.6-2 3.4-2.5-.7c-.5.4-1 .7-1.6 1l-.4 2.6h-4l-.4-2.6c-.6-.3-1.1-.6-1.6-1l-2.5.7-2-3.4L8.6 12 6.5 10.4l2-3.4 2.5.7c.5-.4 1-.7 1.6-1L13 4h4l.4 2.6c.6.3 1.1.6 1.6 1l2.5-.7 2 3.4L21.4 12z"/>
-          </svg>
-        </button>
-        <div
-          id="settings-panel"
-          class="settings-panel"
-          role="dialog"
-          data-i18n="settings.aria"
-          data-i18n-attr="aria-label"
-          aria-label="Settings"
-          hidden>
-          <fieldset class="settings-group">
-            <legend data-i18n="settings.theme">Theme</legend>
-            <div class="toggle-group" id="theme-toggle" role="radiogroup" aria-label="Theme"></div>
-          </fieldset>
-          <fieldset class="settings-group">
-            <legend data-i18n="settings.cb">Colorblind mode</legend>
-            <div class="toggle-group" id="cb-toggle" role="radiogroup" aria-label="Colorblind mode"></div>
-            <p class="settings-hint" data-i18n="settings.cb.hint">Swaps red/green for a deuteranopia-safe palette. Symbols (✓ ◐ ✗ ▲ ▼) are always shown.</p>
-          </fieldset>
-          <fieldset class="settings-group">
-            <legend data-i18n="settings.calm">Calm mode</legend>
-            <div class="toggle-group" id="calm-toggle" role="radiogroup" aria-label="Calm mode"></div>
-            <p class="settings-hint" data-i18n="settings.calm.hint">Stops animations, shimmering text, and the drifting background. Confetti and entrance flips are disabled.</p>
-          </fieldset>
-          <fieldset class="settings-group">
-            <legend data-i18n="settings.filter">Detective mode</legend>
-            <div class="toggle-group" id="filter-toggle" role="radiogroup" aria-label="Detective mode"></div>
-            <p class="settings-hint" data-i18n="settings.filter.hint">Hides candidates that can't be the answer given clues so far (e.g. wrong company, debuts outside the inferred range). Takes effect on the next puzzle.</p>
-          </fieldset>
-          <fieldset class="settings-group">
-            <legend data-i18n="settings.lang">Language</legend>
-            <div class="toggle-group" id="lang-toggle" role="radiogroup" aria-label="Language"></div>
-          </fieldset>
-          <div class="settings-actions">
-            <div class="settings-action-row">
-              <button id="export-stats-btn" type="button" class="link-btn" data-i18n="settings.export">Export stats</button>
-              <button id="import-stats-btn" type="button" class="link-btn" data-i18n="settings.import">Import stats</button>
+        <h1 data-i18n="app.title">KPopdle</h1>
+        <div class="header-tools">
+          <button
+            id="achievements-btn"
+            class="achievements-btn"
+            type="button"
+            aria-haspopup="dialog"
+            data-i18n="achievements.aria"
+            data-i18n-attr="aria-label"
+            aria-label="Achievements">
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
+              <path fill="currentColor" d="M18 4V3H6v1H2v3c0 2.3 1.7 4.2 3.9 4.5.6 2.3 2.5 4 4.8 4.4V18H7v2h10v-2h-3.7v-2.1c2.3-.4 4.2-2.1 4.8-4.4C20.3 11.2 22 9.3 22 7V4h-4zM4 7V6h2v3.4C4.8 9 4 8.1 4 7zm16 0c0 1.1-.8 2-2 2.4V6h2v1z"/>
+            </svg>
+          </button>
+          <div class="settings-wrap">
+            <button
+              id="settings-btn"
+              class="settings-btn"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="settings-panel"
+              data-i18n="settings.aria"
+              data-i18n-attr="aria-label"
+              aria-label="Settings">
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
+                <path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 4l2.1 1.6-2 3.4-2.5-.7c-.5.4-1 .7-1.6 1l-.4 2.6h-4l-.4-2.6c-.6-.3-1.1-.6-1.6-1l-2.5.7-2-3.4L8.6 12 6.5 10.4l2-3.4 2.5.7c.5-.4 1-.7 1.6-1L13 4h4l.4 2.6c.6.3 1.1.6 1.6 1l2.5-.7 2 3.4L21.4 12z"/>
+              </svg>
+            </button>
+            <div
+              id="settings-panel"
+              class="settings-panel"
+              role="dialog"
+              data-i18n="settings.aria"
+              data-i18n-attr="aria-label"
+              aria-label="Settings"
+              hidden>
+              <fieldset class="settings-group">
+                <legend data-i18n="settings.theme">Theme</legend>
+                <div class="toggle-group" id="theme-toggle" role="radiogroup" aria-label="Theme"></div>
+              </fieldset>
+              <fieldset class="settings-group">
+                <legend data-i18n="settings.cb">Colorblind mode</legend>
+                <div class="toggle-group" id="cb-toggle" role="radiogroup" aria-label="Colorblind mode"></div>
+                <p class="settings-hint" data-i18n="settings.cb.hint">Swaps red/green for a deuteranopia-safe palette. Symbols (✓ ◐ ✗ ▲ ▼) are always shown.</p>
+              </fieldset>
+              <fieldset class="settings-group">
+                <legend data-i18n="settings.calm">Calm mode</legend>
+                <div class="toggle-group" id="calm-toggle" role="radiogroup" aria-label="Calm mode"></div>
+                <p class="settings-hint" data-i18n="settings.calm.hint">Stops animations, shimmering text, and the drifting background. Confetti and entrance flips are disabled.</p>
+              </fieldset>
+              <fieldset class="settings-group">
+                <legend data-i18n="settings.filter">Detective mode</legend>
+                <div class="toggle-group" id="filter-toggle" role="radiogroup" aria-label="Detective mode"></div>
+                <p class="settings-hint" data-i18n="settings.filter.hint">Hides candidates that can't be the answer given clues so far (e.g. wrong company, debuts outside the inferred range). Takes effect on the next puzzle.</p>
+              </fieldset>
+              <fieldset class="settings-group">
+                <legend data-i18n="settings.lang">Language</legend>
+                <div class="toggle-group" id="lang-toggle" role="radiogroup" aria-label="Language"></div>
+              </fieldset>
+              <div class="settings-actions">
+                <div class="settings-action-row">
+                  <button id="export-stats-btn" type="button" class="link-btn" data-i18n="settings.export">Export stats</button>
+                  <button id="import-stats-btn" type="button" class="link-btn" data-i18n="settings.import">Import stats</button>
+                </div>
+                <p class="settings-hint" data-i18n="settings.export.hint">Copy your stats to move them to another browser or device.</p>
+                <button id="reset-stats-btn" type="button" class="reset-stats-btn" data-i18n="settings.reset">Reset all stats</button>
+                <p class="settings-hint" data-i18n="settings.reset.hint">Clears streaks, history, and any in-progress games. Theme and accessibility preferences are kept.</p>
+              </div>
             </div>
-            <p class="settings-hint" data-i18n="settings.export.hint">Copy your stats to move them to another browser or device.</p>
-            <button id="reset-stats-btn" type="button" class="reset-stats-btn" data-i18n="settings.reset">Reset all stats</button>
-            <p class="settings-hint" data-i18n="settings.reset.hint">Clears streaks, history, and any in-progress games. Theme and accessibility preferences are kept.</p>
           </div>
         </div>
       </div>
-      <h1 data-i18n="app.title">KPopdle</h1>
       <div class="toggles">
         <div class="toggle-group" id="entity-toggle" role="radiogroup" aria-label="Entity"></div>
         <div class="toggle-group" id="mode-toggle" role="radiogroup" aria-label="Mode"></div>

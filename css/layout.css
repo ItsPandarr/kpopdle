@@ -144,6 +144,24 @@ body::before {
   text-align: center;
   padding: 1.5rem 1rem 0.5rem;
 }
+/* Title row: help button on the left, "KPopdle" centered, achievements +
+   settings on the right. A three-column grid (1fr auto 1fr) keeps the
+   title visually centered regardless of how wide the side groups are,
+   and keeps everything in document flow so iframe-embed chrome (itch.io
+   fullscreen, etc.) at the viewport corners can't overlap any of it. */
+.header-titlebar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+.header-titlebar .help-wrap { justify-self: start; }
+.header-titlebar .header-tools {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 .app-header h1 {
   font-size: 2.1rem;
   letter-spacing: -0.02em;
@@ -1786,9 +1804,11 @@ a:focus-visible,
 /* ─── Settings menu ───────────────────────────────────────────────────────── */
 
 .settings-wrap {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+  /* In-flow inside .header-tools (see .header-titlebar above). `relative`
+     keeps it as the positioning context for the absolute-positioned
+     .settings-panel that flies out below the button. z-index keeps the
+     open panel above the toggle row and clues panel underneath. */
+  position: relative;
   z-index: 50;
 }
 .settings-btn,
@@ -1807,7 +1827,6 @@ a:focus-visible,
 }
 .settings-btn:hover,
 .achievements-btn:hover { color: var(--text); }
-.achievements-btn { margin-right: 0.4rem; }
 .achievements-btn:hover {
   background: var(--surface-2);
   transform: scale(1.05);
@@ -1896,9 +1915,10 @@ a:focus-visible,
 /* ─── Help button + panel (sibling of settings-wrap) ──────────────────────── */
 
 .help-wrap {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
+  /* In-flow inside .header-titlebar's left column. `relative` keeps it
+     as the positioning context for the absolute-positioned .help-panel
+     that flies out below the button. */
+  position: relative;
   z-index: 50;
 }
 .help-btn {
@@ -2070,20 +2090,24 @@ a:focus-visible,
   .app-header h1 { font-size: 1.7rem; }
   .app-main { padding: 0.5rem 0.5rem 2rem; }
 
-  /* Settings/help buttons sit closer to the corner. */
-  .settings-wrap, .help-wrap { top: 0.5rem; }
-  .settings-wrap { right: 0.5rem; }
-  .help-wrap { left: 0.5rem; }
-  .settings-btn, .help-btn { width: 32px; height: 32px; }
-  /* Float a near-full-width panel on mobile. The panel is position:absolute
-     inside a tiny corner-pinned wrapper, so without an explicit width it
-     shrinks to fit text and reads like a column of single words. */
+  /* Tighter title-bar gap + smaller circle buttons so the row fits the
+     title comfortably at phone widths. All three header buttons match
+     in size so the row reads as a single toolbar. */
+  .header-titlebar { gap: 0.35rem; }
+  .settings-btn,
+  .help-btn,
+  .achievements-btn { width: 32px; height: 32px; }
+  /* Float a near-full-width panel on mobile. Each panel is
+     position:absolute inside its in-flow wrapper, so without an explicit
+     width it shrinks to fit text and reads like a column of single words. */
   .settings-panel, .help-panel {
     width: calc(100vw - 1.5rem);
     max-width: calc(100vw - 1.5rem);
     min-width: 0;
   }
-  /* Anchor each panel to the opposite edge so it doesn't overflow. */
+  /* Anchor each panel to the side of the screen its button sits on so
+     it doesn't overflow the viewport — help button sits on the left of
+     the title row, settings button on the right. */
   .settings-panel { right: 0; left: auto; }
   .help-panel { left: 0; right: auto; }
 
