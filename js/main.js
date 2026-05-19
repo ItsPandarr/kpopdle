@@ -1775,8 +1775,17 @@ async function init() {
     await i18n.setLocale(v);
     location.reload();
   });
-  attachSettingsMenu({ button: els.settingsBtn, panel: els.settingsPanel });
-  attachSettingsMenu({ button: els.helpBtn, panel: els.helpPanel });
+  const settingsMenu = attachSettingsMenu({ button: els.settingsBtn, panel: els.settingsPanel });
+  const helpMenu = attachSettingsMenu({ button: els.helpBtn, panel: els.helpPanel });
+  // Mutual exclusivity: now that both fly-out panels share the toolbar
+  // cluster on the left, opening one should auto-close the other so they
+  // don't visually overlap in the same anchor spot. Click order on the
+  // same element is registration order: attachSettingsMenu's handler
+  // runs first (toggles this menu open), then our handler closes the
+  // sibling. stopPropagation in the menu's own handler stops bubbling,
+  // not co-listeners, so this still fires.
+  els.settingsBtn.addEventListener("click", () => helpMenu.close());
+  els.helpBtn.addEventListener("click", () => settingsMenu.close());
   els.achievementsBtn?.addEventListener("click", openAchievementsModal);
 
   // The puzzle-share button dispatches "kpopdle:puzzle-shared" — we listen

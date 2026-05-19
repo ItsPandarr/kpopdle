@@ -61,44 +61,45 @@
   <body>
     <a href="#main" class="skip-link" data-i18n="skiplink">Skip to game</a>
     <header class="app-header">
-      <!-- Title bar: help on the left, title centered, achievements + settings on
-           the right. All three live in document flow (not absolute-positioned to
-           the page corners) so embedded contexts like itch.io's iframe — whose
-           own chrome lives at the iframe edges — can't overlay them. -->
+      <!-- Title bar: all three utility buttons clustered on the left, title
+           centered. All three live in document flow inside a single toolbar
+           so embedded contexts like itch.io (Fullscreen control top-right)
+           don't overlap them. Right column of the grid is intentionally empty
+           — its `1fr` width balances the toolbar's `1fr` on the left so the
+           title stays optically centered on the page. -->
       <div class="header-titlebar">
-        <div class="help-wrap">
-          <button
-            id="help-btn"
-            class="help-btn"
-            type="button"
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-controls="help-panel"
-            data-i18n="help.aria"
-            data-i18n-attr="aria-label"
-            aria-label="How to play">?</button>
-          <div
-            id="help-panel"
-            class="help-panel"
-            role="dialog"
-            aria-labelledby="help-title"
-            hidden>
-            <h2 id="help-title" data-i18n="help.title">How to play</h2>
-            <p data-i18n="help.intro">Guess the hidden K-pop group or idol. Each guess shows how its attributes compare to the answer.</p>
-            <ul class="help-legend">
-              <li><span class="legend-cell status-exact">✓</span><span data-i18n="help.legend.exact">exact match</span></li>
-              <li><span class="legend-cell status-partial">◐</span><span data-i18n="help.legend.partial">partial match (e.g. same parent label)</span></li>
-              <li><span class="legend-cell status-higher">▲</span><span data-i18n="help.legend.higher">answer's value is higher than your guess</span></li>
-              <li><span class="legend-cell status-lower">▼</span><span data-i18n="help.legend.lower">answer's value is lower than your guess</span></li>
-              <li><span class="legend-cell status-none">✗</span><span data-i18n="help.legend.none">no match</span></li>
-            </ul>
-            <p data-i18n="help.daily.note">Daily gives one shared puzzle per day with a guess limit (Easy 6 · Medium 8 · Hard 10). Endless is practice — no cap, fresh target each round.</p>
-            <p data-i18n="help.hints.note">Hints reveal one attribute at a time. Cost decays as you guess; floor is +1. The button shows which attribute it would reveal.</p>
-            <p data-i18n="help.settings.note">Settings (the gear icon) holds theme, colorblind mode, calm-distractions mode, and detective mode (hides candidates that can't be the answer).</p>
-          </div>
-        </div>
-        <h1 data-i18n="app.title">KPopdle</h1>
         <div class="header-tools">
+          <div class="help-wrap">
+            <button
+              id="help-btn"
+              class="help-btn"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="help-panel"
+              data-i18n="help.aria"
+              data-i18n-attr="aria-label"
+              aria-label="How to play">?</button>
+            <div
+              id="help-panel"
+              class="help-panel"
+              role="dialog"
+              aria-labelledby="help-title"
+              hidden>
+              <h2 id="help-title" data-i18n="help.title">How to play</h2>
+              <p data-i18n="help.intro">Guess the hidden K-pop group or idol. Each guess shows how its attributes compare to the answer.</p>
+              <ul class="help-legend">
+                <li><span class="legend-cell status-exact">✓</span><span data-i18n="help.legend.exact">exact match</span></li>
+                <li><span class="legend-cell status-partial">◐</span><span data-i18n="help.legend.partial">partial match (e.g. same parent label)</span></li>
+                <li><span class="legend-cell status-higher">▲</span><span data-i18n="help.legend.higher">answer's value is higher than your guess</span></li>
+                <li><span class="legend-cell status-lower">▼</span><span data-i18n="help.legend.lower">answer's value is lower than your guess</span></li>
+                <li><span class="legend-cell status-none">✗</span><span data-i18n="help.legend.none">no match</span></li>
+              </ul>
+              <p data-i18n="help.daily.note">Daily gives one shared puzzle per day with a guess limit (Easy 6 · Medium 8 · Hard 10). Endless is practice — no cap, fresh target each round.</p>
+              <p data-i18n="help.hints.note">Hints reveal one attribute at a time. Cost decays as you guess; floor is +1. The button shows which attribute it would reveal.</p>
+              <p data-i18n="help.settings.note">Settings (the gear icon) holds theme, colorblind mode, calm-distractions mode, and detective mode (hides candidates that can't be the answer).</p>
+            </div>
+          </div>
           <button
             id="achievements-btn"
             class="achievements-btn"
@@ -169,6 +170,7 @@
             </div>
           </div>
         </div>
+        <h1 data-i18n="app.title">KPopdle</h1>
       </div>
       <div class="toggles">
         <div class="toggle-group" id="entity-toggle" role="radiogroup" aria-label="Entity"></div>
