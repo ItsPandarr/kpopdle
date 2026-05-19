@@ -82,6 +82,8 @@ import {
   importStats,
   parseImportedStats,
   markVisited,
+  hasShownDetectiveHint,
+  markDetectiveHintShown,
   historySummary,
 } from "./persist.js";
 
@@ -319,6 +321,41 @@ function checkAchievementsAfterRecord() {
   }
 }
 
+// One-shot retention nudge: when the player loses their very first daily
+// (across both entities) and Detective mode is currently off, offer to
+// turn it on. A first loss is the moment a new player is most likely to
+// bounce; surfacing the deduction-helper feature can keep them engaged.
+// Marked shown unconditionally — declining the prompt counts as having
+// seen it, so we never re-ask. Replays / custom puzzles never trigger
+// (they don't touch totals, so the gate wouldn't fire anyway, but
+// guarded explicitly for clarity).
+async function maybeShowDetectiveHint() {
+  if (state.replayDate || state.customPuzzle) return;
+  if (getFilter() === "on") return;
+  if (hasShownDetectiveHint()) return;
+  const s = getStats();
+  const totalDailyLosses = s.group.totals.dailyLosses + s.idol.totals.dailyLosses;
+  if (totalDailyLosses !== 1) return;
+  // Mark before showing — if the player closes the tab or the modal gets
+  // dismissed by a competing UI, we still honor "show at most once".
+  markDetectiveHintShown();
+  // Brief delay so the loss banner finishes its entrance animation before
+  // we stack a modal on top of it. Empirically ~900ms is the sweet spot
+  // where the banner has settled but the player hasn't started reading
+  // CTAs yet.
+  await new Promise((resolve) => setTimeout(resolve, 900));
+  const ok = await showConfirm({
+    title: t("detectiveHint.title"),
+    message: t("detectiveHint.body"),
+    confirmLabel: t("detectiveHint.cta"),
+    cancelLabel: t("detectiveHint.dismiss"),
+  });
+  if (ok) {
+    saveFilter("on");
+    setActive(els.filterToggle, "on");
+  }
+}
+
 // End the current round as a loss. Three flavors depending on mode:
 //   - daily:  records a daily loss (breaks streak, hits history), uses the
 //             "Out of guesses today" placeholder.
@@ -351,6 +388,7 @@ function forceLoss() {
     const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
     if (isDaily) {
       recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries, undefined, recordOpts());
+      maybeShowDetectiveHint();
     } else if (state.guesses.length > 0) {
       // Only bother recording an endless skip if the player actually engaged;
       // an immediate "show me" from a fresh round isn't worth tracking.
@@ -773,6 +811,7 @@ function onGuess(entity) {
         const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
         recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries, undefined, recordOpts());
         checkAchievementsAfterRecord();
+        maybeShowDetectiveHint();
       } else {
         // Replay ran out of guesses — keep the saved state but flag it
         // done+lost so the archive row shows ✗ and tapping it opens

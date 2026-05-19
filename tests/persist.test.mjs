@@ -31,6 +31,8 @@ const {
   getActiveReplay,
   saveActiveReplay,
   clearActiveReplay,
+  hasShownDetectiveHint,
+  markDetectiveHintShown,
 } = await import("../js/persist.js");
 
 function resetStorage() {
@@ -681,6 +683,28 @@ function streakOf(entity = "group", difficulty = "easy") {
   let msg = null;
   try { parseImportedStats(fake); } catch (e) { msg = e.message; }
   assert.equal(msg, "version");
+}
+
+// ─── Detective-hint one-shot flag ──────────────────────────────────────────
+//
+// One-time "try Detective mode?" tip surfaces on the player's first daily
+// loss. The flag lives in its own plain-storage key so a stats reset can't
+// inadvertently re-arm the nag.
+
+// Defaults to false on fresh storage; markDetectiveHintShown flips it.
+{
+  resetStorage();
+  assert.equal(hasShownDetectiveHint(), false, "fresh storage → not yet shown");
+  markDetectiveHintShown();
+  assert.equal(hasShownDetectiveHint(), true, "after mark → shown");
+}
+
+// Idempotent — marking twice doesn't break anything and stays true.
+{
+  resetStorage();
+  markDetectiveHintShown();
+  markDetectiveHintShown();
+  assert.equal(hasShownDetectiveHint(), true);
 }
 
 console.log("persist.test ok");

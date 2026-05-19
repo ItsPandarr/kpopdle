@@ -461,6 +461,7 @@ const CB_KEY = "kpopdle:cb";       // "on" | unset (= off)
 const CALM_KEY = "kpopdle:calm";   // "on" | unset (= off)
 const FILTER_KEY = "kpopdle:filter"; // "on" | unset (= off) — Detective mode
 const VISITED_KEY = "kpopdle:visited"; // "1" once the player has seen the help modal at least once
+const DETECTIVE_HINT_KEY = "kpopdle:detectiveHinted"; // "1" once the "try Detective mode?" tip has been offered
 
 export function getTheme() {
   try {
@@ -581,6 +582,24 @@ export function hasVisited() {
 export function markVisited() {
   try {
     localStorage.setItem(VISITED_KEY, "1");
+  } catch { /* localStorage blocked */ }
+}
+
+// One-time tip on the player's first daily loss: "try Detective mode?".
+// Tracked in its own plain key (not the scrambled stats blob) so a stats
+// reset doesn't make us nag the player a second time — the tip is a UX
+// onboarding step, not a stat. Defaults to "shown" when storage is
+// blocked so private-browsing users don't get re-prompted every visit.
+export function hasShownDetectiveHint() {
+  try {
+    return localStorage.getItem(DETECTIVE_HINT_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+export function markDetectiveHintShown() {
+  try {
+    localStorage.setItem(DETECTIVE_HINT_KEY, "1");
   } catch { /* localStorage blocked */ }
 }
 
