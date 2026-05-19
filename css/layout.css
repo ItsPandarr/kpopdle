@@ -1375,6 +1375,28 @@ body::before {
   .modal-backdrop, .modal-card { animation: none; }
 }
 
+/* Past-guesses modal — opened from the daily-archive list. Wider than the
+   default modal-card so a full comparison row fits across at typical
+   viewport widths; scrollable when many guesses + small viewport. */
+.modal-card-past-guesses {
+  max-width: 36rem;
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+}
+.past-guesses-board {
+  margin-bottom: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+/* On a narrow viewport the rebuilt board would otherwise sit at the wider
+   game-page width — clamp it to the modal's content box so cells don't
+   overflow the card. */
+.past-guesses-board .board-header,
+.past-guesses-board .board {
+  width: 100%;
+}
+
 /* Achievement modal — same .modal-backdrop / .modal-card scaffold as the
    confirm dialog, but with a wider card (achievement names + descriptions
    need room) and a scrollable list inside. */

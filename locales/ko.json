@@ -139,6 +139,9 @@
   "stats.archive.won.aria": "성공",
   "stats.archive.lost.aria": "기회 소진",
   "stats.archive.replay.aria": "{{date}} 데일리 다시 풀기",
+  "pastGuesses.outcome.win": "{{guesses}}/{{max}}회{{hintTag}}로 성공. 정답은 {{name}}.",
+  "pastGuesses.outcome.loss": "기회 소진 ({{guesses}}/{{max}}{{hintTag}}). 정답은 {{name}}.",
+  "pastGuesses.replay": "다시 풀기",
 
   "settings.aria": "설정",
   "settings.theme": "테마",

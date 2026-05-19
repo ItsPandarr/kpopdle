@@ -47,6 +47,12 @@ const DEFAULT_STATE = () => ({
 // happens within a normal session.
 export const RECENT_ENDLESS_CAP = 25;
 
+// How many days back the daily archive can show + how long we keep daily
+// history entries' rich payload (guess IDs + metadata) before pruning. The
+// archive UI uses this same constant for its display window so an entry
+// that disappears here also disappears from the archive list.
+export const ARCHIVE_DAYS = 14;
+
 function read() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -168,6 +174,22 @@ export function getDailyStatus(entity, difficulty, date = todayUTC()) {
   return entry;
 }
 
+// Look up a single completed daily entry, including the player's stored
+// guess IDs if any. Returns null when the player didn't play that
+// (entity, difficulty, date) combination or when the entry has aged out
+// of the archive window.
+export function getDailyHistoryEntry(entity, difficulty, date) {
+  const s = read();
+  const bucket = s[entity];
+  if (!bucket) return null;
+  for (const h of bucket.history || []) {
+    if (h.mode === "daily" && h.difficulty === difficulty && h.date === date) {
+      return h;
+    }
+  }
+  return null;
+}
+
 // Last-N-days daily archive for the given (entity, difficulty). Each entry
 // describes whether that day was played and the outcome — used by the stats
 // panel's "last 14 days" strip so the player can spot missed days and tap
@@ -177,7 +199,7 @@ export function getDailyStatus(entity, difficulty, date = todayUTC()) {
 // controls window length (default 14).
 //
 // Returns newest-first: index 0 is today, index 1 is yesterday, etc.
-export function getDailyArchive(entity, difficulty, days = 14, today = todayUTC()) {
+export function getDailyArchive(entity, difficulty, days = ARCHIVE_DAYS, today = todayUTC()) {
   const s = read();
   const bucket = s[entity];
   // Index daily-mode history by date for O(1) lookup. The history array can
@@ -252,9 +274,13 @@ export function recordDailyLoss(entity, difficulty, targetId, guessCount, date =
     filterMode: !!opts.filterMode,
     nationality: opts.nationality ?? null,
     generation: opts.generation ?? null,
+    // Captured for the daily archive's "view past guesses" modal. Stored
+    // as IDs only; comparisons are recomputed from target+guess at view
+    // time since they're cheap and pure (compareFor).
+    guessIds: Array.isArray(opts.guessIds) ? opts.guessIds.slice() : [],
     won: false,
   });
-  bucket.history = bucket.history.slice(0, HISTORY_CAP);
+  trimHistory(bucket, date);
   write(s);
 }
 
@@ -312,10 +338,36 @@ export function recordDailyWin(entity, difficulty, targetId, guessCount, date = 
     filterMode: !!opts.filterMode,
     nationality: opts.nationality ?? null,
     generation: opts.generation ?? null,
+    guessIds: Array.isArray(opts.guessIds) ? opts.guessIds.slice() : [],
     won: true,
   });
-  bucket.history = bucket.history.slice(0, HISTORY_CAP);
+  trimHistory(bucket, date);
   write(s);
+}
+
+// Trim a history array after a new record. Two cuts:
+//   1. The hard FIFO cap (HISTORY_CAP=100) — keeps the localStorage blob
+//      from growing unboundedly across years of play. Endless records use
+//      this exclusively.
+//   2. Daily entries older than ARCHIVE_DAYS — the archive UI can't show
+//      them anyway, so the rich payload (guessIds) just wastes space.
+//      We compute the cutoff relative to the supplied `today` so unit
+//      tests with frozen dates produce deterministic output.
+function trimHistory(bucket, today) {
+  const cutoff = new Date(today + "T00:00:00Z");
+  cutoff.setUTCDate(cutoff.getUTCDate() - ARCHIVE_DAYS);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  bucket.history = bucket.history.filter((h) => {
+    // Endless entries don't use date-based expiry — they age out via the cap.
+    if (h.mode !== "daily") return true;
+    // Daily entries older than the archive window are no longer surfaceable;
+    // drop them entirely. The aggregate counters (totals.*) and streaks.best
+    // capture the long-tail stats that survive across the window.
+    return h.date >= cutoffStr;
+  });
+  if (bucket.history.length > HISTORY_CAP) {
+    bucket.history = bucket.history.slice(0, HISTORY_CAP);
+  }
 }
 
 // ─── last-used selection (entity/mode/difficulty) ────────────────────────────
@@ -559,7 +611,7 @@ export function recordEndlessSkip(entity, difficulty, targetId, guessCount, opts
     won: false,
     skipped: true,
   });
-  bucket.history = bucket.history.slice(0, HISTORY_CAP);
+  trimHistory(bucket, todayUTC());
   write(s);
 }
 
@@ -586,6 +638,6 @@ export function recordEndlessWin(entity, difficulty, targetId, guessCount, opts 
     generation: opts.generation ?? null,
     won: true,
   });
-  bucket.history = bucket.history.slice(0, HISTORY_CAP);
+  trimHistory(bucket, todayUTC());
   write(s);
 }

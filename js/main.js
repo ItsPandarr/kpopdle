@@ -54,6 +54,7 @@ import {
   recordEndlessSkip,
   getStats,
   getDailyArchive,
+  getDailyHistoryEntry,
   getActive,
   saveActive,
   clearActive,
@@ -280,6 +281,10 @@ function recordOpts() {
     filterMode: !!state.filterMode,
     nationality: state.target?.nationality ?? null,
     generation: state.target?.generation ?? null,
+    // Stored so the daily archive's "view past guesses" modal can replay
+    // the exact row sequence the player committed. Endless ignores it
+    // (target identity isn't durable across rounds).
+    guessIds: state.guesses.map((g) => g.group.id),
   };
 }
 
@@ -885,14 +890,24 @@ function renderStats() {
     ${archiveHtml}
   `;
 
-  // Wire up click-to-replay on each archive row. Today's row is non-
-  // interactive (it's the current game); past days call into the same
-  // replay path the "Replay yesterday" button uses, which is stats-neutral.
+  // Wire up archive row clicks. Routing depends on whether the player
+  // actually played that day:
+  //   - played (has a stored entry) → open the "Past guesses" modal so
+  //     they can revisit what they guessed and how it went. From there a
+  //     "Replay" button starts a fresh stats-neutral attempt.
+  //   - unplayed (no entry, was "missed") → tap goes straight to replay,
+  //     matching the original archive-tap behavior since there's nothing
+  //     to show.
   for (const row of els.stats.querySelectorAll(".archive-row.is-clickable")) {
     row.addEventListener("click", () => {
       const date = row.dataset.date;
       if (!date) return;
-      replayArchivedDaily(date);
+      const entry = getDailyHistoryEntry(state.entity, state.difficulty, date);
+      if (entry && Array.isArray(entry.guessIds) && entry.guessIds.length > 0) {
+        openPastGuessesModal(entry);
+      } else {
+        replayArchivedDaily(date);
+      }
     });
   }
 }
@@ -975,6 +990,97 @@ function nameOf(entity, id) {
 // Open a modal listing every achievement, locked and unlocked. Locked rows
 // show the icon at low opacity + a "Locked" label. Unlocked rows show the
 // unlock date.
+// "Past guesses" modal for the daily archive. Shows the player's original
+// guess rows for a stored daily entry — same comparison-grid format as the
+// live game — plus the outcome, plus a "Replay" button so they can take
+// another swing (stats-neutral).
+function openPastGuessesModal(entry) {
+  const { entity, difficulty, date, targetId, won, guesses: guessCount,
+          guessIds = [], hints = 0 } = entry;
+  const target = getById(entity, targetId);
+
+  const prev = document.activeElement;
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  const card = document.createElement("div");
+  card.className = "modal-card modal-card-past-guesses";
+  card.setAttribute("role", "dialog");
+  card.setAttribute("aria-modal", "true");
+
+  const d = new Date(date + "T00:00:00Z");
+  const dateLabel = d.toLocaleDateString(i18n.locale(), {
+    weekday: "short", month: "short", day: "numeric", timeZone: "UTC",
+  });
+  const diffLabel = t(`toggle.difficulty.${difficulty}`);
+  const titleText = `${dateLabel} · ${t("stats.daily")} ${diffLabel}`;
+
+  // Outcome line: win / loss with the target name + guess count.
+  const cap = MAX_DAILY_GUESSES[difficulty];
+  let outcomeKey, name = target ? target.name : (t("clues.empty"));
+  if (won)        outcomeKey = "pastGuesses.outcome.win";
+  else            outcomeKey = "pastGuesses.outcome.loss";
+  const outcomeText = t(outcomeKey, {
+    name,
+    guesses: guessCount,
+    max: cap,
+    hintTag: hints > 0 ? t(hints === 1 ? "hint.tag.one" : "hint.tag.many", { n: hints }) : "",
+  });
+
+  card.innerHTML = `
+    <h3 class="modal-title">${escapeHTML(titleText)}</h3>
+    <p class="modal-message">${escapeHTML(outcomeText)}</p>
+    <div class="past-guesses-board" aria-hidden="true">
+      <div class="board-header past-guesses-header"></div>
+      <div class="board past-guesses-rows"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="modal-btn modal-cancel" id="past-guesses-close-btn">${escapeHTML(t("achievements.close"))}</button>
+      <button type="button" class="modal-btn modal-confirm" id="past-guesses-replay-btn">${escapeHTML(t("pastGuesses.replay"))}</button>
+    </div>
+  `;
+  backdrop.appendChild(card);
+  document.body.appendChild(backdrop);
+
+  // Render the original guess rows using the same renderHeader / renderGuessRow
+  // helpers the live game uses. compareFor is pure so we can rebuild
+  // comparisons on the fly from the stored target+guess IDs.
+  const headerEl = card.querySelector(".past-guesses-header");
+  const rowsEl = card.querySelector(".past-guesses-rows");
+  renderHeader(headerEl, entity, difficulty);
+  if (target) {
+    // Render in the order they were committed. renderGuessRow prepends
+    // (newest-first) so iterate the stored array forwards to end with
+    // the latest guess at top — matching the in-game layout.
+    for (const id of guessIds) {
+      const g = getById(entity, id);
+      if (!g) continue;
+      const cmp = compareFor(entity, g, target);
+      renderGuessRow(rowsEl, g, cmp, entity, difficulty, { animate: false });
+    }
+  }
+
+  function close() {
+    if (!backdrop.parentNode) return;
+    backdrop.remove();
+    document.removeEventListener("keydown", onKey, true);
+    if (prev && typeof prev.focus === "function") {
+      try { prev.focus(); } catch { /* ignore */ }
+    }
+  }
+  function onKey(e) { if (e.key === "Escape") { e.preventDefault(); close(); } }
+  document.addEventListener("keydown", onKey, true);
+
+  const closeBtn = card.querySelector("#past-guesses-close-btn");
+  const replayBtn = card.querySelector("#past-guesses-replay-btn");
+  closeBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) close(); });
+  replayBtn.addEventListener("click", () => {
+    close();
+    replayArchivedDaily(date);
+  });
+  requestAnimationFrame(() => closeBtn.focus());
+}
+
 function openAchievementsModal() {
   const unlocked = getUnlockedAchievements();
   const earned = Object.keys(unlocked).length;

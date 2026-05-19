@@ -20,9 +20,11 @@ const {
   recordDailyWin,
   recordDailyLoss,
   getDailyArchive,
+  getDailyHistoryEntry,
   getRecentEndlessTargets,
   pushRecentEndlessTarget,
   RECENT_ENDLESS_CAP,
+  ARCHIVE_DAYS,
   exportStats,
   importStats,
   parseImportedStats,
@@ -363,6 +365,76 @@ function streakOf(entity = "group", difficulty = "easy") {
   pushRecentEndlessTarget("group", "");
   pushRecentEndlessTarget("group", undefined);
   assert.deepEqual(getRecentEndlessTargets("group"), ["Q1"]);
+}
+
+// ─── Daily history + guessIds + pruning ────────────────────────────────────
+
+// guessIds round-trip through recordDailyWin / recordDailyLoss.
+{
+  resetStorage();
+  recordDailyWin("group", "easy", "Q-target", 3, "2026-05-17", {
+    guessIds: ["Q1", "Q2", "Q-target"],
+    hints: 0,
+  });
+  const e = getDailyHistoryEntry("group", "easy", "2026-05-17");
+  assert.ok(e, "entry was saved");
+  assert.deepEqual(e.guessIds, ["Q1", "Q2", "Q-target"]);
+  assert.equal(e.won, true);
+}
+
+// Missing guessIds opt → stored as empty array (back-compat, no crash).
+{
+  resetStorage();
+  recordDailyWin("group", "easy", "Q-target", 3, "2026-05-17");
+  const e = getDailyHistoryEntry("group", "easy", "2026-05-17");
+  assert.deepEqual(e.guessIds, []);
+}
+
+// Loss path stores guessIds too.
+{
+  resetStorage();
+  recordDailyLoss("group", "easy", "Q-target", 6, "2026-05-17", {
+    guessIds: ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"],
+  });
+  const e = getDailyHistoryEntry("group", "easy", "2026-05-17");
+  assert.equal(e.won, false);
+  assert.equal(e.guessIds.length, 6);
+}
+
+// Daily entries older than ARCHIVE_DAYS get pruned on the next record.
+// Endless entries are NOT date-pruned (they age out via the cap instead).
+{
+  resetStorage();
+  // 25 days back — outside the ARCHIVE_DAYS window.
+  recordDailyWin("group", "easy", "Q-old", 3, "2026-04-22", { guessIds: ["Q1"] });
+  // Today's record triggers the prune via trimHistory.
+  recordDailyWin("group", "easy", "Q-today", 3, "2026-05-17", { guessIds: ["Q2"] });
+  const old = getDailyHistoryEntry("group", "easy", "2026-04-22");
+  const fresh = getDailyHistoryEntry("group", "easy", "2026-05-17");
+  assert.equal(old, null, "25-day-old daily entry was pruned");
+  assert.ok(fresh, "today's entry survived");
+}
+
+// Entry exactly at the edge of the window stays.
+{
+  resetStorage();
+  // ARCHIVE_DAYS days back — at the boundary, should survive.
+  const today = new Date("2026-05-17T00:00:00Z");
+  const edge = new Date(today);
+  edge.setUTCDate(edge.getUTCDate() - ARCHIVE_DAYS);
+  const edgeStr = edge.toISOString().slice(0, 10);
+  recordDailyWin("group", "easy", "Q-edge", 3, edgeStr, { guessIds: ["Q1"] });
+  recordDailyWin("group", "easy", "Q-today", 3, "2026-05-17", { guessIds: ["Q2"] });
+  assert.ok(getDailyHistoryEntry("group", "easy", edgeStr), "edge entry survives");
+}
+
+// getDailyHistoryEntry returns null for unplayed (entity, difficulty, date).
+{
+  resetStorage();
+  recordDailyWin("group", "easy", "Q-target", 3, "2026-05-17", { guessIds: ["Q1"] });
+  assert.equal(getDailyHistoryEntry("group", "easy", "2026-05-16"), null);
+  assert.equal(getDailyHistoryEntry("group", "hard", "2026-05-17"), null);
+  assert.equal(getDailyHistoryEntry("idol",  "easy", "2026-05-17"), null);
 }
 
 // ─── export / import roundtrip ─────────────────────────────────────────────

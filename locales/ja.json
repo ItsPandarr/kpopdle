@@ -139,6 +139,9 @@
   "stats.archive.won.aria": "クリア",
   "stats.archive.lost.aria": "推測回数を使い切り",
   "stats.archive.replay.aria": "{{date}} のデイリーをリプレイ",
+  "pastGuesses.outcome.win": "{{guesses}}/{{max}}回{{hintTag}}でクリア。答えは {{name}} でした。",
+  "pastGuesses.outcome.loss": "推測回数を使い切り ({{guesses}}/{{max}}{{hintTag}})。答えは {{name}} でした。",
+  "pastGuesses.replay": "リプレイ",
 
   "settings.aria": "設定",
   "settings.theme": "テーマ",
