@@ -425,7 +425,13 @@ function pickTarget() {
   return target;
 }
 
-function startGame({ replayDaily = false, replayDate = null } = {}) {
+// `forceTargetId` (optional) pins the round's target to a specific entity
+// regardless of the date-seed derivation in pickTarget(). Used by the
+// daily-archive "Replay" path so the replay lands on the exact target
+// the player originally faced — pickTarget() recomputes from
+// `pool[seed % pool.length]`, which shifts when the pool size changes
+// between when the player first played and when they replay.
+function startGame({ replayDaily = false, replayDate = null, forceTargetId = null } = {}) {
   resetGame();
   state.replayDate = replayDate; // null for normal play
   // Snapshot the Detective-mode preference for this round. Changing the
@@ -520,6 +526,14 @@ function startGame({ replayDaily = false, replayDate = null } = {}) {
     }
   }
 
+  // Caller-supplied target ID takes precedence over pickTarget (used by the
+  // archive's "Replay" path to anchor onto the exact target the player
+  // originally faced). Falls through to pickTarget if the ID isn't in the
+  // current dataset.
+  if (!state.target && forceTargetId) {
+    const fixed = getById(state.entity, forceTargetId);
+    if (fixed) state.target = fixed;
+  }
   if (!state.target) state.target = pickTarget();
   if (!state.target) {
     els.guessCount.textContent = "(no entities in pool)";
@@ -1364,6 +1378,12 @@ function escapeHTML(s) {
 // the player happened to be in endless / custom, and clears any active
 // in-progress state so the replay starts cleanly. Replays don't touch
 // stats — same one-shot semantic as the "Replay yesterday" button.
+//
+// If we have a stored history entry for that date (player has played it
+// before), we anchor the replay to the original target ID. Without this,
+// pickTarget() would re-derive from `pool[seed % pool.length]` — and the
+// pool size has grown since the data was last scraped, so the modulus
+// lands on a DIFFERENT group than the player originally faced.
 function replayArchivedDaily(dateStr) {
   // If they were in a custom puzzle, drop it (and its hash) — they're
   // leaving the custom round to revisit a past daily.
@@ -1378,7 +1398,11 @@ function replayArchivedDaily(dateStr) {
     setActive(els.modeToggle, "daily");
     saveLastSelection({ entity: state.entity, mode: "daily", difficulty: state.difficulty });
   }
-  startGame({ replayDate: dateStr });
+  // Anchor to the stored target if we have one (played-day replays). For
+  // missed days the entry is null and startGame falls through to the
+  // standard seed-based pick — that's the best we can do without history.
+  const entry = getDailyHistoryEntry(state.entity, state.difficulty, dateStr);
+  startGame({ replayDate: dateStr, forceTargetId: entry?.targetId ?? null });
   renderStats();
   // Scroll the board into view so the player sees the new round, since the
   // archive sits below the fold in the stats panel.
@@ -1570,9 +1594,13 @@ async function init() {
   });
 
   // "Replay yesterday's daily" — same difficulty, yesterday's seed. Doesn't
-  // touch streak/bests/history.
+  // touch streak/bests/history. Uses the stored history entry's targetId when
+  // available so the replay lands on what the player actually faced, not what
+  // the current dataset's pool-size happens to compute from the seed.
   els.replayYesterdayBtn.addEventListener("click", () => {
-    startGame({ replayDate: yesterdayUTC() });
+    const dateStr = yesterdayUTC();
+    const entry = getDailyHistoryEntry(state.entity, state.difficulty, dateStr);
+    startGame({ replayDate: dateStr, forceTargetId: entry?.targetId ?? null });
   });
 
   ac = attachAutocomplete({
