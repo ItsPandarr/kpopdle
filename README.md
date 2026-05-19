@@ -153,8 +153,9 @@ The blob has one bucket per entity (`group`, `idol`):
 - `bests[difficulty]` — fewest guesses ever recorded.
 - `endless[difficulty]` — plays + best guess count.
 - `totals` — lifetime `dailyWins` / `dailyLosses` / `endlessWins` / `endlessSkips` counters. Kept separately from `history` (which caps at 100 entries) so volume achievements like "100 wins" can count past the cap.
-- `active[mode][difficulty]` — in-progress round (guesses + hint reveals + detective flag) so a reload mid-game resumes seamlessly.
-- `history` — last 100 results, each carrying `guesses` (with hint penalty), `rawGuesses` (without), `hints` count, `filterMode`, target `nationality` and `generation` so achievement checks can read enough metadata without re-resolving the target.
+- `active.daily[difficulty]` / `active.endless[difficulty]` — in-progress live round (guesses + hint reveals + detective flag) so a reload mid-game resumes seamlessly.
+- `active.replays[difficulty][date]` — per-date replay round state. Replays from the daily archive persist mid-progress here so the player can tab between several in-progress replays without losing work. Once finished, the entry is stamped with `done: true` + `won` instead of being cleared — that's how the archive row keeps showing the outcome (✓/✗) when there's no real history entry behind it (e.g. a missed day later won via replay). Entries age out alongside the 14-day archive window.
+- `history` — last 100 results, each carrying `guesses` (with hint penalty), `rawGuesses` (without), `hints` count, `filterMode`, target `nationality` and `generation` so achievement checks can read enough metadata without re-resolving the target. Daily entries also store `guessIds` so the past-guesses modal can re-render the original board.
 
 Plus three top-level fields outside the per-entity buckets:
 
@@ -228,7 +229,7 @@ The UI ships English (bundled inline so `t()` works synchronously from import ti
 
 ```
 locales/
-├── en.json           # source of truth (222 keys)
+├── en.json           # source of truth (228 keys)
 ├── ko.json           # 한국어
 └── ja.json           # 日本語
 ```

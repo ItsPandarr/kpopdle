@@ -134,7 +134,7 @@ export default {
   "stats.archive.today.aria": "today's puzzle, in progress",
   "stats.archive.skipped.aria": "missed — not played",
   "stats.archive.inprogress": "in progress",
-  "stats.archive.inprogress.aria": "in progress — guesses started but round not finished",
+  "stats.archive.inprogress.aria": "in progress — round started but not finished",
   "stats.archive.won.aria": "won",
   "stats.archive.lost.aria": "out of guesses",
   "stats.archive.replay.aria": "Replay daily for {{date}}",
