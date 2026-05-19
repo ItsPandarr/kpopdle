@@ -1655,7 +1655,7 @@ body::before {
 }
 .app-footer .install-line .link-btn:hover { color: var(--text); }
 
-/* ─── Give-up button + replay-yesterday link ──────────────────────────────── */
+/* ─── Give-up button ──────────────────────────────────────────────────────── */
 
 .give-up-btn {
   background: var(--surface-2);
@@ -1676,10 +1676,6 @@ body::before {
   background: rgba(176, 69, 69, 0.10);
   color: #b04545;
   border-color: rgba(176, 69, 69, 0.40);
-}
-.meta-extra {
-  margin: -0.2rem 0 0.6rem;
-  text-align: center;
 }
 .link-btn {
   background: none;

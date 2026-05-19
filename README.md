@@ -229,7 +229,7 @@ The UI ships English (bundled inline so `t()` works synchronously from import ti
 
 ```
 locales/
-├── en.json           # source of truth (232 keys)
+├── en.json           # source of truth (231 keys)
 ├── ko.json           # 한국어
 └── ja.json           # 日本語
 ```

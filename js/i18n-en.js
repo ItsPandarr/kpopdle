@@ -41,7 +41,6 @@ export default {
   "meta.outoftoday": "Out of guesses today",
   "meta.next.daily": "Next daily in {{time}}",
   "meta.next.daily.aria": "Time until next daily puzzle",
-  "meta.replay.yesterday": "Replay yesterday's {{difficulty}}",
   "hint.cost": "Hint (+{{cost}}) · {{label}}",
   "hint.none": "Hint (none left)",
   "attr.debut_year": "Debut",

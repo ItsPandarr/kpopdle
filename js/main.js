@@ -1,7 +1,7 @@
 import { loadAll, poolFor, targetPoolFor, getById, getNumericBounds, getDataAsOfDate } from "./data.js";
 import { state, resetGame, recordGuess } from "./state.js";
 import { compareFor, isWin } from "./compare.js";
-import { targetForDaily, randomTarget, todayUTC, yesterdayUTC } from "./seed.js";
+import { targetForDaily, randomTarget, todayUTC } from "./seed.js";
 import { attachAutocomplete } from "./autocomplete.js";
 import { repoUrlFor, correctionIssueUrl } from "./share.js";
 import { readPuzzleFromHash, clearPuzzleFromHash } from "./puzzle.js";
@@ -102,7 +102,6 @@ const els = {
   helpPanel: null,
   resetStatsBtn: null,
   giveUpBtn: null,
-  replayYesterdayBtn: null,
   byline: null,
   input: null,
   dropdown: null,
@@ -438,18 +437,13 @@ function forceLoss() {
   renderStats();
 }
 
-// Show/hide give-up + replay-yesterday based on game state. Called whenever
-// the game transitions (start, win, loss, mode switch).
+// Show/hide give-up based on game state. Called whenever the game
+// transitions (start, win, loss, mode switch).
 function updateMetaButtons() {
   // Give up: visible during any active round with a target — daily, endless,
   // replay, or friend's puzzle. Each picks its own confirm text in the click
   // handler. Hidden after win/loss or before a target is picked.
   els.giveUpBtn.hidden = state.frozen || !state.target;
-  // Replay yesterday: visible only when in daily mode and not currently in a
-  // replay / custom puzzle.
-  const inDaily = state.mode === "daily";
-  els.replayYesterdayBtn.hidden = !inDaily || !!state.replayDate || !!state.customPuzzle;
-  els.replayYesterdayBtn.textContent = t("meta.replay.yesterday", { difficulty: t(`toggle.difficulty.${state.difficulty}`) });
 }
 
 function prettyValue(attr, value, entity) {
@@ -1665,7 +1659,6 @@ async function init() {
   els.exportStatsBtn = $("export-stats-btn");
   els.importStatsBtn = $("import-stats-btn");
   els.giveUpBtn = $("give-up-btn");
-  els.replayYesterdayBtn = $("replay-yesterday-btn");
   els.byline = $("byline");
   els.input = $("guess-input");
   els.dropdown = $("autocomplete");
@@ -1829,16 +1822,6 @@ async function init() {
     });
     if (!ok) return;
     forceLoss();
-  });
-
-  // "Replay yesterday's daily" — same difficulty, yesterday's seed. Doesn't
-  // touch streak/bests/history. Uses the stored history entry's targetId when
-  // available so the replay lands on what the player actually faced, not what
-  // the current dataset's pool-size happens to compute from the seed.
-  els.replayYesterdayBtn.addEventListener("click", () => {
-    const dateStr = yesterdayUTC();
-    const entry = getDailyHistoryEntry(state.entity, state.difficulty, dateStr);
-    startGame({ replayDate: dateStr, forceTargetId: entry?.targetId ?? null });
   });
 
   ac = attachAutocomplete({

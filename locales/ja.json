@@ -37,7 +37,6 @@
   "meta.outoftoday": "今日の推測回数を使い切りました",
   "meta.next.daily": "次のデイリーまで {{time}}",
   "meta.next.daily.aria": "次のデイリーパズルまでの時間",
-  "meta.replay.yesterday": "昨日の{{difficulty}}をリプレイ",
 
   "hint.cost": "ヒント (+{{cost}}) · {{label}}",
   "hint.none": "ヒント (残りなし)",

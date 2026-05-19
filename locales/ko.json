@@ -39,7 +39,6 @@
   "meta.outoftoday": "오늘 추측 기회를 다 썼어요",
   "meta.next.daily": "다음 데일리까지 {{time}}",
   "meta.next.daily.aria": "다음 데일리 퍼즐까지 남은 시간",
-  "meta.replay.yesterday": "어제 {{difficulty}} 다시 풀기",
 
   "hint.cost": "힌트 (+{{cost}}) · {{label}}",
   "hint.none": "힌트 (더 이상 없음)",
