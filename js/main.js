@@ -357,9 +357,18 @@ function forceLoss() {
       recordEndlessSkip(state.entity, state.difficulty, state.target.id, state.guesses.length, recordOpts());
     }
   } else if (state.replayDate) {
-    // Replay give-up — discard the saved replay state for that date so a
-    // subsequent click on the archive row doesn't resume the lost round.
-    clearActiveReplay(state.entity, state.difficulty, state.replayDate);
+    // Replay give-up — flag the saved state done+lost so the archive row
+    // shows ✗ and tapping it opens past-guesses. Without this the row would
+    // silently revert to "missed" (replays don't touch history).
+    saveActiveReplay(state.entity, state.difficulty, state.replayDate, {
+      targetId: state.target.id,
+      guessIds: state.guesses.map((x) => x.group.id),
+      hintOrder: state.hintOrder,
+      hintEvents: state.hintEvents,
+      filterMode: state.filterMode,
+      done: true,
+      won: false,
+    });
     checkAchievementsAfterRecord();
   } else if (isCustom) {
     // Friend's puzzle done — clear the URL so future reloads start fresh.
@@ -532,6 +541,13 @@ function startGame({ replayDaily = false, replayDate = null, forceTargetId = nul
     active = null;
   } else if (state.replayDate) {
     active = getActiveReplay(state.entity, state.difficulty, state.replayDate);
+    // A `done` flag means the player already finished this replay — surfaced
+    // via the past-guesses modal. If they explicitly kick off a Replay again
+    // we want a clean slate, not a restored frozen game.
+    if (active && active.done) {
+      clearActiveReplay(state.entity, state.difficulty, state.replayDate);
+      active = null;
+    }
   } else {
     active = getActive(state.entity, state.mode, state.difficulty);
   }
@@ -630,6 +646,11 @@ function onGuess(entity) {
   // Score line (including "1/6 guesses" daily progress) updates via refreshClues.
   refreshClues();
   snapshotProgress();
+  // Re-render the archive so the row for whatever the player is currently
+  // playing flips to "in progress" the moment they make their first guess.
+  // Without this it doesn't update until something else triggers renderStats
+  // (visibility change, win/loss banner, etc.). Cheap — just innerHTML.
+  renderStats();
 
   const visible = VISIBLE_ATTRS[state.entity][state.difficulty];
 
@@ -639,7 +660,21 @@ function onGuess(entity) {
     els.input.disabled = true;
     const isCustom = !!state.customPuzzle;
     if (!state.replayDate && !isCustom) clearActive(state.entity, state.mode, state.difficulty);
-    else if (state.replayDate) clearActiveReplay(state.entity, state.difficulty, state.replayDate);
+    else if (state.replayDate) {
+      // Replay win: keep the saved state but mark it done+won so the archive
+      // row surfaces a ✓ and tapping it opens the past-guesses modal. Without
+      // this, a "missed day → replayed → won" would silently revert to
+      // "missed" since replays don't touch history.
+      saveActiveReplay(state.entity, state.difficulty, state.replayDate, {
+        targetId: state.target.id,
+        guessIds: state.guesses.map((x) => x.group.id),
+        hintOrder: state.hintOrder,
+        hintEvents: state.hintEvents,
+        filterMode: state.filterMode,
+        done: true,
+        won: true,
+      });
+    }
     const totalTries = state.guesses.length + totalHintPenalty(state.hintEvents);
     const maxGuesses = state.mode === "daily" && !isCustom ? MAX_DAILY_GUESSES[state.difficulty] : null;
     // Replays + custom puzzles are practice — don't touch stats. Custom
@@ -709,9 +744,18 @@ function onGuess(entity) {
         recordDailyLoss(state.entity, state.difficulty, state.target.id, totalTries, undefined, recordOpts());
         checkAchievementsAfterRecord();
       } else {
-        // Replay ran out of guesses — drop the saved replay state so the
-        // archive row doesn't keep offering to resume a dead round.
-        clearActiveReplay(state.entity, state.difficulty, state.replayDate);
+        // Replay ran out of guesses — keep the saved state but flag it
+        // done+lost so the archive row shows ✗ and tapping it opens
+        // past-guesses instead of trying to resume a dead round.
+        saveActiveReplay(state.entity, state.difficulty, state.replayDate, {
+          targetId: state.target.id,
+          guessIds: state.guesses.map((x) => x.group.id),
+          hintOrder: state.hintOrder,
+          hintEvents: state.hintEvents,
+          filterMode: state.filterMode,
+          done: true,
+          won: false,
+        });
       }
       renderLossBanner(els.banner, {
         mode: "daily",
@@ -932,30 +976,83 @@ function renderStats() {
   `;
 
   // Wire up archive row clicks. Routing in priority order:
-  //   1. There's an in-progress replay for that (entity, difficulty, date)
-  //      → resume it directly so the player's in-flight guesses come back.
-  //   2. Player played that day before → open the "Past guesses" modal so
-  //      they can revisit the original guesses; a "Replay" button there
-  //      starts a fresh stats-neutral attempt.
-  //   3. Missed / unplayed day → tap goes straight to replay, matching
-  //      the original archive-tap behavior since there's nothing to show.
+  //   1. Clicking today's row while the player is currently somewhere else
+  //      (mid-replay or in a friend's puzzle) → exit that and return to
+  //      today's live daily.
+  //   2. Past day with an in-progress (non-`done`) replay → resume it so
+  //      the player's in-flight guesses come back.
+  //   3. Past day with a done replay → open the past-guesses modal showing
+  //      the replay (no Replay button — they already finished).
+  //   4. Player has a real history entry for that day → open the modal so
+  //      they can revisit the original guesses; the "Replay" button starts
+  //      a fresh stats-neutral attempt.
+  //   5. Missed / unplayed past day → tap goes straight to fresh replay.
   for (const row of els.stats.querySelectorAll(".archive-row.is-clickable")) {
     row.addEventListener("click", () => {
       const date = row.dataset.date;
       if (!date) return;
-      const replay = getActiveReplay(state.entity, state.difficulty, date);
+      const isToday = date === todayUTC();
+
+      // Returning to today from a replay or custom puzzle. startGame()
+      // handles "today already played" by restoring the won/lost banner;
+      // if today's still live it just restores the in-progress state.
+      if (isToday && (state.replayDate || state.customPuzzle)) {
+        returnToToday();
+        return;
+      }
+
+      const replay = !isToday && getActiveReplay(state.entity, state.difficulty, date);
       if (replay && Array.isArray(replay.guessIds) && replay.guessIds.length > 0) {
-        replayArchivedDaily(date);
+        if (replay.done) {
+          openPastGuessesModal(replayAsEntry(date, replay));
+        } else {
+          replayArchivedDaily(date);
+        }
         return;
       }
       const entry = getDailyHistoryEntry(state.entity, state.difficulty, date);
       if (entry && Array.isArray(entry.guessIds) && entry.guessIds.length > 0) {
         openPastGuessesModal(entry);
-      } else {
+      } else if (!isToday) {
         replayArchivedDaily(date);
       }
     });
   }
+}
+
+// Build a history-entry-shaped object from a stored done replay, so the
+// past-guesses modal can render it with no special-casing. Used when the
+// player taps an archive row whose only record is a completed replay (no
+// official live play of that day).
+function replayAsEntry(date, replay) {
+  return {
+    entity: state.entity,
+    mode: "daily",
+    difficulty: state.difficulty,
+    date,
+    targetId: replay.targetId,
+    won: !!replay.won,
+    guesses: replay.guessIds.length,
+    rawGuesses: replay.guessIds.length,
+    hints: (replay.hintEvents || []).length,
+    filterMode: !!replay.filterMode,
+    guessIds: replay.guessIds,
+  };
+}
+
+// Return to today's live game from a replay or custom puzzle. Exits the
+// replay/custom state, then re-runs the standard startGame() flow which
+// will restore an in-progress live daily, surface a finished-today banner,
+// or land on a fresh round depending on what's saved.
+function returnToToday() {
+  if (state.customPuzzle) {
+    state.customPuzzle = null;
+    clearPuzzleFromHash(location, history);
+  }
+  state.replayDate = null;
+  startGame();
+  renderStats();
+  els.board?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 // Build the "last 14 days" strip. Per row:
@@ -996,6 +1093,19 @@ function renderArchive(entity, difficulty) {
       icon = `<span class="archive-icon is-progress" aria-label="${t("stats.archive.inprogress.aria")}">◐</span>`;
       score = `<span class="dim">${t("stats.archive.inprogress")}</span>`;
       name = "";
+    } else if (row.replayDone) {
+      // Completed replay of a day the player never officially played. Same
+      // visual treatment as a real win/loss — we have the target ID and
+      // outcome, so show them just like a history-backed row.
+      if (row.replayWon) {
+        icon = `<span class="archive-icon is-win" aria-label="${t("stats.archive.won.aria")}">✓</span>`;
+        score = `${row.replayGuessCount}/${cap}`;
+      } else {
+        icon = `<span class="archive-icon is-loss" aria-label="${t("stats.archive.lost.aria")}">✗</span>`;
+        score = `X/${cap}`;
+      }
+      const targetName = nameOf(entity, row.replayTargetId);
+      name = targetName ? `<span class="archive-name">${escapeHTML(targetName)}</span>` : "";
     } else if (row.isToday && !row.played) {
       icon = `<span class="archive-icon is-today" aria-label="${t("stats.archive.today.aria")}">●</span>`;
       score = `<span class="dim">${t("stats.archive.today")}</span>`;
@@ -1017,12 +1127,19 @@ function renderArchive(entity, difficulty) {
     }
 
     // Past days are clickable to either resume a replay, open past-guesses
-    // (if there's a stored entry), or kick off a fresh replay (missed days).
-    // Today is clickable IFF the player has already played — clicking shows
-    // their own play in the past-guesses modal (no Replay button, daily is
-    // locked until next UTC midnight). If they haven't played today yet,
-    // it stays non-interactive since the regular play flow handles it.
-    const clickable = !row.isToday || row.played;
+    // (if there's a stored entry or done replay), or kick off a fresh
+    // replay (missed days). Today is clickable in three cases:
+    //   1. The player has already played today (clicking shows past guesses).
+    //   2. They have an in-progress daily on it.
+    //   3. They're currently elsewhere (in a replay or custom puzzle) so
+    //      clicking today is how they navigate back.
+    // Otherwise today stays non-interactive — they're already on it and
+    // the regular play flow is doing its job.
+    const clickable = !row.isToday
+      || row.played
+      || row.inProgress
+      || !!state.replayDate
+      || !!state.customPuzzle;
     const klass = ["archive-row"];
     if (clickable) klass.push("is-clickable");
     if (row.isToday) klass.push("is-today-row");
@@ -1694,7 +1811,10 @@ async function init() {
     }
     // Mid-replay "New round" → abandon the replay's saved state too, so
     // the archive row that pointed to it doesn't keep offering to resume.
-    if (state.replayDate) {
+    // BUT: if the replay is already finished (state.frozen — win or loss),
+    // the saved state is a "done" record that the archive uses to show
+    // the outcome. Don't wipe it; the player has moved on, not abandoned.
+    if (state.replayDate && !state.frozen) {
       clearActiveReplay(state.entity, state.difficulty, state.replayDate);
     }
     clearActive(state.entity, state.mode, state.difficulty);

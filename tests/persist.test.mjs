@@ -498,6 +498,76 @@ function streakOf(entity = "group", difficulty = "easy") {
   assert.equal(may15.inProgress, true,"in-progress takes display priority");
 }
 
+// Done replay (player won/lost a stats-neutral replay of a day they never
+// officially played) surfaces on the archive with the outcome so the row
+// doesn't silently revert to "missed". `replayDone` carries enough info
+// for renderArchive to draw the row + for click routing to open the
+// past-guesses modal without consulting active state again.
+{
+  resetStorage();
+  saveActiveReplay("group", "easy", "2026-05-15", {
+    targetId: "Q-T",
+    guessIds: ["Q1", "Q2", "Q3"],
+    hintOrder: [],
+    hintEvents: [],
+    filterMode: false,
+    done: true,
+    won: true,
+  });
+  const may15 = getDailyArchive("group", "easy", 5, "2026-05-17")
+    .find((r) => r.date === "2026-05-15");
+  assert.equal(may15.inProgress,       false, "done replay is not in-progress");
+  assert.equal(may15.replayDone,        true);
+  assert.equal(may15.replayWon,         true);
+  assert.equal(may15.replayGuessCount,  3);
+  assert.equal(may15.replayTargetId,   "Q-T");
+}
+
+// Done+lost replay surfaces too — same shape, won=false.
+{
+  resetStorage();
+  saveActiveReplay("group", "easy", "2026-05-15", {
+    targetId: "Q-T",
+    guessIds: ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"],
+    hintOrder: [],
+    hintEvents: [],
+    filterMode: false,
+    done: true,
+    won: false,
+  });
+  const may15 = getDailyArchive("group", "easy", 5, "2026-05-17")
+    .find((r) => r.date === "2026-05-15");
+  assert.equal(may15.replayDone,       true);
+  assert.equal(may15.replayWon,        false);
+  assert.equal(may15.replayGuessCount, 6);
+}
+
+// Real history entry takes precedence over a done replay — the official
+// live play is what the archive shows, even if the player later replayed
+// the same day. The replayDone fields stay null so renderArchive falls
+// through to the played-won/played-lost branch.
+{
+  resetStorage();
+  recordDailyWin("group", "easy", "Q-orig", 2, "2026-05-15", {
+    guessIds: ["A", "B"],
+  });
+  saveActiveReplay("group", "easy", "2026-05-15", {
+    targetId: "Q-orig",
+    guessIds: ["Q1", "Q2", "Q3"],
+    hintOrder: [],
+    hintEvents: [],
+    filterMode: false,
+    done: true,
+    won: true,
+  });
+  const may15 = getDailyArchive("group", "easy", 5, "2026-05-17")
+    .find((r) => r.date === "2026-05-15");
+  assert.equal(may15.played,     true,  "history entry still wins display");
+  assert.equal(may15.won,        true);
+  assert.equal(may15.guesses,    2,     "history count, not replay count");
+  assert.equal(may15.replayDone, false, "history takes precedence");
+}
+
 // ─── Active replay state ───────────────────────────────────────────────────
 //
 // Replays from the daily archive persist mid-round state per (entity,

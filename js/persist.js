@@ -245,8 +245,19 @@ export function getDailyArchive(entity, difficulty, days = ARCHIVE_DAYS, today =
     // in-progress replay with at least one guess on file — even if the
     // day was originally played and has a history entry, the in-progress
     // replay takes display priority since clicking the row resumes it.
+    //
+    // Completed-replay detection. When the player wins or loses a replay,
+    // we leave the saved state in place with `done: true` so we can surface
+    // the outcome on the archive (otherwise a "missed → replayed → won" day
+    // would silently revert to "missed"). Only surfaces when there's no real
+    // history entry — a legitimate live play of that day always takes
+    // precedence over a practice replay.
     let inProgress = false;
     let inProgressGuesses = 0;
+    let replayDone = false;
+    let replayWon = null;
+    let replayGuessCount = null;
+    let replayTargetId = null;
     if (isToday) {
       if (activeToday?.targetId && (activeToday.guessIds?.length || 0) > 0 && !entry) {
         inProgress = true;
@@ -255,8 +266,17 @@ export function getDailyArchive(entity, difficulty, days = ARCHIVE_DAYS, today =
     } else {
       const r = replaysByDifficulty[dateStr];
       if (r?.targetId && (r.guessIds?.length || 0) > 0) {
-        inProgress = true;
-        inProgressGuesses = r.guessIds.length;
+        if (r.done) {
+          if (!entry) {
+            replayDone = true;
+            replayWon = !!r.won;
+            replayGuessCount = r.guessIds.length;
+            replayTargetId = r.targetId;
+          }
+        } else {
+          inProgress = true;
+          inProgressGuesses = r.guessIds.length;
+        }
       }
     }
     out.push({
@@ -268,6 +288,10 @@ export function getDailyArchive(entity, difficulty, days = ARCHIVE_DAYS, today =
       targetId: entry?.targetId ?? null,
       inProgress,
       inProgressGuesses,
+      replayDone,
+      replayWon,
+      replayGuessCount,
+      replayTargetId,
     });
   }
   return out;
@@ -646,15 +670,21 @@ export function getActiveReplay(entity, difficulty, date) {
   return s[entity]?.active?.replays?.[difficulty]?.[date] || null;
 }
 
-export function saveActiveReplay(entity, difficulty, date, { targetId, guessIds, hintOrder, hintEvents, filterMode }) {
+export function saveActiveReplay(entity, difficulty, date, { targetId, guessIds, hintOrder, hintEvents, filterMode, done = false, won = false }) {
   const s = read();
   if (!s[entity]?.active?.replays?.[difficulty]) return;  // schema missing — defensive
+  // `done` (with `won`) marks a finished replay whose state we keep around so
+  // the archive row still shows the outcome and tapping it opens the
+  // past-guesses modal. When a replay was practice for a day that the player
+  // never officially played, this is the only record that the round happened.
   s[entity].active.replays[difficulty][date] = {
     targetId,
     guessIds,
     hintOrder,
     hintEvents,
     filterMode,
+    done,
+    won,
   };
   write(s);
 }

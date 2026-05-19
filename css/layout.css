@@ -1524,7 +1524,10 @@ body::before {
 }
 .archive-row {
   display: grid;
-  grid-template-columns: 1.5rem 9rem 4rem 1fr;
+  /* Score column is wide enough to fit the "in progress" label on one line
+     in every supported locale. Numeric scores like "3/6" still align in
+     the same column thanks to tabular-nums + the left-aligned default. */
+  grid-template-columns: 1.5rem 9rem 6.5rem 1fr;
   align-items: baseline;
   gap: 0.6rem;
   padding: 0.35rem 0.5rem;
@@ -1581,7 +1584,9 @@ body::before {
 /* Narrow screens: drop the name column and tighten the date column. */
 @media (max-width: 540px) {
   .archive-row {
-    grid-template-columns: 1.3rem 7rem 3.5rem 1fr;
+    /* Same "fit the in-progress label" rationale as desktop, with a slightly
+       smaller font, so we land at ~6rem rather than ~6.5rem. */
+    grid-template-columns: 1.3rem 7rem 6rem 1fr;
     gap: 0.45rem;
     font-size: 0.88rem;
   }
