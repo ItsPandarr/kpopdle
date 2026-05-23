@@ -28,6 +28,9 @@
   "Q61057550": { "extra_aliases": ["트레저"] },
   "Q20898046": { "extra_aliases": ["데이식스"] },
 
+  "_member-count-comment": "Member counts that Wikidata / infobox parsing got wrong. Override here so the value survives the next scrape.",
+  "Q136378026": { "member_count": 8 },
+
   "Q12300129": {
     "name": "BTS",
     "company": "Big Hit Music",
