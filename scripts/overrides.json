@@ -30,8 +30,8 @@
   "_member-count-comment": "Member counts that Wikidata / infobox parsing got wrong. Override here so the value survives the next scrape.",
   "Q136378026": { "member_count": 8 },
 
-  "_status-comment": "Status corrections (active / inactive / disbanded). Wikidata lags on disbandments and contract-expiry breakups.",
-  "Q28025953": { "status": "inactive", "extra_aliases": ["이달의 소녀", "이달소"] },
+  "_status-comment": "Status corrections (active / disbanded). Wikidata lags on disbandments and contract-expiry breakups — Loona is the canonical case (Blockberry contract collapse left no active group).",
+  "Q28025953": { "status": "disbanded", "extra_aliases": ["이달의 소녀", "이달소"] },
 
   "Q12300129": {
     "name": "BTS",
