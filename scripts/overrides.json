@@ -18,7 +18,6 @@
   "Q60732823": { "extra_aliases": ["있지"] },
   "Q171885":   { "extra_aliases": ["투애니원"] },
   "Q21964258": { "extra_aliases": ["우주소녀"] },
-  "Q28025953": { "extra_aliases": ["이달의 소녀", "이달소"] },
   "Q476119":   { "extra_aliases": ["원더걸스"] },
   "Q124459":   { "extra_aliases": ["카라"] },
   "Q18161349": { "extra_aliases": ["아이콘"] },
@@ -30,6 +29,9 @@
 
   "_member-count-comment": "Member counts that Wikidata / infobox parsing got wrong. Override here so the value survives the next scrape.",
   "Q136378026": { "member_count": 8 },
+
+  "_status-comment": "Status corrections (active / inactive / disbanded). Wikidata lags on disbandments and contract-expiry breakups.",
+  "Q28025953": { "status": "inactive", "extra_aliases": ["이달의 소녀", "이달소"] },
 
   "Q12300129": {
     "name": "BTS",

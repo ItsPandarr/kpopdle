@@ -6,10 +6,12 @@
     <title>KPopdle</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <!-- Repo URL used to build the "Report a data correction" link in the footer.
-         Leave blank to auto-derive from a *.github.io host; override here for
-         custom domains. Example: https://github.com/your-user/kpopdle -->
-    <meta name="kpopdle:repo" content="" />
+    <!-- Repo URL used to build the "Report a data correction" link in the
+         footer. Has to be set explicitly because this site is served from
+         kpopdle.pandarr.games and pandarr.itch.io — neither is a github.io
+         host, so the auto-derive path in repoUrlFor() would return null
+         and hide the link, leaving players with no way to report bad data. -->
+    <meta name="kpopdle:repo" content="https://github.com/ItsPandarr/kpopdle" />
     <!-- Explicit index,follow so a misconfigured X-Robots-Tag header
          elsewhere in the deploy stack can't accidentally noindex us. -->
     <meta name="robots" content="index,follow" />
