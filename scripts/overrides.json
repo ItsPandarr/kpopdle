@@ -30,6 +30,18 @@
   "_member-count-comment": "Member counts that Wikidata / infobox parsing got wrong. Override here so the value survives the next scrape.",
   "Q136378026": { "member_count": 8 },
 
+  "_extra-idols-comment": "Members whose individual Wikidata entries either don't exist or aren't linked to their group via P527, so the SPARQL scrape misses them. Listed here so scrape_idols can synthesise entries (synthetic id = `<group qid>-<name slug>`). Required keys: name, gender. Optional: aliases, birth_year, nationality. All other fields are inherited from the group at build time.",
+  "Q135181578": {
+    "member_count": 9,
+    "extra_idols": [
+      { "name": "Steven Kim",    "gender": "boy", "nationality": "Filipino", "birth_year": 2000, "aliases": ["Steven", "스티븐"] },
+      { "name": "Seo Jeong-woo", "gender": "boy", "nationality": "Korean",   "birth_year": 2001, "aliases": ["서정우", "Jeongwoo", "Seo Jeongwoo"] },
+      { "name": "Park Han",      "gender": "boy", "nationality": "Korean",   "birth_year": 2003, "aliases": ["박한", "Han"] },
+      { "name": "Park Ju-won",   "gender": "boy", "nationality": "Korean",   "birth_year": 2006, "aliases": ["박주원", "Juwon", "Park Juwon"] },
+      { "name": "Daisuke",       "gender": "boy", "nationality": "Japanese", "birth_year": 2009, "aliases": ["다이스케"] }
+    ]
+  },
+
   "_status-comment": "Status corrections (active / disbanded). Wikidata lags on disbandments and contract-expiry breakups — Loona is the canonical case (Blockberry contract collapse left no active group).",
   "Q28025953": { "status": "disbanded", "extra_aliases": ["이달의 소녀", "이달소"] },
 

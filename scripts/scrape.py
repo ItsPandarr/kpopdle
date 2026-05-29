@@ -438,11 +438,17 @@ def main() -> None:
             if "company" in ov and "company_parent" not in ov:
                 groups[gid]["company_parent"] = company_parent(ov["company"])
 
-    # Drop internal fields and finalize.
+    # Drop internal fields and finalize. `extra_idols` is moved off the group
+    # dict into a side map keyed by group id, so it doesn't bleed into the
+    # public groups.json but is still available when scrape_idols runs.
+    extra_idols_by_gid: dict[str, list[dict]] = {}
     final = []
     for g in groups.values():
         g.pop("_enwikiName", None)
         g.pop("_kowikiName", None)
+        extras = g.pop("extra_idols", None)
+        if extras:
+            extra_idols_by_gid[g["id"]] = extras
         final.append(g)
 
     # Apply --limit AFTER sorting, so the highest-popularity groups survive.
@@ -491,10 +497,10 @@ def main() -> None:
     print(f"  wrote {OUT_FULL.relative_to(ROOT)} and {OUT_INDEX.relative_to(ROOT)}")
 
     if not args.skip_idols:
-        scrape_idols(final)
+        scrape_idols(final, extra_idols_by_gid)
 
 
-def scrape_idols(groups: list[dict]) -> None:
+def scrape_idols(groups: list[dict], extra_idols_by_gid: dict[str, list[dict]] | None = None) -> None:
     """Pull the membership of every group we kept, then enrich each member.
 
     Output: data/idols.json, data/idols.index.json.
@@ -628,6 +634,36 @@ SELECT ?idol ?alias WHERE {{
             "popularity": popularity,
             "tier": "hard",
         })
+
+    # Synthesise idols flagged in group overrides under `extra_idols` — for
+    # members whose Wikidata entries either don't exist or aren't linked to
+    # their group via P527. Synthetic id = `<group qid>-<slug>` (idol IDs are
+    # only used internally; the public-facing Wikipedia link uses
+    # primary_group_id, so a non-Wikidata id is harmless).
+    for g in groups:
+        for extra in (extra_idols_by_gid or {}).get(g["id"], []):
+            name = extra["name"]
+            slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+            synth_id = f"{g['id']}-{slug}"
+            debut_year = g.get("debut_year")
+            idols.append({
+                "id": synth_id,
+                "name": name,
+                "aliases": list(extra.get("aliases") or []),
+                "birth_year": extra.get("birth_year"),
+                "debut_year": debut_year,
+                "generation": generation_from_year(debut_year) if debut_year else None,
+                "gender": extra["gender"],
+                "nationality": extra.get("nationality"),
+                "group_ids": [g["id"]],
+                "group_names": [g["name"]],
+                "primary_group": g["name"],
+                "primary_group_id": g["id"],
+                "company": g.get("company"),
+                "company_parent": g.get("company_parent"),
+                "popularity": g.get("popularity", 0),
+                "tier": "hard",
+            })
 
     # Apply manual per-idol overrides (gender backfills, name fixes, etc.).
     # Done before sort/tier so any popularity changes still bucket correctly.

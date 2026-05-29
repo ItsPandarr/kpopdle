@@ -15080,12 +15080,138 @@
       "tier": "hard"
     },
     {
+      "id": "Q135181578-daisuke",
+      "name": "Daisuke",
+      "aliases": [
+        "다이스케"
+      ],
+      "birth_year": 2009,
+      "debut_year": 2025,
+      "generation": 5,
+      "gender": "boy",
+      "nationality": "Japanese",
+      "group_ids": [
+        "Q135181578"
+      ],
+      "group_names": [
+        "AHOF"
+      ],
+      "primary_group": "AHOF",
+      "primary_group_id": "Q135181578",
+      "company": "F&F",
+      "company_parent": null,
+      "popularity": 20052,
+      "tier": "hard"
+    },
+    {
       "id": "Q131920148",
       "name": "JL Gaspar",
       "aliases": [
         "Jay Lawrence Gaspar"
       ],
       "birth_year": 2004,
+      "debut_year": 2025,
+      "generation": 5,
+      "gender": "boy",
+      "nationality": "Filipino",
+      "group_ids": [
+        "Q135181578"
+      ],
+      "group_names": [
+        "AHOF"
+      ],
+      "primary_group": "AHOF",
+      "primary_group_id": "Q135181578",
+      "company": "F&F",
+      "company_parent": null,
+      "popularity": 20052,
+      "tier": "hard"
+    },
+    {
+      "id": "Q135181578-park-han",
+      "name": "Park Han",
+      "aliases": [
+        "박한",
+        "Han"
+      ],
+      "birth_year": 2003,
+      "debut_year": 2025,
+      "generation": 5,
+      "gender": "boy",
+      "nationality": "Korean",
+      "group_ids": [
+        "Q135181578"
+      ],
+      "group_names": [
+        "AHOF"
+      ],
+      "primary_group": "AHOF",
+      "primary_group_id": "Q135181578",
+      "company": "F&F",
+      "company_parent": null,
+      "popularity": 20052,
+      "tier": "hard"
+    },
+    {
+      "id": "Q135181578-park-ju-won",
+      "name": "Park Ju-won",
+      "aliases": [
+        "박주원",
+        "Juwon",
+        "Park Juwon"
+      ],
+      "birth_year": 2006,
+      "debut_year": 2025,
+      "generation": 5,
+      "gender": "boy",
+      "nationality": "Korean",
+      "group_ids": [
+        "Q135181578"
+      ],
+      "group_names": [
+        "AHOF"
+      ],
+      "primary_group": "AHOF",
+      "primary_group_id": "Q135181578",
+      "company": "F&F",
+      "company_parent": null,
+      "popularity": 20052,
+      "tier": "hard"
+    },
+    {
+      "id": "Q135181578-seo-jeong-woo",
+      "name": "Seo Jeong-woo",
+      "aliases": [
+        "서정우",
+        "Jeongwoo",
+        "Seo Jeongwoo"
+      ],
+      "birth_year": 2001,
+      "debut_year": 2025,
+      "generation": 5,
+      "gender": "boy",
+      "nationality": "Korean",
+      "group_ids": [
+        "Q135181578"
+      ],
+      "group_names": [
+        "AHOF"
+      ],
+      "primary_group": "AHOF",
+      "primary_group_id": "Q135181578",
+      "company": "F&F",
+      "company_parent": null,
+      "popularity": 20052,
+      "tier": "hard"
+    },
+    {
+      "id": "Q135181578-steven-kim",
+      "name": "Steven Kim",
+      "aliases": [
+        "Steven",
+        "스티븐"
+      ],
+      "birth_year": 2000,
       "debut_year": 2025,
       "generation": 5,
       "gender": "boy",
