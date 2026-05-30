@@ -45,6 +45,9 @@
   "_status-comment": "Status corrections (active / disbanded). Wikidata lags on disbandments and contract-expiry breakups — Loona is the canonical case (Blockberry contract collapse left no active group).",
   "Q28025953": { "status": "disbanded", "extra_aliases": ["이달의 소녀", "이달소"] },
 
+  "_exclude-comment": "Groups that match the SPARQL anchor (K-pop genre / SK country / etc.) but don't fit the 'guess a real entity' puzzle frame. Matches the existing fictional-exclusion policy documented at scrape.py:91-95. Setting exclude=true drops the group AND removes it from every idol's group_ids/group_names at build time; idols whose only group was the excluded one are dropped entirely.",
+  "Q65061223": { "exclude": true, "_label": "K/DA — virtual League of Legends group; performers vary per release, in-universe roster is fictional characters, member_count comes out wrong (12 because Wikidata lists (G)I-dle the group as a P527 part)." },
+
   "Q12300129": {
     "name": "BTS",
     "company": "Big Hit Music",

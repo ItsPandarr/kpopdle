@@ -1016,12 +1016,10 @@
       "gender": "girl",
       "nationality": "Korean",
       "group_ids": [
-        "Q20645861",
-        "Q65061223"
+        "Q20645861"
       ],
       "group_names": [
-        "Twice",
-        "K/DA"
+        "Twice"
       ],
       "primary_group": "Twice",
       "primary_group_id": "Q20645861",
@@ -1098,13 +1096,11 @@
       "nationality": "Japanese",
       "group_ids": [
         "Q116767949",
-        "Q20645861",
-        "Q65061223"
+        "Q20645861"
       ],
       "group_names": [
         "MiSaMo",
-        "Twice",
-        "K/DA"
+        "Twice"
       ],
       "primary_group": "Twice",
       "primary_group_id": "Q20645861",
@@ -1154,12 +1150,10 @@
       "gender": "girl",
       "nationality": "Korean",
       "group_ids": [
-        "Q20645861",
-        "Q65061223"
+        "Q20645861"
       ],
       "group_names": [
-        "Twice",
-        "K/DA"
+        "Twice"
       ],
       "primary_group": "Twice",
       "primary_group_id": "Q20645861",
@@ -1182,12 +1176,10 @@
       "gender": "girl",
       "nationality": "Korean",
       "group_ids": [
-        "Q20645861",
-        "Q65061223"
+        "Q20645861"
       ],
       "group_names": [
-        "Twice",
-        "K/DA"
+        "Twice"
       ],
       "primary_group": "Twice",
       "primary_group_id": "Q20645861",
@@ -10520,170 +10512,6 @@
       "company": "Pledis Entertainment",
       "company_parent": "HYBE",
       "popularity": 33935,
-      "tier": "hard"
-    },
-    {
-      "id": "Q16240326",
-      "name": "Bea Miller",
-      "aliases": [
-        "Beatrice Annika Kipnis Miller",
-        "Beatrice Annika Miller"
-      ],
-      "birth_year": 1999,
-      "debut_year": 2018,
-      "generation": 4,
-      "gender": "girl",
-      "nationality": null,
-      "group_ids": [
-        "Q65061223"
-      ],
-      "group_names": [
-        "K/DA"
-      ],
-      "primary_group": "K/DA",
-      "primary_group_id": "Q65061223",
-      "company": "Riot Games",
-      "company_parent": null,
-      "popularity": 33744,
-      "tier": "hard"
-    },
-    {
-      "id": "Q26405662",
-      "name": "Bekuh BOOM",
-      "aliases": [
-        "Rebecca Johnson",
-        "Rebecca Rose Johnson"
-      ],
-      "birth_year": 1994,
-      "debut_year": 2018,
-      "generation": 4,
-      "gender": "girl",
-      "nationality": null,
-      "group_ids": [
-        "Q65061223"
-      ],
-      "group_names": [
-        "K/DA"
-      ],
-      "primary_group": "K/DA",
-      "primary_group_id": "Q65061223",
-      "company": "Riot Games",
-      "company_parent": null,
-      "popularity": 33744,
-      "tier": "hard"
-    },
-    {
-      "id": "Q53225665",
-      "name": "Jaira Burns",
-      "aliases": [],
-      "birth_year": 1997,
-      "debut_year": 2018,
-      "generation": 4,
-      "gender": "girl",
-      "nationality": null,
-      "group_ids": [
-        "Q65061223"
-      ],
-      "group_names": [
-        "K/DA"
-      ],
-      "primary_group": "K/DA",
-      "primary_group_id": "Q65061223",
-      "company": "Riot Games",
-      "company_parent": null,
-      "popularity": 33744,
-      "tier": "hard"
-    },
-    {
-      "id": "Q60964",
-      "name": "Kim Petras",
-      "aliases": [],
-      "birth_year": 1992,
-      "debut_year": 2018,
-      "generation": 4,
-      "gender": "girl",
-      "nationality": null,
-      "group_ids": [
-        "Q65061223"
-      ],
-      "group_names": [
-        "K/DA"
-      ],
-      "primary_group": "K/DA",
-      "primary_group_id": "Q65061223",
-      "company": "Riot Games",
-      "company_parent": null,
-      "popularity": 33744,
-      "tier": "hard"
-    },
-    {
-      "id": "Q50287943",
-      "name": "Lexie Liu",
-      "aliases": [
-        "Liu Boxin"
-      ],
-      "birth_year": 1998,
-      "debut_year": 2018,
-      "generation": 4,
-      "gender": "girl",
-      "nationality": "Chinese",
-      "group_ids": [
-        "Q65061223"
-      ],
-      "group_names": [
-        "K/DA"
-      ],
-      "primary_group": "K/DA",
-      "primary_group_id": "Q65061223",
-      "company": "Riot Games",
-      "company_parent": null,
-      "popularity": 33744,
-      "tier": "hard"
-    },
-    {
-      "id": "Q15059490",
-      "name": "Madison Beer",
-      "aliases": [
-        "Madison Elle Beer"
-      ],
-      "birth_year": 1999,
-      "debut_year": 2018,
-      "generation": 4,
-      "gender": "girl",
-      "nationality": null,
-      "group_ids": [
-        "Q65061223"
-      ],
-      "group_names": [
-        "K/DA"
-      ],
-      "primary_group": "K/DA",
-      "primary_group_id": "Q65061223",
-      "company": "Riot Games",
-      "company_parent": null,
-      "popularity": 33744,
-      "tier": "hard"
-    },
-    {
-      "id": "Q100428190",
-      "name": "Wolftyla",
-      "aliases": [],
-      "birth_year": 1996,
-      "debut_year": 2018,
-      "generation": 4,
-      "gender": "girl",
-      "nationality": "Korean",
-      "group_ids": [
-        "Q65061223"
-      ],
-      "group_names": [
-        "K/DA"
-      ],
-      "primary_group": "K/DA",
-      "primary_group_id": "Q65061223",
-      "company": "Riot Games",
-      "company_parent": null,
-      "popularity": 33744,
       "tier": "hard"
     },
     {

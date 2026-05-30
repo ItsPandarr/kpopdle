@@ -168,7 +168,16 @@ def load_overrides() -> dict:
     if not path.exists():
         return {}
     data = json.loads(path.read_text())
-    return {k: v for k, v in data.items() if not k.startswith("_")}
+    out = {}
+    for k, v in data.items():
+        if k.startswith("_"):
+            continue
+        # Strip comment-style keys inside entries too (e.g. "_label" notes that
+        # explain why this override exists). Same pattern as load_idol_overrides.
+        if isinstance(v, dict):
+            v = {kk: vv for kk, vv in v.items() if not kk.startswith("_")}
+        out[k] = v
+    return out
 
 
 def load_idol_overrides() -> dict:
@@ -417,6 +426,17 @@ def main() -> None:
     overrides = load_overrides()
     for gid, ov in overrides.items():
         if gid in groups:
+            if ov.get("exclude") is True:
+                # Drop the group entirely. Used for entries that match the
+                # SPARQL anchor (K-pop genre, SK origin, etc.) but don't fit
+                # the "guess a real entity" puzzle frame — e.g. virtual
+                # League-of-Legends groups. Idols whose only group was this
+                # one will fall out of the idol scrape automatically; idols
+                # in multiple groups will simply not pick this one up because
+                # scrape_idols only queries P527 for groups that survived
+                # here.
+                del groups[gid]
+                continue
             for k, v in ov.items():
                 if k == "extra_aliases":
                     # Special-cased: extend the existing aliases list rather

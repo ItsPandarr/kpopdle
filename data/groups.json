@@ -1140,24 +1140,6 @@
       "tier": "easy"
     },
     {
-      "id": "Q65061223",
-      "name": "K/DA",
-      "aliases": [
-        "KDA"
-      ],
-      "debut_date": "2018-01-01",
-      "debut_year": 2018,
-      "generation": 4,
-      "company": "Riot Games",
-      "company_parent": null,
-      "member_count": 12,
-      "gender": "girl",
-      "status": "active",
-      "country": "KR",
-      "popularity": 33744,
-      "tier": "easy"
-    },
-    {
       "id": "Q41398331",
       "name": "Fromis 9",
       "aliases": [
